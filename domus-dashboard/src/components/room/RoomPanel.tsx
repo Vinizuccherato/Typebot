@@ -141,12 +141,19 @@ function RoomHeader() {
           </span>
           <span className="relative overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span key={room.id} {...swap} className="block whitespace-nowrap text-[20px] font-normal leading-none tracking-[-0.01em] text-white">
+              <motion.span key={room.id} {...swap} className="block whitespace-nowrap text-[18px] font-normal leading-none tracking-[-0.01em] text-white">
                 {room.name}
               </motion.span>
             </AnimatePresence>
           </span>
-          <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springs.snappy} className="text-white/45 transition-colors group-hover:text-white/80">
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={springs.snappy}
+            className={cn(
+              'text-white/70 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100',
+              open ? 'opacity-100' : 'opacity-0',
+            )}
+          >
             <ChevronDown size={15} strokeWidth={1.8} />
           </motion.span>
         </button>
@@ -199,7 +206,6 @@ export function RoomPanel() {
       radius={30}
       specular={0.5}
       className="flex h-full w-full flex-col p-3"
-      style={{ background: 'linear-gradient(150deg, rgb(178 172 163 / 0.34) 0%, rgb(96 92 86 / 0.3) 100%)' }}
     >
       <div className="relative z-[4] mt-2">
         <RoomHeader />
@@ -207,10 +213,10 @@ export function RoomPanel() {
       <div className="relative z-[3] mt-3.5">
         <RoomStats />
       </div>
-      <div className="relative z-[3] mt-3 h-[208px] shrink-0">
+      <div className="relative z-[3] mt-3 min-h-[208px] flex-1">
         <ZonalClimate />
       </div>
-      <div className="relative z-[2] mt-2 min-h-[226px] flex-1">
+      <div className="relative z-[2] mt-2 h-[236px] max-h-[236px] shrink-0">
         <NodesGrid />
       </div>
     </Glass>

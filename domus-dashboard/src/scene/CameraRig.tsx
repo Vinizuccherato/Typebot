@@ -20,9 +20,9 @@ interface View {
 
 /** Camera "shots". Overview reproduces the reference: elevated 3/4 from the front-right. */
 const VIEWS: Record<FocusId, View> = {
-  overview: { target: [-1.6, 3.4, -0.6], az: 0.69, polar: 1.33, k: 1 },
+  overview: { target: [-1.6, 3.4, -0.6], az: 0.63, polar: 1.35, k: 1 },
   solar: { target: [ARRAY_CENTER[0], ARRAY_CENTER[1], ARRAY_CENTER[2]], az: 0.45, polar: 0.72, k: 0.6 },
-  'main-hall': { target: [-5.6, 2.5, 1.2], az: 0.42, polar: 1.2, k: 0.46 },
+  'main-hall': { target: [-5.6, 2.9, 1.2], az: 0.42, polar: 1.2, k: 0.62 },
   'front-door': { target: [(DOOR.x0 + DOOR.x1) / 2, 2.2, PAV.z1 + 0.6], az: 0.3, polar: 1.3, k: 0.4 },
 }
 
@@ -43,18 +43,19 @@ function useFraming() {
   return useMemo(() => {
     const aspect = size.width / Math.max(1, size.height)
     if (mode === 'compact') {
-      // same long-lens shot; fit ~23 m of house across the width, centred in the hero window
-      const fov = 20
+      // same lens; fit ~27 m of house across the width, centred in the hero window
+      const fov = 32
       const halfH = Math.tan(THREE.MathUtils.degToRad(fov / 2))
-      const dist = 23 / (2 * halfH * aspect)
-      return { fov, dist: Math.max(60, dist), ox: 0.52, oy: aspect < 0.8 ? 0.42 : 0.45 }
+      const dist = 27 / (2 * halfH * aspect)
+      return { fov, dist: Math.max(36, dist), ox: 0.52, oy: aspect < 0.8 ? 0.42 : 0.45 }
     }
-    // long lens, low camera — parameters least-squares fitted to landmarks of the reference shot
-    const fov = 16
+    // 32° lens, low camera — least-squares fitted to landmarks of the reference shot
+    // (principal point shifted instead of tilting, so verticals stay vertical)
+    const fov = 32
     const ref = 16 / 9
     // keep the house width constant relative to the artboard on narrower screens
-    const dist = 72.5 * Math.max(1, Math.pow(ref / aspect, 0.85))
-    return { fov, dist, ox: 0.58, oy: 0.38 }
+    const dist = 36 * Math.max(1, Math.pow(ref / aspect, 0.85))
+    return { fov, dist, ox: 0.58, oy: 0.39 }
   }, [size.width, size.height, mode])
 }
 

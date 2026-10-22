@@ -63,13 +63,13 @@ export function solarCellTexture() {
   const S = 512
   const [c, g] = canvas(S)
   const base = g.createLinearGradient(0, 0, S, S)
-  base.addColorStop(0, '#2a3552')
-  base.addColorStop(0.5, '#1a2340')
-  base.addColorStop(1, '#26314e')
+  base.addColorStop(0, '#4a4b56')
+  base.addColorStop(0.5, '#3d4049')
+  base.addColorStop(1, '#474955')
   g.fillStyle = base
   g.fillRect(0, 0, S, S)
-  const cols = 3
-  const rows = 5
+  const cols = 4
+  const rows = 6
   const cw = S / cols
   const ch = S / rows
   for (let i = 0; i < cols; i++)
@@ -77,8 +77,8 @@ export function solarCellTexture() {
       const x = i * cw
       const y = j * ch
       const cg = g.createLinearGradient(x, y, x + cw, y + ch)
-      cg.addColorStop(0, 'rgba(70,92,130,0.22)')
-      cg.addColorStop(1, 'rgba(10,14,24,0.0)')
+      cg.addColorStop(0, 'rgba(120,130,150,0.18)')
+      cg.addColorStop(1, 'rgba(20,22,30,0.12)')
       g.fillStyle = cg
       g.fillRect(x + 3, y + 3, cw - 6, ch - 6)
       // busbars
@@ -146,9 +146,9 @@ export function haloTexture(aspect: number, pad = 0.12) {
   }
   g.shadowColor = 'rgba(198,239,142,1)'
   for (const [blur, alpha, lw] of [
-    [60, 0.38, 14],
-    [26, 0.6, 7],
-    [8, 0.9, 3],
+    [30, 0.32, 8],
+    [13, 0.55, 4],
+    [4, 0.9, 2],
   ] as const) {
     g.shadowBlur = blur
     g.strokeStyle = `rgba(198,239,142,${alpha})`

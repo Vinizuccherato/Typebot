@@ -27,17 +27,17 @@ export interface DeviceCardProps {
   className?: string
 }
 
-/** Card glass tuned to the reference: lifted, slightly lighter than the smoked panel. */
+/** Card glass tuned to the reference: as dark as (or darker than) the smoked panel. */
 const CARD_MATERIAL = {
-  '--g-fill-a': 'rgb(255 255 255 / 0.085)',
-  '--g-fill-b': 'rgb(255 255 255 / 0.018)',
+  '--g-fill-a': 'rgb(26 25 23 / 0.55)',
+  '--g-fill-b': 'rgb(14 14 13 / 0.5)',
   '--g-blur': '16px',
   '--g-edge-a': 'rgb(255 255 255 / 0.3)',
   '--g-edge-b': 'rgb(255 255 255 / 0.07)',
   '--g-edge-c': 'rgb(255 255 255 / 0.03)',
   '--g-edge-d': 'rgb(255 255 255 / 0.12)',
   '--g-shadow': '0 18px 36px -20px rgb(0 0 0 / 0.55), 0 1px 2px rgb(0 0 0 / 0.15)',
-  '--g-bevel': 'inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 0 24px rgb(255 255 255 / 0.025)',
+  '--g-bevel': 'inset 0 1px 0 rgb(255 255 255 / 0.08)',
 } as React.CSSProperties
 
 export function DeviceCard({
@@ -66,7 +66,7 @@ export function DeviceCard({
       <div className="relative z-[25] flex items-start justify-between gap-2">
         <h3
           className={cn(
-            'pt-[2px] text-[14.5px] font-normal leading-[1.18] tracking-[-0.005em] text-white/92 transition-opacity duration-300',
+            'pt-[2px] text-[13.5px] font-normal leading-[1.18] tracking-[-0.005em] text-white/92 transition-opacity duration-300',
             covered && 'opacity-0',
           )}
         >
@@ -116,8 +116,8 @@ export function DeviceCard({
 
 /** Near-opaque lifted sheet — legible even where nested backdrop blur is unavailable. */
 const SHEET_MATERIAL = {
-  '--g-fill-a': 'rgb(128 125 118 / 0.94)',
-  '--g-fill-b': 'rgb(86 84 79 / 0.96)',
+  '--g-fill-a': 'rgb(70 67 63 / 0.96)',
+  '--g-fill-b': 'rgb(44 42 39 / 0.97)',
   '--g-blur': '18px',
   '--g-edge-a': 'rgb(255 255 255 / 0.55)',
   '--g-edge-b': 'rgb(255 255 255 / 0.12)',
@@ -195,7 +195,7 @@ export function SheetHeader({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="mb-2 min-h-[30px] pr-10">
       <div className="text-[12.5px] leading-tight text-white/95">{title}</div>
-      {sub && <div className="tabular mt-0.5 text-[10.5px] leading-tight text-white/50">{sub}</div>}
+      {sub && <div className="tabular mt-0.5 text-[10.5px] leading-tight text-white/60">{sub}</div>}
     </div>
   )
 }

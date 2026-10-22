@@ -8,41 +8,58 @@ import { AnimatedNumber } from '../../ui/AnimatedNumber'
 import { usePointerDrag } from '../../lib/usePointerDrag'
 import { clamp, cn, springs } from '../../lib/utils'
 
-/* Dial geometry (design px) */
-const SIZE = 184
+/* Dial geometry (design px).
+   Reference: lit counter-clockwise from 12 o'clock around the left side to a knob at the
+   bottom-right; a 60° gap at the top-right holds the "% HR" chip. */
+const SIZE = 200
 const C = SIZE / 2
-const R = 74
-const START = -135 // degrees, clockwise from 12 o'clock
-const SWEEP = 270
+const R = 82
+const TUBE = 10
+const SWEEP = 300 // degrees, counter-clockwise from 12 o'clock
 const STEP = 0.5
 /** The ring reads as a thermometer on a 0–30°C scale; the target is limited to TEMP_MIN–TEMP_MAX. */
 const SCALE_MIN = 0
 const SCALE_MAX = 30
 const RANGE = SCALE_MAX - SCALE_MIN
 
-const MODES: { id: ClimateMode; label: string; icon: LucideIcon; color: string; dim: string }[] = [
-  { id: 'auto', label: 'Auto', icon: RefreshCw, color: '#c2e89c', dim: '#7d9a62' },
-  { id: 'cold', label: 'Cold', icon: Snowflake, color: '#9fd3e6', dim: '#5d8796' },
-  { id: 'warm', label: 'Warm', icon: Flame, color: '#f2b36b', dim: '#9c6b3a' },
-  { id: 'eco', label: 'Eco', icon: Leaf, color: '#c6ef8e', dim: '#6d8f52' },
-]
-
-const polar = (deg: number, r = R) => {
-  const a = (deg * Math.PI) / 180
-  return { x: C + r * Math.sin(a), y: C - r * Math.cos(a) }
+interface ModeDef {
+  id: ClimateMode
+  label: string
+  icon: LucideIcon
+  /** accent (list, readout) */
+  color: string
+  /** tube gradient start → end */
+  tube: [string, string]
+  /** knob sphere: highlight, body, shade */
+  sphere: [string, string, string]
 }
 
-const arcPath = (from: number, to: number, r = R) => {
-  const span = Math.max(0.01, to - from)
-  const a = polar(from, r)
-  const b = polar(from + span, r)
-  return `M ${a.x} ${a.y} A ${r} ${r} 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`
+const MODES: ModeDef[] = [
+  { id: 'auto', label: 'Auto', icon: RefreshCw, color: '#c6ef8e', tube: ['#e9f9cf', '#a6d27c'], sphere: ['#f3ffe0', '#b5e27a', '#7fa95a'] },
+  { id: 'cold', label: 'Cold', icon: Snowflake, color: '#9fd3e6', tube: ['#e3f5fb', '#86c0d6'], sphere: ['#effaff', '#9fd3e6', '#5f97ab'] },
+  { id: 'warm', label: 'Warm', icon: Flame, color: '#f2b36b', tube: ['#fde8cc', '#e8a35c'], sphere: ['#fff1de', '#f2b36b', '#b97a3a'] },
+  { id: 'eco', label: 'Eco', icon: Leaf, color: '#b5e27a', tube: ['#e2f7c8', '#8cc46a'], sphere: ['#eefde0', '#9fd67e', '#5e9449'] },
+]
+
+/** Point at `ccw` degrees counter-clockwise from 12 o'clock. */
+const polar = (ccw: number, r = R) => {
+  const a = (ccw * Math.PI) / 180
+  return { x: C - r * Math.sin(a), y: C - r * Math.cos(a) }
+}
+
+/** Counter-clockwise arc from 12 o'clock spanning `span` degrees. */
+const arcPath = (span: number, r = R) => {
+  const s = clamp(span, 0.01, 359.9)
+  const a = polar(0, r)
+  const b = polar(s, r)
+  return `M ${a.x} ${a.y} A ${r} ${r} 0 ${s > 180 ? 1 : 0} 0 ${b.x} ${b.y}`
 }
 
 const toT = (v: number) => clamp((v - SCALE_MIN) / RANGE, 0, 1)
 const T_MIN = toT(TEMP_MIN)
 const T_MAX = toT(TEMP_MAX)
 const snap = (v: number) => Math.round(v / STEP) * STEP
+const fade = { duration: 0.6 }
 
 function Dial({ chip }: { chip?: React.ReactNode }) {
   const climate = useDomus((s) => s.climate)
@@ -60,9 +77,10 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
     lastT.current = toT(climate.target)
   }, [t, climate.target])
 
-  const arc = useTransform(t, (v) => arcPath(START, START + v * SWEEP))
-  const kx = useTransform(t, (v) => polar(START + v * SWEEP).x)
-  const ky = useTransform(t, (v) => polar(START + v * SWEEP).y)
+  const arc = useTransform(t, (v) => arcPath(v * SWEEP))
+  const arcInner = useTransform(t, (v) => arcPath(v * SWEEP, R - 2.2))
+  const kx = useTransform(t, (v) => polar(v * SWEEP).x)
+  const ky = useTransform(t, (v) => polar(v * SWEEP).y)
 
   const commit = (v: number) => {
     const next = clamp(snap(v), TEMP_MIN, TEMP_MAX)
@@ -77,7 +95,7 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
     const dy = p.y - 0.5
     if (p.phase === 'start') {
       // ignore presses in the hub — only the ring is grabbable
-      active.current = Math.hypot(dx, dy) > 0.27
+      active.current = Math.hypot(dx, dy) > 0.3
       if (active.current) setDragging(true)
     }
     if (!active.current) return
@@ -86,12 +104,13 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
       setDragging(false)
       return
     }
-    const deg = (Math.atan2(dx, -dy) * 180) / Math.PI // -180..180, 0 = top
+    const cw = (Math.atan2(dx, -dy) * 180) / Math.PI // clockwise from 12, -180..180
+    const ccw = (((-cw) % 360) + 360) % 360 // counter-clockwise from 12, 0..360
     let nt: number
-    if (deg >= START && deg <= START + SWEEP) nt = (deg - START) / SWEEP
-    else nt = lastT.current > 0.75 ? 1 : T_MIN // dead zone at the bottom
-    // no wrap-around jumps across the gap
-    if (Math.abs(nt - lastT.current) > 0.6) nt = lastT.current > 0.75 ? 1 : T_MIN
+    if (ccw <= SWEEP) nt = ccw / SWEEP
+    else nt = ccw < SWEEP + (360 - SWEEP) / 2 ? 1 : lastT.current // inside the top-right gap
+    // never wrap across the gap (30°C ↔ 0°C)
+    if (Math.abs(nt - lastT.current) > 0.6) nt = lastT.current
     nt = clamp(nt, T_MIN, T_MAX)
     lastT.current = nt
     commit(SCALE_MIN + nt * RANGE)
@@ -133,11 +152,9 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
     }
   }
 
-  // ticks cover the settable band only (TEMP_MIN–TEMP_MAX)
-  const ticks = (TEMP_MAX - TEMP_MIN) / STEP + 1
-  const activeTick = Math.round((climate.target - TEMP_MIN) / STEP)
-  const tickDeg = (i: number) => START + toT(TEMP_MIN + i * STEP) * SWEEP
-  const curPt = polar(START + toT(climate.current) * SWEEP)
+  const dotR = R + TUBE / 2 + 8
+  const valuePt = polar(toT(climate.target) * SWEEP, dotR)
+  const curPt = polar(toT(climate.current) * SWEEP, dotR)
 
   return (
     <div
@@ -156,78 +173,89 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
     >
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 overflow-visible">
         <defs>
-          <linearGradient id={`arc-${uid}`} gradientUnits="userSpaceOnUse" x1={polar(START).x} y1={polar(START).y} x2={C + R * 0.8} y2={C - R * 0.7}>
-            <motion.stop offset="0" initial={false} animate={{ stopColor: mode.color }} transition={{ duration: 0.6 }} />
-            <motion.stop offset="0.55" initial={false} animate={{ stopColor: mode.color }} transition={{ duration: 0.6 }} stopOpacity="0.8" />
-            <motion.stop offset="1" initial={false} animate={{ stopColor: mode.dim }} transition={{ duration: 0.6 }} stopOpacity="0.55" />
+          <linearGradient id={`tube-${uid}`} gradientUnits="userSpaceOnUse" x1={C - R * 0.2} y1={C - R} x2={C + R * 0.55} y2={C + R}>
+            <motion.stop offset="0" initial={false} animate={{ stopColor: mode.tube[0] }} transition={fade} />
+            <motion.stop offset="1" initial={false} animate={{ stopColor: mode.tube[1] }} transition={fade} />
           </linearGradient>
-          <radialGradient id={`hub-${uid}`} cx="50%" cy="35%" r="70%">
-            <stop offset="0" stopColor="rgb(255 255 255 / 0.07)" />
+          <radialGradient id={`hub-${uid}`} cx="50%" cy="30%" r="75%">
+            <stop offset="0" stopColor="rgb(255 255 255 / 0.05)" />
             <stop offset="1" stopColor="rgb(0 0 0 / 0.14)" />
           </radialGradient>
           <filter id={`blur-${uid}`} x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="5" />
+            <feGaussianBlur stdDeviation="6" />
           </filter>
         </defs>
 
-        {/* hub */}
-        <circle cx={C} cy={C} r={R - 12} fill={`url(#hub-${uid})`} stroke="rgb(255 255 255 / 0.07)" />
+        {/* recessed hub */}
+        <circle cx={C} cy={C} r={64} fill="rgb(0 0 0 / 0.12)" />
+        <circle cx={C} cy={C} r={64} fill={`url(#hub-${uid})`} stroke="rgb(255 255 255 / 0.07)" />
 
         {/* track */}
-        <circle cx={C} cy={C} r={R} fill="none" stroke="rgb(255 255 255 / 0.18)" strokeWidth="1.6" />
-        <path d={arcPath(START, START + SWEEP)} fill="none" stroke="rgb(0 0 0 / 0.18)" strokeWidth="6" strokeLinecap="round" />
+        <path d={arcPath(SWEEP)} fill="none" stroke="rgb(0 0 0 / 0.2)" strokeWidth={TUBE} strokeLinecap="round" />
+        <path d={arcPath(SWEEP, R + TUBE / 2)} fill="none" stroke="rgb(255 255 255 / 0.08)" strokeWidth="1" />
 
-        {/* ticks (visible while interacting) */}
-        <motion.g initial={false} animate={{ opacity: dragging ? 1 : 0 }} transition={{ duration: 0.25 }} className="group-focus-visible:!opacity-100">
-          {Array.from({ length: ticks }, (_, i) => {
-            const deg = tickDeg(i)
-            const major = i % 4 === 0
-            const on = i === activeTick
-            const a = polar(deg, R + 9)
-            const b = polar(deg, R + (on ? 16 : major ? 13.5 : 12))
-            return (
-              <line
-                key={i}
-                x1={a.x}
-                y1={a.y}
-                x2={b.x}
-                y2={b.y}
-                stroke={on ? mode.color : i <= activeTick ? 'rgb(255 255 255 / 0.55)' : 'rgb(255 255 255 / 0.22)'}
-                strokeWidth={on ? 2 : 1}
-                strokeLinecap="round"
-              />
-            )
-          })}
-        </motion.g>
+        {/* faint dot ticks — 1°C steps on the 0–30 scale; the settable band brightens while dragging */}
+        {Array.from({ length: RANGE + 1 }, (_, v) => {
+          const pt = polar((v / RANGE) * SWEEP, dotR)
+          const settable = v >= TEMP_MIN
+          const major = v % 5 === 0
+          return (
+            <motion.circle
+              key={v}
+              cx={pt.x}
+              cy={pt.y}
+              initial={{ r: major ? 1.4 : 1 }}
+              animate={{
+                r: major ? 1.4 : 1,
+                opacity: dragging && settable ? (v <= climate.target ? 0.9 : 0.5) : major ? 0.38 : 0.2,
+              }}
+              transition={{ duration: 0.25 }}
+              fill="white"
+            />
+          )
+        })}
+        {/* current reading */}
+        <circle cx={curPt.x} cy={curPt.y} r="2.4" fill="white" opacity="0.9" />
+        {/* exact set-point while dragging */}
+        <motion.circle
+          cx={valuePt.x}
+          cy={valuePt.y}
+          initial={{ r: 2.6, opacity: 0 }}
+          animate={{ r: 2.6, opacity: dragging ? 1 : 0 }}
+          fill={mode.color}
+        />
 
-        {/* glow + progress */}
-        <motion.path d={arc} fill="none" stroke={`url(#arc-${uid})`} strokeWidth="12" strokeLinecap="round" opacity="0.55" filter={`url(#blur-${uid})`} />
-        <motion.path d={arc} fill="none" stroke={`url(#arc-${uid})`} strokeWidth="5" strokeLinecap="round" />
-
-        {/* current-temperature marker */}
-        <circle cx={curPt.x} cy={curPt.y} r="2.2" fill="rgb(255 255 255 / 0.85)" />
+        {/* glow + tube + specular */}
+        <motion.path d={arc} fill="none" stroke={`url(#tube-${uid})`} strokeWidth={TUBE + 8} strokeLinecap="round" opacity="0.4" filter={`url(#blur-${uid})`} />
+        <motion.path d={arc} fill="none" stroke={`url(#tube-${uid})`} strokeWidth={TUBE} strokeLinecap="round" />
+        <motion.path d={arcInner} fill="none" stroke="rgb(255 255 255 / 0.4)" strokeWidth="2" strokeLinecap="round" />
       </svg>
 
-      {/* HR chip floats on the ring, under the knob */}
+      {/* HR chip sits in the top-right gap, under the knob */}
       {chip}
 
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="pointer-events-none absolute inset-0 overflow-visible">
-        {/* knob */}
+        <defs>
+          <radialGradient id={`sphere-${uid}`} cx="35%" cy="30%" r="75%" fx="35%" fy="30%">
+            <motion.stop offset="0" initial={false} animate={{ stopColor: mode.sphere[0] }} transition={fade} />
+            <motion.stop offset="0.55" initial={false} animate={{ stopColor: mode.sphere[1] }} transition={fade} />
+            <motion.stop offset="1" initial={false} animate={{ stopColor: mode.sphere[2] }} transition={fade} />
+          </radialGradient>
+        </defs>
         <motion.g style={{ x: kx, y: ky }}>
           <motion.circle
-            r={15}
-            initial={{ r: 15, fill: mode.color, opacity: 0.16, scale: 1 }}
-            animate={{ r: 15, fill: mode.color, opacity: dragging ? 0.28 : 0.16, scale: dragging ? 1.25 : 1 }}
+            initial={{ r: 21, opacity: 0.16, scale: 1 }}
+            animate={{ r: 21, fill: mode.color, opacity: dragging ? 0.3 : 0.16, scale: dragging ? 1.2 : 1 }}
             transition={springs.soft}
           />
           <motion.circle
-            r={8.5}
-            fill="white"
-            initial={{ r: 8.5, stroke: mode.color, scale: 1 }}
-            animate={{ r: 8.5, stroke: mode.color, scale: dragging ? 1.15 : 1 }}
-            strokeWidth="3"
+            initial={{ r: 13, scale: 1 }}
+            animate={{ r: 13, scale: dragging ? 1.12 : 1 }}
             transition={springs.bouncy}
-            style={{ filter: 'drop-shadow(0 2px 4px rgb(0 0 0 / 0.35))' }}
+            fill={`url(#sphere-${uid})`}
+            stroke="rgb(255 255 255 / 0.55)"
+            strokeWidth="0.75"
+            style={{ filter: 'drop-shadow(0 3px 6px rgb(0 0 0 / 0.35))' }}
           />
         </motion.g>
       </svg>
@@ -247,7 +275,7 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
               <div className="text-[40px] font-light leading-none tracking-[-0.02em]" style={{ color: mode.color }}>
                 <AnimatedNumber value={climate.target} decimals={1} stiffness={400} />°
               </div>
-              <div className="mt-1.5 text-[11px] text-white/55">Set target</div>
+              <div className="mt-1.5 text-[11px] text-white/60">Set target</div>
             </motion.div>
           ) : (
             <motion.div
@@ -261,7 +289,7 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
               <div className="pl-2 text-[42px] font-light leading-none tracking-[-0.025em] text-white">
                 <AnimatedNumber value={climate.current} decimals={1} />°
               </div>
-              <div className="mt-1.5 text-[11px] text-white/50">
+              <div className="mt-1.5 text-[11px] text-white/60">
                 Target <span className="tabular">{climate.target.toFixed(1)}</span>°C
               </div>
             </motion.div>
@@ -309,7 +337,7 @@ function ModeList() {
               refs.current[j]?.focus()
             }}
             className={cn(
-              'group relative flex h-[34px] w-[100px] cursor-pointer items-center gap-2 rounded-full pl-[5px] pr-3 text-left text-[13px] outline-none transition-colors duration-300',
+              'group relative flex h-[34px] w-full max-w-[100px] cursor-pointer items-center gap-2 rounded-full pl-[5px] pr-3 text-left text-[13px] outline-none transition-colors duration-300',
               on ? 'text-white' : 'text-white/60 hover:text-white/90',
             )}
           >
@@ -362,10 +390,10 @@ export function ClimateCard() {
         </div>
 
         <div className="relative z-[3] mt-[8px] flex flex-1 items-start gap-3">
-          <div className="relative -ml-[6px] mt-[10px]">
+          <div className="relative -ml-[8px] mt-[4px]">
             <Dial
               chip={
-                <div className="pointer-events-none absolute left-[118px] top-[-2px]">
+                <div className="pointer-events-none absolute left-[114px] top-[13px]">
                   <Chip icon={Wind} size="sm" variant="pill" title="Relative humidity">
                     <AnimatedNumber value={humidity} />% HR
                   </Chip>
@@ -373,7 +401,7 @@ export function ClimateCard() {
               }
             />
           </div>
-          <div className="flex min-w-[104px] flex-1 flex-col items-start pl-1 pt-[34px]">
+          <div className="flex min-w-[92px] flex-1 flex-col items-start pt-[30px]">
             <ModeList />
           </div>
         </div>

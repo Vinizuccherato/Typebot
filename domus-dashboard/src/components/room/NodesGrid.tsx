@@ -37,6 +37,7 @@ function NodeTile({ id }: { id: NodeId }) {
     <Glass
       variant="well"
       radius={18}
+      style={{ background: 'linear-gradient(160deg, rgb(88 87 92 / 0.5) 0%, rgb(62 61 66 / 0.42) 100%)' }}
       specular={0.7}
       whileHover={{ y: -2 }}
       transition={springs.soft}
@@ -46,7 +47,7 @@ function NodeTile({ id }: { id: NodeId }) {
         <motion.div
           className="h-full max-h-[86px] w-full"
           initial={false}
-          animate={{ opacity: node.on ? 1 : 0.5, filter: node.on ? 'saturate(1) brightness(1)' : 'saturate(0.4) brightness(0.8)' }}
+          animate={{ opacity: node.on ? 1 : 0.45, filter: node.on ? 'saturate(1)' : 'saturate(0.4)' }}
           transition={{ duration: 0.5 }}
         >
           <Art on={node.on} className="h-full w-full" />
@@ -55,7 +56,7 @@ function NodeTile({ id }: { id: NodeId }) {
       <div
         className={cn(
           'relative z-[3] mt-1 text-center text-[11.5px] leading-[1.25] transition-colors duration-500',
-          node.on ? 'text-white/85' : 'text-white/50',
+          node.on ? 'text-white/90' : 'text-white/70',
         )}
       >
         <div className="truncate">{node.name}</div>
@@ -70,7 +71,7 @@ function NodeTile({ id }: { id: NodeId }) {
 
 export function NodesGrid() {
   return (
-    <Glass variant="inset" radius={26} className="flex h-full w-full flex-col px-3 pb-3 pt-[15px]" style={{ background: 'linear-gradient(150deg, rgb(255 255 255 / 0.1) 0%, rgb(38 36 33 / 0.16) 100%)' }}>
+    <Glass variant="inset" radius={26} className="flex h-full w-full flex-col px-3 pb-3 pt-[15px]" style={{ background: 'linear-gradient(150deg, rgb(70 68 70 / 0.62) 0%, rgb(40 39 41 / 0.72) 100%)' }}>
       <div className="relative z-[3] px-1.5 text-[13px] leading-none text-white/80">Nodes connected in a room</div>
       <div className="relative z-[3] mt-3 grid min-h-0 flex-1 grid-cols-3 gap-2.5">
         <NodeTile id="tv" />

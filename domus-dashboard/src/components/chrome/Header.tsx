@@ -3,7 +3,6 @@ import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import {
   Bot,
   Building2,
-  ChevronDown,
   Cpu,
   Lamp,
   Leaf,
@@ -65,14 +64,9 @@ function Logo() {
       className="group flex h-full shrink-0 items-center gap-2.5 rounded-full pr-2 outline-none"
       aria-label="Domus — home overview"
     >
-      <motion.span
-        className="grid place-items-center drop-shadow-[0_4px_14px_rgb(198_239_142/0.35)]"
-        whileHover={{ rotate: -6, scale: 1.06 }}
-        whileTap={{ scale: 0.92 }}
-        transition={springs.bouncy}
-      >
+      <span className="grid place-items-center drop-shadow-[0_4px_14px_rgb(198_239_142/0.35)] transition-transform duration-500 ease-[var(--ease-spring)] group-hover:-rotate-6 group-hover:scale-[1.06] group-active:scale-[0.92] group-active:duration-150">
         <DomusMark />
-      </motion.span>
+      </span>
       <span className="text-[22px] font-semibold tracking-[-0.01em] text-white">Domus</span>
     </a>
   )
@@ -161,17 +155,16 @@ function EcoPill({ compact }: { compact?: boolean }) {
         aria-checked={eco.active}
         aria-label="ECO mode"
         onClick={flip}
-        className="relative z-[3] flex h-full w-full cursor-pointer items-center gap-3 rounded-full pl-2 pr-4 text-left outline-none"
+        className="group relative z-[3] flex h-full w-full cursor-pointer items-center gap-3 rounded-full pl-2 pr-4 text-left outline-none"
       >
         <motion.span
-          className="glass glass-pill grid h-[32px] w-[32px] shrink-0 place-items-center rounded-full"
+          className="glass glass-pill grid h-[32px] w-[32px] shrink-0 place-items-center rounded-full transition-[scale] duration-300 ease-[var(--ease-spring)] group-active:scale-[0.88] group-active:duration-100"
           animate={{
             backgroundColor: eco.active ? 'rgba(198,239,142,0.18)' : 'rgba(255,255,255,0.04)',
             boxShadow: eco.active
               ? '0 0 18px rgba(198,239,142,0.45), inset 0 1px 0 rgba(255,255,255,0.3)'
               : '0 0 0 rgba(198,239,142,0), inset 0 1px 0 rgba(255,255,255,0.2)',
           }}
-          whileTap={{ scale: 0.88 }}
           transition={{ duration: 0.45 }}
         >
           <motion.span
@@ -411,8 +404,10 @@ function UserMenu({ open, onToggle }: { open: boolean; onToggle: () => void }) {
           <span className="block truncate text-[13.5px] leading-tight text-white">Alejandra Magno</span>
           <span className="block truncate text-[11px] leading-tight text-white/50">Nort Residence</span>
         </span>
-        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springs.snappy} className="text-white/70">
-          <ChevronDown size={16} strokeWidth={1.8} />
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springs.snappy} className="grid place-items-center text-white/75">
+          <svg width="9" height="6" viewBox="0 0 9 6" aria-hidden>
+            <path d="M1.2 0.6h6.6a.7.7 0 0 1 .55 1.13L5.05 5.5a.7.7 0 0 1-1.1 0L.65 1.73A.7.7 0 0 1 1.2.6z" fill="currentColor" />
+          </svg>
         </motion.span>
       </button>
     </Glass>
@@ -537,7 +532,7 @@ export function Header() {
             setOpen={setOpen}
             width={316}
             label="Residence"
-            trigger={<IconButton icon={Building2} label="Residence" active={open === 'residence'} onClick={() => toggle('residence')} />}
+            trigger={<IconButton icon={Building2} size={48} label="Residence" active={open === 'residence'} onClick={() => toggle('residence')} />}
           >
             <ResidencePanel />
           </PopTrigger>
@@ -549,7 +544,8 @@ export function Header() {
             label="Security"
             trigger={
               <IconButton
-                icon={Shield}
+                icon={ShieldCheck}
+                size={48}
                 label="Security status"
                 badge={!locked}
                 active={open === 'security'}
@@ -565,7 +561,7 @@ export function Header() {
             setOpen={setOpen}
             width={316}
             label="Network"
-            trigger={<IconButton icon={Radio} label="Network & nodes" active={open === 'network'} onClick={() => toggle('network')} />}
+            trigger={<IconButton icon={Radio} size={48} label="Network & nodes" active={open === 'network'} onClick={() => toggle('network')} />}
           >
             <NetworkPanel />
           </PopTrigger>

@@ -10,6 +10,8 @@ import { haloTexture } from './textures'
 const W = ARRAY.x1 - ARRAY.x0
 const D = ARRAY.z1 - ARRAY.z0
 const GAP = 0.085
+/** halo sprite margin (m) — kept tight: the reference edge is a thin dotted LED line */
+const HALO = 1.4
 const LIME = new THREE.Color('#c6ef8e')
 
 /** Rounded-rect outline as a flat ring (XZ plane). */
@@ -59,12 +61,12 @@ export function SolarArray() {
     const pad = 0.16
     const hw = W / 2 + pad
     const hd = D / 2 + pad
-    const step = 0.13
+    const step = 0.16
     const pts: Array<[number, number]> = []
     for (let x = -hw; x <= hw; x += step) pts.push([x, -hd], [x, hd])
     for (let z = -hd + step; z < hd; z += step) pts.push([-hw, z], [hw, z])
-    const ring = ringGeometry(W + pad * 2 - 0.14, D + pad * 2 - 0.14, 0.18, 0.13)
-    const halo = haloTexture((W + 3) / (D + 3), 3 / (W + 3) * 2 * 0.5)
+    const ring = ringGeometry(W + pad * 2 - 0.1, D + pad * 2 - 0.1, 0.18, 0.04)
+    const halo = haloTexture((W + HALO) / (D + HALO), HALO / (W + HALO))
     return { pw, pd, count, dotPositions: pts, ring, halo }
   }, [])
 
@@ -98,9 +100,9 @@ export function SolarArray() {
     easing.damp(g, 'level', eco ? 1 : 0.28, 0.6, dt)
     const breathe = eco ? 0.86 + 0.14 * Math.sin(t * 1.7) : 1
     const k = g.level * breathe
-    if (lineMat.current) lineMat.current.color.copy(LIME).multiplyScalar(0.6 + 1.5 * k)
+    if (lineMat.current) lineMat.current.color.copy(LIME).multiplyScalar(0.4 + 0.9 * k)
     if (dotMat.current) dotMat.current.color.copy(LIME).multiplyScalar(0.8 + 2.8 * k)
-    if (haloMat.current) haloMat.current.opacity = 0.2 + 0.8 * k
+    if (haloMat.current) haloMat.current.opacity = 0.15 + 0.55 * k
     // reticle
     if (reticle.current) reticle.current.rotation.y = t * 0.25
     if (pulse.current && pulseMat.current) {
@@ -144,14 +146,14 @@ export function SolarArray() {
 
       {/* LED border: dotted emitters + continuous line + soft spill */}
       <instancedMesh ref={dots} args={[undefined, undefined, dotPositions.length]}>
-        <boxGeometry args={[0.085, 0.05, 0.085]} />
+        <boxGeometry args={[0.07, 0.04, 0.07]} />
         <meshBasicMaterial ref={dotMat} toneMapped={false} />
       </instancedMesh>
       <mesh geometry={ring} position={[ARRAY_CENTER[0], ARRAY.y + 0.045, ARRAY_CENTER[2]]}>
         <meshBasicMaterial ref={lineMat} toneMapped={false} />
       </mesh>
       <mesh position={[ARRAY_CENTER[0], ARRAY.y + 0.11, ARRAY_CENTER[2]]} rotation-x={-Math.PI / 2} renderOrder={3}>
-        <planeGeometry args={[W + 3, D + 3]} />
+        <planeGeometry args={[W + HALO, D + HALO]} />
         <meshBasicMaterial
           ref={haloMat}
           map={halo}

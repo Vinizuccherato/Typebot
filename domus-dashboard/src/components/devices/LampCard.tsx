@@ -41,7 +41,7 @@ export function LampCard() {
               <span className="tabular text-white/55">{kelvin}K</span>
             </div>
             <KelvinSlider value={kelvin} onChange={setKelvin} />
-            <div className="mt-1 flex justify-between text-[10px] text-white/40">
+            <div className="mt-1 flex justify-between text-[10px] text-white/55">
               <span>Warm</span>
               <span>Cool</span>
             </div>
@@ -53,7 +53,7 @@ export function LampCard() {
         <AnimatedNumber value={Math.round(lamp.intensity)} className="text-[38px] font-light leading-[0.9] tracking-[-0.03em]" />
         <span className="ml-[1px] text-[21px] font-light leading-none text-white/90">%</span>
       </div>
-      <div className="pointer-events-none mt-[5px] text-[10.5px] leading-none text-white/45">Intensity</div>
+      <div className="pointer-events-none mt-[5px] text-[10.5px] leading-none text-white/55">Intensity</div>
       <IntensityRamp />
     </DeviceCard>
   )
@@ -132,7 +132,7 @@ function IntensityRamp() {
             }}
             className={cn(
               'cursor-pointer transition-colors duration-300',
-              i === band ? 'font-medium text-white/90' : 'text-white/40 hover:text-white/70',
+              i === band ? 'font-medium text-white/90' : 'text-white/50 hover:text-white/75',
             )}
           >
             {l}

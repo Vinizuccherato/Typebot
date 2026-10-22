@@ -1,6 +1,6 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
-import { ArrowDown, BatteryCharging } from 'lucide-react'
+import { ArrowDown, Layers2 } from 'lucide-react'
 import { useDomus } from '../../store'
 import { Glass } from '../../ui/Glass'
 import { AnimatedNumber } from '../../ui/AnimatedNumber'
@@ -10,7 +10,7 @@ const CHART_H = 74 // svg height (design px)
 const BASE_Y = 66 // dotted baseline
 const TOP_Y = 6
 const INSET = 15 // label half-width so 00:00 / 24:00 centre on the ends
-const PEAK = 0.6
+const PEAK = 0.75 // hours at/above this are hatched — morning & evening peaks dominate
 
 const fmtHour = (h: number) => `${String(h).padStart(2, '0')}:00`
 
@@ -57,11 +57,19 @@ function StepChart({ onHover }: { onHover?: (h: number | null) => void }) {
   const { line, blocks, stems } = useMemo(() => {
     let d = `M ${X(0)} ${Y(series[0])}`
     for (let i = 0; i < 24; i++) d += ` H ${X(i + 1)} V ${Y(series[i + 1])}`
-    const blocks: { x: number; w: number; y: number; i: number }[] = []
+    // consecutive peak hours merge into one stepped, outlined block
+    const blocks: { d: string; from: number; to: number }[] = []
     const stems: { x: number; y: number }[] = []
     for (let i = 0; i < 24; i++) {
-      if (series[i] >= PEAK) blocks.push({ x: X(i), w: X(i + 1) - X(i), y: Y(series[i]), i })
-      else if (i % 2 === 1) stems.push({ x: (X(i) + X(i + 1)) / 2, y: Y(series[i]) })
+      if (series[i] >= PEAK) {
+        let j = i
+        while (j + 1 < 24 && series[j + 1] >= PEAK) j++
+        let bd = `M ${X(i)} ${BASE_Y} V ${Y(series[i])}`
+        for (let k = i; k <= j; k++) bd += ` H ${X(k + 1)}${k < j ? ` V ${Y(series[k + 1])}` : ''}`
+        bd += ` V ${BASE_Y} Z`
+        blocks.push({ d: bd, from: i, to: j + 1 })
+        i = j
+      } else if (i % 2 === 1) stems.push({ x: (X(i) + X(i + 1)) / 2, y: Y(series[i]) })
     }
     return { line: d, blocks, stems }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,7 +122,7 @@ function StepChart({ onHover }: { onHover?: (h: number | null) => void }) {
       >
         <defs>
           <pattern id={`hatch-${uid}`} width="4.5" height="4.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <line x1="0" y1="0" x2="0" y2="4.5" stroke="rgb(255 255 255 / 0.62)" strokeWidth="1.3" />
+            <line x1="0" y1="0" x2="0" y2="4.5" stroke="rgb(255 255 255 / 0.7)" strokeWidth="1.3" />
           </pattern>
           <radialGradient id={`glow-${uid}`}>
             <stop offset="0" stopColor="#c6ef8e" stopOpacity="0.9" />
@@ -143,14 +151,14 @@ function StepChart({ onHover }: { onHover?: (h: number | null) => void }) {
         {/* hatched peak blocks */}
         {blocks.map((b, k) => (
           <motion.g
-            key={`b${b.i}`}
+            key={`b${b.from}`}
             initial={{ opacity: 0, scaleY: 0 }}
-            animate={{ opacity: hover === null || (hover >= b.i && hover <= b.i + 1) ? 1 : 0.55, scaleY: 1 }}
-            transition={{ ...springs.soft, delay: 0.35 + k * 0.06 }}
+            animate={{ opacity: hover === null || (hover >= b.from && hover <= b.to) ? 1 : 0.5, scaleY: 1 }}
+            transition={{ ...springs.soft, delay: 0.35 + k * 0.08 }}
             style={{ originY: 1, transformBox: 'fill-box' }}
           >
-            <rect x={b.x} y={b.y} width={b.w} height={BASE_Y - b.y} fill="rgb(255 255 255 / 0.06)" />
-            <rect x={b.x} y={b.y} width={b.w} height={BASE_Y - b.y} fill={`url(#hatch-${uid})`} />
+            <path d={b.d} fill="rgb(255 255 255 / 0.07)" />
+            <path d={b.d} fill={`url(#hatch-${uid})`} stroke="white" strokeWidth="1" strokeLinejoin="miter" />
           </motion.g>
         ))}
 
@@ -248,8 +256,8 @@ export function EnergyCard() {
         transition={{ ...springs.glide, delay: 0.25 }}
       >
         <div className="relative z-[3] flex items-start gap-3">
-          <span className="glass glass-well grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[12px] text-white/85">
-            <BatteryCharging size={17} strokeWidth={1.6} className="relative z-[3]" />
+          <span className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-[12px] bg-white/[0.08] text-white/90 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.14),inset_0_1px_0_rgb(255_255_255/0.12)]">
+            <Layers2 size={17} strokeWidth={1.6} />
           </span>
           <div className="min-w-0 pt-[1px]">
             <h2 className="m-0 text-[17px] font-normal leading-[1.1] text-white">Energy Usage</h2>

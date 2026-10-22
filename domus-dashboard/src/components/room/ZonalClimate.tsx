@@ -18,6 +18,8 @@ const R = 157
 const HALF = 47 // degrees each side of 12 o'clock
 const TICKS = 71
 const STEP = 0.5
+const SPOT = 20 // degrees of glow each side of the value
+const SIGMA = 9 // tick highlight falloff (degrees)
 
 const toRad = (deg: number) => (deg * Math.PI) / 180
 const angleOf = (v: number) => -HALF + ((v - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)) * HALF * 2
@@ -45,7 +47,7 @@ function useAutoRepeat(fn: () => void) {
     let delay = 380
     const loop = () => {
       fn()
-      delay = Math.max(55, delay * 0.78)
+      delay = Math.max(140, delay * 0.8)
       timer.current = window.setTimeout(loop, delay)
     }
     timer.current = window.setTimeout(loop, delay)
@@ -73,10 +75,11 @@ export function ZonalClimate() {
   /* animated arc */
   const angle = useSpring(angleOf(target), { stiffness: 210, damping: 28, mass: 0.8 })
   useEffect(() => angle.set(angleOf(target)), [angle, target])
-  const bandD = useTransform(angle, (a) => arcPath(-HALF, a))
-  const knobX = useTransform(angle, (a) => pt(a)[0])
-  const knobY = useTransform(angle, (a) => pt(a)[1])
-  const gradX2 = useTransform(angle, (a) => Math.max(pt(a)[0], pt(-HALF)[0] + 24))
+  const dotX = useTransform(angle, (a) => pt(a)[0])
+  const dotY = useTransform(angle, (a) => pt(a)[1])
+  // spotlight gradient centred on the value (±SPOT degrees along the arc)
+  const spotX1 = useTransform(angle, (a) => pt(a - SPOT)[0])
+  const spotX2 = useTransform(angle, (a) => pt(a + SPOT)[0])
 
   /* drag along the arc */
   const active = useRef(false)
@@ -166,7 +169,6 @@ export function ZonalClimate() {
     }
   }, [settingsOpen])
 
-  const [startX] = pt(-HALF)
 
   return (
     <Glass
@@ -179,15 +181,26 @@ export function ZonalClimate() {
       {/* label + status */}
       <div className="absolute left-[18px] top-[17px] z-[3]">
         <div className="text-[13px] leading-none text-white/80">Zonal climate control</div>
-        <div className="mt-[7px] flex items-center gap-1.5 text-[11px] leading-none text-white/50">
-          <span
-            className={cn(
-              'h-1.5 w-1.5 rounded-full transition-colors duration-500',
-              status.tone === 'hold' ? 'bg-white/40' : status.tone === 'heat' ? 'bg-[#f0c27a] shadow-[0_0_6px_#f0c27a]' : 'bg-[#9fd4ff] shadow-[0_0_6px_#9fd4ff]',
-            )}
-          />
-          <span className="tabular">{status.text}</span>
-        </div>
+        <AnimatePresence initial={false}>
+          {status.tone !== 'hold' && (
+            <motion.div
+              key="status"
+              initial={{ opacity: 0, y: -3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-[7px] flex items-center gap-1.5 text-[11px] leading-none text-white/60"
+            >
+              <span
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full transition-colors duration-500',
+                  status.tone === 'heat' ? 'bg-[#f0c27a] shadow-[0_0_6px_#f0c27a]' : 'bg-[#9fd4ff] shadow-[0_0_6px_#9fd4ff]',
+                )}
+              />
+              <span className="tabular">{status.text}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* settings */}
@@ -254,7 +267,7 @@ export function ZonalClimate() {
       </div>
 
       {/* gauge box — keeps reference proportions at any card width */}
-      <div className="absolute inset-x-0 bottom-0 z-[3] mx-auto aspect-[364/208] w-full max-w-[364px]">
+      <div className="absolute inset-x-0 top-1/2 z-[3] mx-auto aspect-[364/208] w-full max-w-[364px] -translate-y-1/2">
         <div
           ref={(el) => {
             drag.ref.current = el
@@ -273,28 +286,31 @@ export function ZonalClimate() {
         >
           <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
             <defs>
-              <motion.linearGradient id="zc-band" gradientUnits="userSpaceOnUse" x1={startX} y1={0} x2={gradX2} y2={0}>
-                <stop offset="0" stopColor="#c6ef8e" stopOpacity="0.08" />
-                <stop offset="0.55" stopColor="#b5e27a" stopOpacity="0.55" />
-                <stop offset="1" stopColor="#dcffb0" stopOpacity="1" />
+              <motion.linearGradient id="zc-band" gradientUnits="userSpaceOnUse" x1={spotX1} y1={0} x2={spotX2} y2={0}>
+                <stop offset="0" stopColor="#b5e27a" stopOpacity="0" />
+                <stop offset="0.35" stopColor="#c6ef8e" stopOpacity="0.45" />
+                <stop offset="0.5" stopColor="#e2ffbc" stopOpacity="1" />
+                <stop offset="0.65" stopColor="#c6ef8e" stopOpacity="0.45" />
+                <stop offset="1" stopColor="#b5e27a" stopOpacity="0" />
               </motion.linearGradient>
               <filter id="zc-halo" x="-40%" y="-80%" width="180%" height="260%">
                 <feGaussianBlur stdDeviation="9" />
               </filter>
               <filter id="zc-knob" x="-200%" y="-200%" width="500%" height="500%">
-                <feGaussianBlur stdDeviation="5" />
+                <feGaussianBlur stdDeviation="3" />
               </filter>
             </defs>
 
             {/* track */}
             <path d={arcPath(-HALF, HALF)} fill="none" stroke="rgb(255 255 255 / 0.06)" strokeWidth={20} strokeLinecap="round" />
-            {/* halo + band */}
-            <motion.path d={bandD} fill="none" stroke="url(#zc-band)" strokeWidth={30} strokeLinecap="round" filter="url(#zc-halo)" opacity={0.85} />
-            <motion.path d={bandD} fill="none" stroke="url(#zc-band)" strokeWidth={18} strokeLinecap="round" />
+            {/* spotlight halo + band (full arc, gradient centred on the value) */}
+            <path d={arcPath(-HALF, HALF)} fill="none" stroke="url(#zc-band)" strokeWidth={34} filter="url(#zc-halo)" opacity={0.9} />
+            <path d={arcPath(-HALF, HALF)} fill="none" stroke="url(#zc-band)" strokeWidth={18} />
 
             {/* ticks */}
             {ticks.map((t) => {
-              const on = t.deg <= valueDeg + 0.01
+              const w = Math.exp(-(((t.deg - valueDeg) / SIGMA) ** 2))
+              const a = (t.major ? 0.36 : 0.22) + w * 0.72
               return (
                 <line
                   key={t.deg}
@@ -305,31 +321,16 @@ export function ZonalClimate() {
                   strokeLinecap="round"
                   strokeWidth={t.major ? 1.3 : 1}
                   style={{
-                    stroke: on ? 'rgb(34 48 20 / 0.42)' : t.major ? 'rgb(255 255 255 / 0.42)' : 'rgb(255 255 255 / 0.24)',
+                    stroke: `rgb(${Math.round(255 - w * 25)} 255 ${Math.round(255 - w * 60)} / ${a.toFixed(3)})`,
                     transition: 'stroke 0.35s ease',
                   }}
                 />
               )
             })}
 
-            {/* knob */}
-            <motion.circle
-              cx={knobX}
-              cy={knobY}
-              fill="#e6ffc8"
-              filter="url(#zc-knob)"
-              initial={{ r: 12, opacity: 0.55 }}
-              animate={{ r: 12, opacity: dragging ? 0.9 : 0.55 }}
-            />
-            <motion.circle
-              cx={knobX}
-              cy={knobY}
-              fill="#fff"
-              style={{ filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 0.35))' }}
-              initial={{ r: 5.5 }}
-              animate={{ r: dragging ? 7 : 5.5 }}
-              transition={springs.snappy}
-            />
+            {/* soft value dot */}
+            <motion.circle cx={dotX} cy={dotY} fill="#f2ffe2" filter="url(#zc-knob)" initial={{ r: 6, opacity: 0.5 }} animate={{ r: 6, opacity: dragging ? 0.95 : 0.5 }} />
+            <motion.circle cx={dotX} cy={dotY} fill="#fff" initial={{ r: 2 }} animate={{ r: dragging ? 3 : 2 }} transition={springs.snappy} />
           </svg>
 
           {/* readout */}

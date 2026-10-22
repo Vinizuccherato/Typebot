@@ -38,7 +38,7 @@ export function Greeting() {
           variants={rise}
           transition={{ type: 'spring', stiffness: 120, damping: 20 }}
           className="m-0 font-light leading-[1.15] tracking-[-0.005em] text-white/80"
-          style={{ fontSize: compact ? 22 : 27, textShadow: '0 1px 18px rgb(60 56 50 / 0.18)' }}
+          style={{ fontSize: compact ? 22 : 27, textShadow: compact ? '0 1px 12px rgb(0 0 0 / 0.25)' : '0 1px 18px rgb(60 56 50 / 0.18)' }}
         >
           {partOfDay(now)},
         </motion.p>
@@ -46,7 +46,7 @@ export function Greeting() {
           variants={rise}
           transition={{ type: 'spring', stiffness: 120, damping: 20 }}
           className="m-0 font-normal leading-[1.08] tracking-[-0.02em] text-white"
-          style={{ fontSize: compact ? 42 : 52, textShadow: '0 2px 24px rgb(60 56 50 / 0.22)' }}
+          style={{ fontSize: compact ? 42 : 52, textShadow: compact ? '0 1px 12px rgb(0 0 0 / 0.25)' : '0 2px 24px rgb(60 56 50 / 0.22)' }}
         >
           Alejandra
         </motion.h1>

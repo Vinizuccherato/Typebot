@@ -113,11 +113,11 @@ export function Sidebar() {
                   />
                 )}
                 {!active && (
-                  <span className="absolute inset-0 scale-75 rounded-full bg-white/0 transition-all duration-300 ease-[var(--ease-glass)] group-hover:scale-100 group-hover:bg-white/10 group-active:scale-90" />
+                  <span className="absolute inset-0 rounded-full bg-white/[0.06] shadow-[inset_0_0_0_1px_rgb(255_255_255/0.05)] transition-[background-color,scale] duration-300 ease-[var(--ease-glass)] group-hover:bg-white/[0.13] group-active:scale-[0.92]" />
                 )}
-                <motion.span className="relative z-[3] grid place-items-center" whileTap={{ scale: 0.84 }} transition={springs.snappy}>
+                <span className="relative z-[3] grid place-items-center transition-[scale] duration-300 ease-[var(--ease-spring)] group-active:scale-[0.84] group-active:duration-100">
                   <Icon size={18} strokeWidth={1.6} />
-                </motion.span>
+                </span>
               </button>
             )
           })}

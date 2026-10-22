@@ -48,6 +48,8 @@ export function Interior() {
   const botState = useRef({ t: 0, x: -7.5, z: 3.4, heading: 0 })
   const tv = useMemo(() => screenTexture(), [])
   const lampTarget = useMemo(() => new THREE.Object3D(), [])
+  const ledHex = useRef('')
+  const ledBase = useMemo(() => new THREE.Color(), [])
   const tvTarget = useMemo(() => new THREE.Object3D(), [])
 
   useFrame((state, dt) => {
@@ -64,7 +66,11 @@ export function Interior() {
 
     // LED strip frame
     const ledK = s.led.on ? s.led.brightness / 100 : 0
-    tmp.set(s.led.color).multiplyScalar(0.05 + ledK * 2.6)
+    if (ledHex.current !== s.led.color) {
+      ledHex.current = s.led.color
+      ledBase.set(s.led.color)
+    }
+    tmp.copy(ledBase).multiplyScalar(0.05 + ledK * 2.6)
     if (ledCove.current) easing.dampC(ledCove.current.color, tmp, 0.35, dt)
     if (ledFrame.current) easing.dampC(ledFrame.current.color, tmp, 0.35, dt)
 

@@ -76,7 +76,7 @@ export function SpeakerCard() {
         <>
           <div className="mb-1.5 min-h-[30px] pr-10">
             <div className="truncate text-[12.5px] leading-tight text-white/95">{speaker.track}</div>
-            <div className="mt-0.5 truncate text-[10.5px] leading-tight text-white/50">{speaker.artist}</div>
+            <div className="mt-0.5 truncate text-[10.5px] leading-tight text-white/60">{speaker.artist}</div>
           </div>
           <div className="relative h-[3px] overflow-hidden rounded-full bg-white/12">
             <motion.div
@@ -143,7 +143,7 @@ function BandLabels() {
       {BANDS.map(([, hi], i) => (
         <span
           key={hi}
-          className={cn('tabular transition-colors duration-300', i === active ? 'font-medium text-white/90' : 'text-white/40')}
+          className={cn('tabular transition-colors duration-300', i === active ? 'font-medium text-white/90' : 'text-white/50')}
         >
           {hi}%
         </span>

@@ -7,10 +7,10 @@ import { LedCard } from './LedCard'
 import { EQ_CSS, SpeakerCard } from './SpeakerCard'
 import { ZonePill } from './Zones'
 
-/** Deeper, warmer smoke than the stock variant — matches the reference panel. */
+/** Deep warm smoke — measured against the reference panel (#423e3b). */
 const PANEL_MATERIAL = {
-  '--g-fill-a': 'rgb(64 62 57 / 0.62)',
-  '--g-fill-b': 'rgb(34 33 30 / 0.72)',
+  '--g-fill-a': 'rgb(52 49 46 / 0.74)',
+  '--g-fill-b': 'rgb(24 23 21 / 0.82)',
   '--g-blur': '32px',
   '--g-sat': '130%',
 } as React.CSSProperties

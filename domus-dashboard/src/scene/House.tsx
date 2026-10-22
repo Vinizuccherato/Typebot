@@ -13,7 +13,7 @@ import { Interior } from './Interior'
 const M = 0.07 // mullion width
 const FRONT_MULLIONS = [FIN_X1, -5.4, -3.8, -2.2, -0.6, 0.95, 2.4, DOOR.x0, DOOR.x1]
 const SIDE_MULLIONS = [-3.3, -1.7, -0.1, 1.5, 3.05]
-const TOWER_MULLIONS = [-3.2, -1.6, 0, 1.6, 3.2, 4.8, 6.4, 8.0]
+const TOWER_MULLIONS = [-3.2, -1.6, 0, 1.6, 3.2, 4.8, 6.4]
 
 function useGeometry() {
   return useMemo(() => {
@@ -91,9 +91,9 @@ function useGeometry() {
       [SLAB.x0 + 0.1, SLAB.x0 + 0.32, SLAB.y1, SLAB.y1 + 0.12, SLAB.z0 + 0.1, SLAB.z1 - 0.1],
       [SLAB.x1 - 0.32, SLAB.x1 - 0.1, SLAB.y1, SLAB.y1 + 0.12, SLAB.z0 + 0.1, SLAB.z1 - 0.1],
     ]
-    const skylights: BoxSpec[] = Array.from({ length: 6 }, (_, i): BoxSpec => {
+    const skylights: BoxSpec[] = Array.from({ length: 5 }, (_, i): BoxSpec => {
       const x0 = TOWER.x0 + 1.1 + i * 2.2
-      return [x0, x0 + 2.05, TOWER_GLASS.y1 + 1.5, TOWER_GLASS.y1 + 1.55, TOWER.z0 + 0.9, TOWER.z1 - 0.9]
+      return [x0, x0 + 2.05, TOWER.y1, TOWER.y1 + 0.05, TOWER.z0 + 0.9, TOWER.z1 - 0.9]
     })
 
     return {
@@ -227,8 +227,8 @@ export function House() {
 
       {/* Tower roof (taller back-right volume) */}
       <RoundedBox
-        args={[sx(TOWER) + 1.1, 1.2, sz(TOWER) + 1.1]}
-        position={[cx(TOWER) + 0.1, TOWER_GLASS.y1 + 0.3 + 0.6, cz(TOWER)]}
+        args={[sx(TOWER) + 1.1, TOWER.y1 - TOWER_GLASS.y1 - 0.3, sz(TOWER) + 1.1]}
+        position={[cx(TOWER) + 0.1, (TOWER_GLASS.y1 + 0.3 + TOWER.y1) / 2, cz(TOWER)]}
         radius={0.22}
         smoothness={4}
         material={mats.concrete}

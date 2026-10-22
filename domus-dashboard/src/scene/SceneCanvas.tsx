@@ -95,7 +95,7 @@ function Studio({ lowPower }: { lowPower: boolean }) {
 function Effects({ msaa, lean }: { msaa: number; lean: boolean }) {
   return (
     <EffectComposer multisampling={msaa} enableNormalPass={false}>
-      <Bloom mipmapBlur luminanceThreshold={1.3} luminanceSmoothing={0.3} intensity={0.95} radius={0.62} levels={lean ? 5 : 7} />
+      <Bloom mipmapBlur luminanceThreshold={1.3} luminanceSmoothing={0.3} intensity={0.5} radius={0.45} levels={lean ? 5 : 7} />
       <ToneMapping mode={ToneMappingMode.NEUTRAL} />
     </EffectComposer>
   )

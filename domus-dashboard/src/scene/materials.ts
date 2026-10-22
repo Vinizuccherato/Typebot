@@ -10,12 +10,12 @@ function build() {
   const concreteShade = new THREE.MeshStandardMaterial({ color: '#e3e0da', roughness: 0.7, metalness: 0, envMapIntensity: 0.7 })
   const frame = new THREE.MeshStandardMaterial({ color: '#121212', roughness: 0.38, metalness: 0.55, envMapIntensity: 1 })
   const glass = new THREE.MeshPhysicalMaterial({
-    color: '#5d6668',
+    color: '#737474',
     metalness: 0.1,
     roughness: 0.04,
     transparent: true,
-    opacity: 0.46,
-    envMapIntensity: 3.6,
+    opacity: 0.39,
+    envMapIntensity: 4.4,
     ior: 1.5,
     specularIntensity: 1,
     clearcoat: 1,
@@ -34,13 +34,13 @@ function build() {
   const solar = new THREE.MeshStandardMaterial({
     map: solarCellTexture(),
     color: '#ffffff',
-    roughness: 0.34,
-    metalness: 0.3,
-    envMapIntensity: 1.4,
+    roughness: 0.16,
+    metalness: 0.45,
+    envMapIntensity: 1.9, // picks up the sky light-formers
   })
   const solarFrame = new THREE.MeshStandardMaterial({ color: '#e6e9ee', roughness: 0.3, metalness: 0.4 })
-  const leaf = new THREE.MeshStandardMaterial({ color: '#6f7a5c', roughness: 0.95, metalness: 0 })
-  const leafDark = new THREE.MeshStandardMaterial({ color: '#515c45', roughness: 0.95, metalness: 0 })
+  const leaf = new THREE.MeshStandardMaterial({ color: '#7d8770', roughness: 0.95, metalness: 0 })
+  const leafDark = new THREE.MeshStandardMaterial({ color: '#6c7562', roughness: 0.95, metalness: 0 })
   const trunk = new THREE.MeshStandardMaterial({ color: '#4b4038', roughness: 1 })
   const pot = new THREE.MeshStandardMaterial({ color: '#d9d4cc', roughness: 0.8 })
   const white = new THREE.MeshStandardMaterial({ color: '#fafafa', roughness: 0.35, metalness: 0.05 })

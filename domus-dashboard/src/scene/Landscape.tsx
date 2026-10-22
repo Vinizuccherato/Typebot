@@ -8,13 +8,14 @@ import { PLINTH, STAIRS } from './layout'
 type Tree = { p: [number, number, number]; s: number; dark?: boolean }
 
 // Hand-placed so the composition matches the reference: canopy at bottom-left & bottom-right, backdrop behind.
+// Background only (z < -8 or x > 18) so canopies sit inside the fog and never behind the bottom panels.
 const TREES: Tree[] = [
-  { p: [17, 0, 13], s: 1.05 },
-  { p: [21, 0, 6.5], s: 1.3, dark: true },
-  { p: [22, 0, -3], s: 1.45 },
-  { p: [18, 0, -13], s: 1.6, dark: true },
-  { p: [3.5, 0, 18.5], s: 0.8 },
-  { p: [1.2, 0, 21], s: 0.65, dark: true },
+  { p: [-14, 0, -12], s: 0.6 },
+  { p: [-6, 0, -15.5], s: 0.72, dark: true },
+  { p: [3.5, 0, -16], s: 0.66 },
+  { p: [12.5, 0, -13.5], s: 0.78, dark: true },
+  { p: [19.5, 0, -8], s: 0.7 },
+  { p: [21, 0, -1.5], s: 0.6, dark: true },
 ]
 
 /** Soft canopy = a few smooth, gently lumpy spheres merged (lumps are position-hashed → no cracks). */

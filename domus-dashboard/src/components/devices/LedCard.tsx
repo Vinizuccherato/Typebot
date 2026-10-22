@@ -43,7 +43,7 @@ export function LedCard() {
         <CardSheet open={sheet === 'presets'} onClose={() => setSheet(null)} label="LED colour presets" anchor={captionRef}>
           <div className="mb-2 min-h-[30px] pr-10 text-[12.5px] leading-tight text-white/95">
             Presets
-            <div className="mt-0.5 text-[10.5px] text-white/50">Tap to apply</div>
+            <div className="mt-0.5 text-[10.5px] text-white/60">Tap to apply</div>
           </div>
           <div className="grid flex-1 grid-cols-3 content-start gap-x-1 gap-y-1.5">
             {LED_PRESETS.map((p) => {
@@ -67,20 +67,18 @@ export function LedCard() {
                         transition={springs.snappy}
                       />
                     )}
-                    <motion.span
-                      whileHover={{ scale: 1.08 }}
-                      whileTap={{ scale: 0.9 }}
-                      transition={springs.snappy}
-                      className="grid h-[22px] w-[22px] place-items-center rounded-full"
+                    {/* CSS press/hover: motion gestures on a span would add a second tab stop */}
+                    <span
+                      className="grid h-[22px] w-[22px] place-items-center rounded-full transition-transform duration-300 ease-[var(--ease-spring)] group-hover:scale-[1.08] group-active:scale-90"
                       style={{
                         background: `radial-gradient(circle at 35% 30%, #fff8 0%, transparent 45%), ${p.color}`,
                         boxShadow: `0 0 12px ${p.color}66, inset 0 -2px 4px rgb(0 0 0 / 0.18)`,
                       }}
                     >
                       {active && <Check size={11} strokeWidth={2.4} className="text-ink/70" />}
-                    </motion.span>
+                    </span>
                   </span>
-                  <span className={cn('text-[9.5px] leading-none', active ? 'text-white/90' : 'text-white/50 group-hover:text-white/75')}>
+                  <span className={cn('text-[9.5px] leading-none', active ? 'text-white/90' : 'text-white/60 group-hover:text-white/85')}>
                     {p.name}
                   </span>
                 </button>
@@ -121,7 +119,7 @@ export function LedCard() {
         aria-haspopup="dialog"
         aria-expanded={sheet === 'presets'}
         onClick={() => setSheet(sheet === 'presets' ? null : 'presets')}
-        className="mx-auto mt-auto cursor-pointer rounded-full px-2 text-[11px] leading-[16px] text-white/45 outline-none transition-colors hover:text-white/80"
+        className="mx-auto mt-auto cursor-pointer rounded-full px-2 text-[11px] leading-[16px] text-white/55 outline-none transition-colors hover:text-white/80"
       >
         Customize Color
       </button>

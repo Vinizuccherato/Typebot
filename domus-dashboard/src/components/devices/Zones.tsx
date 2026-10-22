@@ -98,8 +98,8 @@ export function ZonePill() {
               bottom: 'calc(100% + 10px)',
               right: 0,
               transformOrigin: 'calc(100% - 40px) 100%',
-              ['--g-fill-a' as string]: 'rgb(120 117 110 / 0.72)',
-              ['--g-fill-b' as string]: 'rgb(70 68 64 / 0.8)',
+              ['--g-fill-a' as string]: 'rgb(66 63 59 / 0.9)',
+              ['--g-fill-b' as string]: 'rgb(36 35 32 / 0.94)',
             }}
             initial={{ opacity: 0, scale: 0.9, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -109,7 +109,7 @@ export function ZonePill() {
             <div className="relative z-[3]">
               <div className="flex items-baseline justify-between px-2 pb-1.5 pt-1">
                 <span className="text-[12.5px] text-white/90">Zones</span>
-                <span className="tabular text-[10.5px] text-white/50">
+                <span className="tabular text-[10.5px] text-white/60">
                   {synced.length} of {ORDER.length} in sync
                 </span>
               </div>
@@ -128,7 +128,7 @@ export function ZonePill() {
                         <RoomThumb id={id} size={28} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[12.5px] leading-tight text-white/90">{r.name}</span>
-                          <span className="tabular block text-[10.5px] leading-tight text-white/45">
+                          <span className="tabular block text-[10.5px] leading-tight text-white/55">
                             {r.code} · {r.temperature.toFixed(1)}°C
                           </span>
                         </span>
@@ -148,7 +148,7 @@ export function ZonePill() {
                               )}
                             />
                           </span>
-                          <span className={on ? 'text-white/75' : 'text-white/40'}>{on ? 'Synced' : 'Sync'}</span>
+                          <span className={on ? 'text-white/80' : 'text-white/55'}>{on ? 'Synced' : 'Sync'}</span>
                         </span>
                       </button>
                     </li>

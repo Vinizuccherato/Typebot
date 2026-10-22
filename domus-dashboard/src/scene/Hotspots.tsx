@@ -186,10 +186,10 @@ export function Hotspots() {
       <Html position={[-5.4, ARRAY.y + 1.35, ARRAY.z0 + 1.6]} {...common}>
         <SolarPill k={k} />
       </Html>
-      <Html position={[PAV.x0 + 1.9, PAV.y0 + 2.5, PAV.z1 + 0.55]} {...common}>
+      <Html position={[PAV.x0 + 2.7, PAV.y0 + 3.5, PAV.z1 + 0.55]} {...common}>
         <HallPill k={k} />
       </Html>
-      <Html position={[DOOR.x0 - 0.2, PAV.y0 + 1.05, PAV.z1 + 1.0]} {...common}>
+      <Html position={[DOOR.x1 - 0.9, PAV.y0 + 1.4, PAV.z1 + 0.8]} {...common}>
         <DoorPill k={k} />
       </Html>
     </group>

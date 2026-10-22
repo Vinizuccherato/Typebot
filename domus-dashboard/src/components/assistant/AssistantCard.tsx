@@ -8,6 +8,7 @@ import { useDomus, type ChatMessage } from '../../store'
 import { detectLang, interpret, SUGGESTIONS, WELCOME, type Lang } from './brain'
 import { useSpeech } from './useSpeech'
 
+/** Chat sheet height when no room slot is found (compact flow). On desktop it covers the room panel exactly. */
 const OPEN_H = 560
 const THINK_MS = 520
 const CHAR_MS = 16
@@ -144,6 +145,7 @@ export function AssistantCard() {
   const [streamingId, setStreamingId] = useState<number | null>(null)
   const [lang, setLang] = useState<Lang>(initialLang)
   const [baseH, setBaseH] = useState(162)
+  const [openH, setOpenH] = useState(OPEN_H)
 
   const root = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -151,14 +153,26 @@ export function AssistantCard() {
   const streamTimer = useRef<number | undefined>(undefined)
   const flush = useRef<(() => void) | null>(null)
 
-  /* collapsed height = slot height */
+  /* collapsed height = slot height; open height = from the room panel's top edge down to our bottom edge */
   useLayoutEffect(() => {
     const el = root.current
     if (!el) return
-    const ro = new ResizeObserver(() => setBaseH(el.offsetHeight))
+    const measure = () => {
+      setBaseH(el.offsetHeight)
+      const room = document.querySelector('[data-slot="room"]')
+      if (!room) return setOpenH(OPEN_H)
+      const r = el.getBoundingClientRect()
+      const scale = r.height / (el.offsetHeight || 1) || 1
+      setOpenH(Math.round((r.bottom - room.getBoundingClientRect().top) / scale))
+    }
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
-    setBaseH(el.offsetHeight)
-    return () => ro.disconnect()
+    window.addEventListener('resize', measure)
+    measure()
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [])
 
   useEffect(() => () => window.clearInterval(streamTimer.current), [])
@@ -257,11 +271,11 @@ export function AssistantCard() {
         radius={28}
         specular={0.5}
         initial={false}
-        animate={{ height: open ? Math.max(OPEN_H, baseH) : baseH }}
+        animate={{ height: open ? Math.max(openH, baseH) : baseH }}
         transition={springs.glide}
         className={cn('absolute inset-x-0 bottom-0 flex flex-col overflow-hidden', open && 'z-50')}
         style={{
-          background: 'linear-gradient(150deg, rgb(186 180 170 / 0.32) 0%, rgb(100 96 89 / 0.28) 100%)',
+          background: 'linear-gradient(150deg, rgb(84 90 70 / 0.62) 0%, rgb(42 44 36 / 0.74) 100%)',
           boxShadow: glow
             ? 'inset 0 1px 0 rgb(255 255 255 / 0.3), 0 0 0 1px rgb(198 239 142 / 0.18), 0 0 46px -8px rgb(198 239 142 / 0.45), 0 24px 60px -24px rgb(20 18 14 / 0.5)'
             : undefined,
@@ -290,31 +304,60 @@ export function AssistantCard() {
             className="absolute inset-x-0 bottom-0 h-[2px]"
             style={{ background: 'linear-gradient(90deg, rgb(198 239 142 / 0.9), rgb(198 239 142 / 0.15) 55%, rgb(198 239 142 / 0.5))', filter: 'blur(1.5px)' }}
           />
+          {/* top-right lime-cream sheen */}
+          <div
+            className="absolute -right-[10%] -top-[30%] h-[80%] w-[60%] rounded-full"
+            style={{ background: 'radial-gradient(closest-side, rgb(232 246 196 / 0.28), transparent 100%)', filter: 'blur(16px)' }}
+          />
         </div>
+        {/* lime-cream rim along the top-right edge */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-[2] rounded-[inherit]"
+          style={{
+            padding: 1.5,
+            background: 'linear-gradient(205deg, rgb(240 250 210 / 0.95) 0%, rgb(214 240 170 / 0.55) 14%, rgb(198 239 142 / 0.12) 34%, transparent 48%)',
+            WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+          }}
+        />
 
         {/* header */}
         <div className="relative z-[3] flex shrink-0 items-center gap-3 px-[18px] pt-[24px]">
-          <span className="glass glass-pill grid h-10 w-10 shrink-0 place-items-center rounded-full text-white">
+          <span
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-[#1d1e1a]"
+            style={{
+              background: 'radial-gradient(circle at 35% 30%, #f4f4ee, #8d8f86 60%, #4b4c47)',
+              boxShadow: 'inset 0 -2px 4px rgb(0 0 0 / 0.25), inset 0 1px 1px rgb(255 255 255 / 0.6), 0 6px 14px -6px rgb(0 0 0 / 0.55)',
+            }}
+          >
             <motion.span
               className="relative z-[3]"
               animate={thinking && !prefersReducedMotion() ? { rotate: 360 } : { rotate: 0 }}
               transition={thinking ? { duration: 2.4, repeat: Infinity, ease: 'linear' } : springs.soft}
             >
-              <Sparkle size={16} strokeWidth={1.7} />
+              <Sparkle size={17} strokeWidth={1.9} />
             </motion.span>
           </span>
           <div className="min-w-0 flex-1">
             <div className="text-[15px] leading-tight text-white">Home AI Assistants</div>
-            <div className="mt-0.5 truncate text-[11.5px] leading-tight text-white/55">Optimize and control your home with the help of AI</div>
+            <div className="mt-0.5 text-[11.5px] leading-tight text-white/60">Optimize and control your home with the help of AI</div>
           </div>
-          <AnimatePresence>
-            {open && (
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={springs.snappy}>
-                <IconButton icon={X} label="Close assistant" size={34} iconSize={15} onClick={() => setOpen(false)} />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={springs.snappy}
+              className="absolute right-3 top-3 z-[5]"
+            >
+              <IconButton icon={X} label="Close assistant" size={30} iconSize={14} onClick={() => setOpen(false)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* conversation */}
         <div className="relative z-[3] min-h-0 flex-1">
@@ -379,6 +422,7 @@ export function AssistantCard() {
           <div
             className="glass glass-well flex h-[46px] items-center gap-2 rounded-full pl-[18px] pr-[6px]"
             style={{
+              background: 'rgb(30 31 27 / 0.72)',
               boxShadow: focused ? 'inset 0 0 0 1px rgb(198 239 142 / 0.4), 0 0 0 3px rgb(198 239 142 / 0.1), 0 12px 30px -20px rgb(0 0 0 / 0.6)' : undefined,
               transition: 'box-shadow 0.35s var(--ease-glass)',
             }}
