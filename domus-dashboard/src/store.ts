@@ -150,7 +150,7 @@ export const useDomus = create<DomusState>()((set, get) => ({
   climate: { current: 16.1, target: 21.5, humidity: 51, mode: 'auto' },
   lamp: { on: true, intensity: 32 },
   led: { on: true, color: '#d8b25a', x: 0.92, y: 0.12, brightness: 86 },
-  speaker: { on: true, playing: true, volume: 62, track: 'Weightless', artist: 'Marconi Union' },
+  speaker: { on: true, playing: true, volume: 20, track: 'Weightless', artist: 'Marconi Union' },
   zonesSynced: 3,
 
   messages: [],

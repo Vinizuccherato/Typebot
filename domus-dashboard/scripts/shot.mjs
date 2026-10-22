@@ -16,9 +16,10 @@ const page = await browser.newPage({ viewport: { width: +w, height: +h }, device
 const logs = []
 page.on('console', (m) => (m.type() === 'error' || m.type() === 'warning') && logs.push(`[${m.type()}] ${m.text()}`))
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`))
-await page.goto(url, { waitUntil: 'networkidle' })
+page.setDefaultTimeout(120000)
+await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 })
 await page.waitForTimeout(+wait)
-await page.screenshot({ path: out })
+await page.screenshot({ path: out, timeout: 120000 })
 console.log(`saved ${out}`)
 if (logs.length) console.log(logs.slice(0, 30).join('\n'))
 await browser.close()

@@ -81,15 +81,18 @@ textarea {
   background: rgb(198 239 142 / 0.35);
 }
 
-:focus-visible {
-  outline: 2px solid rgb(198 239 142 / 0.85);
-  outline-offset: 2px;
+@layer base {
+  :focus-visible {
+    outline: 2px solid rgb(198 239 142 / 0.85);
+    outline-offset: 2px;
+  }
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
+@layer components {
 /* ──────────────────────────────────────────────────────────────
    Liquid glass material
    Layers: tinted fill → backdrop blur/saturate → refraction edge
@@ -259,6 +262,7 @@ textarea {
 .scroll-thin {
   scrollbar-width: thin;
   scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+}
 }
 
 @media (prefers-reduced-motion: reduce) {
