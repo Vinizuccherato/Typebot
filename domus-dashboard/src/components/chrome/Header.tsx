@@ -396,6 +396,7 @@ function UserMenu({ open, onToggle }: { open: boolean; onToggle: () => void }) {
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="Account menu — Alejandra Magno, Nort Residence"
         onClick={onToggle}
         className="relative z-[3] flex h-full w-full cursor-pointer items-center gap-2.5 rounded-full pl-1.5 pr-3.5 text-left outline-none"
       >
