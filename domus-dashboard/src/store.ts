@@ -199,25 +199,34 @@ export const useDomus = create<DomusState>()((set, get) => ({
 
   tick: () =>
     set((s) => {
+      // Only replace slices whose values actually move, so subscribers that
+      // select an unchanged slice keep its identity and skip re-rendering.
+      const patch: Partial<DomusState> = {}
       const jitter = (amp: number) => (Math.random() - 0.5) * amp
+
       const solarKw = round1(clamp(s.solar.kw + jitter(0.3), 3.2, 4.4))
+      if (solarKw !== s.solar.kw) patch.solar = { ...s.solar, kw: solarKw }
+
+      // Accumulate at 0.01 precision; consumers format to 1 decimal.
+      patch.energy = { ...s.energy, today: Math.round((s.energy.today + (s.eco.active ? 0.01 : 0.03)) * 100) / 100 }
+
       // Rooms drift toward their set-point
-      const rooms = { ...s.rooms }
-      for (const id of Object.keys(rooms) as RoomId[]) {
-        const r = rooms[id]
+      let rooms: DomusState['rooms'] | undefined
+      for (const id of Object.keys(s.rooms) as RoomId[]) {
+        const r = s.rooms[id]
         const diff = r.target - r.temperature
-        const step = Math.abs(diff) < 0.05 ? 0 : clamp(diff * 0.25, -0.3, 0.3)
-        rooms[id] = { ...r, temperature: round1(r.temperature + step) }
+        if (Math.abs(diff) < 0.05) continue
+        rooms ??= { ...s.rooms }
+        rooms[id] = { ...r, temperature: round1(r.temperature + clamp(diff * 0.25, -0.3, 0.3)) }
       }
-      // Outdoor-ish comfort reading drifts toward target when not eco
+      if (rooms) patch.rooms = rooms
+
+      // Comfort reading drifts toward its target
       const cDiff = s.climate.target - s.climate.current
-      const climateCurrent = round1(s.climate.current + clamp(cDiff * 0.04, -0.1, 0.1))
-      return {
-        solar: { ...s.solar, kw: solarKw },
-        energy: { ...s.energy, today: round1(s.energy.today + (s.eco.active ? 0.01 : 0.03)) },
-        rooms,
-        climate: { ...s.climate, current: climateCurrent },
+      if (Math.abs(cDiff) >= 0.05) {
+        patch.climate = { ...s.climate, current: round1(s.climate.current + clamp(cDiff * 0.04, -0.1, 0.1)) }
       }
+      return patch
     }),
 }))
 

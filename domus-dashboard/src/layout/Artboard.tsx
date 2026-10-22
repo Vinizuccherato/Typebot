@@ -23,9 +23,10 @@ export interface ArtboardInfo {
 const measure = (): ArtboardInfo => {
   const vw = window.innerWidth
   const vh = window.innerHeight
-  const compact = vw < 1024 || vw / vh < 1.15
-  if (compact) return { mode: 'compact', scale: 1, width: vw, height: vh }
   const scale = Math.min(vw / BASE_W, vh / BASE_H)
+  // Below ~0.74 the 11px labels would render under 8px — switch to the flow layout instead.
+  const compact = vw < 1024 || vw / vh < 1.15 || scale < 0.74
+  if (compact) return { mode: 'compact', scale: 1, width: vw, height: vh }
   return { mode: 'desktop', scale, width: vw / scale, height: vh / scale }
 }
 

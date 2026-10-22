@@ -81,6 +81,12 @@ textarea {
   background: rgb(198 239 142 / 0.35);
 }
 
+/* Unlayered on purpose: Tailwind's outline-none must not strip it from controls. */
+:where(button, a, [role='slider'], [role='switch'], [role='radio'], [role='option'], [role='tab'], [tabindex='0']):focus-visible {
+  outline: 2px solid rgb(198 239 142 / 0.9);
+  outline-offset: 2px;
+}
+
 @layer base {
   :focus-visible {
     outline: 2px solid rgb(198 239 142 / 0.85);
@@ -100,10 +106,10 @@ textarea {
    hotspot that follows the pointer (--mx/--my set by useSpecular).
    ────────────────────────────────────────────────────────────── */
 .glass {
-  --g-fill-a: rgb(255 255 255 / 0.17);
-  --g-fill-b: rgb(255 255 255 / 0.07);
+  --g-fill-a: rgb(132 124 116 / 0.34);
+  --g-fill-b: rgb(78 73 68 / 0.3);
   --g-blur: 26px;
-  --g-sat: 165%;
+  --g-sat: 140%;
   --g-edge-a: rgb(255 255 255 / 0.62);
   --g-edge-b: rgb(255 255 255 / 0.1);
   --g-edge-c: rgb(255 255 255 / 0.04);
@@ -231,8 +237,8 @@ textarea {
 
 /* Pill — chips & small controls */
 .glass-pill {
-  --g-fill-a: rgb(255 255 255 / 0.14);
-  --g-fill-b: rgb(255 255 255 / 0.06);
+  --g-fill-a: rgb(120 113 106 / 0.36);
+  --g-fill-b: rgb(84 79 74 / 0.3);
   --g-blur: 18px;
   --g-shadow: 0 8px 24px -14px rgb(0 0 0 / 0.35);
   --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.22);
