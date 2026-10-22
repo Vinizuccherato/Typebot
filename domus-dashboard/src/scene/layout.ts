@@ -29,7 +29,7 @@ export const SLAB: Box3 = { x0: -10.6, x1: 7.3, y0: 5.0, y1: 5.85, z0: -5.7, z1:
 export const TOWER: Box3 = { x0: -5.6, x1: 7.4, y0: 1, y1: 8.2, z0: -10.2, z1: -5.0 }
 
 /** Low wing to the right (mostly behind the right UI column). */
-export const WING: Box3 = { x0: 7.4, x1: 10.2, y0: 0, y1: 3.1, z0: -10.2, z1: -4.6 }
+export const WING: Box3 = { x0: 7.4, x1: 8.9, y0: 0, y1: 3.1, z0: -8.7, z1: -4.6 }
 
 /** Solar array footprint on SLAB's top. */
 export const ARRAY = { x0: -9.1, x1: 5.5, z0: -2.9, z1: 4.55, y: SLAB.y1 + 0.02, cols: 7, rows: 3 }

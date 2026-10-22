@@ -88,6 +88,8 @@ function Studio({ lowPower }: { lowPower: boolean }) {
         <Lightformer key={i} form="rect" intensity={1.6} color="#ffffff" position={[x, 4, 30]} scale={[1.4, 14, 1]} target={[0, 3, 0]} />
       ))}
       <Lightformer form="ring" intensity={2} color="#ffffff" position={[22, 18, 24]} scale={7} target={[0, 0, 0]} />
+      {/* low sky behind the house → the blue-grey sheen the solar panels reflect at grazing angles */}
+      <Lightformer form="rect" intensity={0.85} color="#dde2ea" position={[-12, 7, -45]} scale={[90, 18, 1]} target={[0, 3, 0]} />
     </Environment>
   )
 }
