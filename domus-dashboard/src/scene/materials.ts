@@ -14,8 +14,8 @@ function build() {
     metalness: 0.1,
     roughness: 0.04,
     transparent: true,
-    opacity: 0.5,
-    envMapIntensity: 2.4,
+    opacity: 0.46,
+    envMapIntensity: 3.6,
     ior: 1.5,
     specularIntensity: 1,
     clearcoat: 1,
@@ -38,7 +38,7 @@ function build() {
     metalness: 0.55,
     envMapIntensity: 1.6,
   })
-  const solarFrame = new THREE.MeshStandardMaterial({ color: '#c9cdd3', roughness: 0.35, metalness: 0.8 })
+  const solarFrame = new THREE.MeshStandardMaterial({ color: '#e6e9ee', roughness: 0.3, metalness: 0.4 })
   const leaf = new THREE.MeshStandardMaterial({ color: '#6f7a5c', roughness: 0.95, metalness: 0 })
   const leafDark = new THREE.MeshStandardMaterial({ color: '#515c45', roughness: 0.95, metalness: 0 })
   const trunk = new THREE.MeshStandardMaterial({ color: '#4b4038', roughness: 1 })

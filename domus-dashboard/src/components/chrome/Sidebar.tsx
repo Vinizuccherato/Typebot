@@ -108,8 +108,7 @@ export function Sidebar() {
                 {active && (
                   <motion.span
                     layoutId="sidebar-active"
-                    className="glass glass-solid inset-0 rounded-full"
-                    style={{ position: 'absolute' }}
+                    className="glass glass-solid absolute inset-0 rounded-full"
                     transition={springs.snappy}
                   />
                 )}
@@ -136,21 +135,23 @@ export function Sidebar() {
                   ? { bottom: `calc(100% + 10px)`, left: PAD + tip * (ITEM + GAP) + ITEM / 2, x: '-50%' }
                   : { left: `calc(100% + 12px)`, top: PAD + tip * (ITEM + GAP) + ITEM / 2, y: '-50%' }
               }
-              initial={{ opacity: 0, scale: 0.9, ...(horizontal ? { y: 6 } : { x: -6 }) }}
+              initial={{ scale: 0.9, ...(horizontal ? { y: 6 } : { x: -6 }) }}
               animate={{
-                opacity: 1,
                 scale: 1,
                 ...(horizontal ? { y: 0 } : { x: 0 }),
                 ...(horizontal
                   ? { left: PAD + tip * (ITEM + GAP) + ITEM / 2 }
                   : { top: PAD + tip * (ITEM + GAP) + ITEM / 2 }),
               }}
-              exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
+              exit={{ scale: 0.92, transition: { duration: 0.12 } }}
               transition={springs.snappy}
             >
               <Glass
                 variant="pill"
                 radius={14}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.15 } }}
+                exit={{ opacity: 0, transition: { duration: 0.1 } }}
                 className="whitespace-nowrap px-3 py-1.5"
                 style={{
                   ['--g-fill-a' as string]: 'rgb(60 58 54 / 0.62)',

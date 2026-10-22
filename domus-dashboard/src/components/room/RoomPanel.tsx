@@ -56,12 +56,12 @@ function RoomSwitcher({ onClose }: { onClose: () => void }) {
     <Glass
       variant="smoke"
       radius={22}
-      initial={{ opacity: 0, y: -8, scale: 0.97, filter: 'blur(8px)' }}
-      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-      exit={{ opacity: 0, y: -6, scale: 0.98, filter: 'blur(6px)' }}
+      initial={{ opacity: 0, y: -8, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -6, scale: 0.98 }}
+      style={{ background: 'linear-gradient(150deg, rgb(52 50 46 / 0.9), rgb(28 27 25 / 0.88))' }}
       transition={springs.snappy}
-      className="w-[272px] origin-top-left p-1.5"
-      style={{ position: 'absolute', left: 0, top: 52, zIndex: 40 }}
+      className="absolute left-0 top-[52px] z-40 w-[272px] origin-top-left p-1.5"
     >
       <div ref={list} role="listbox" aria-label="Rooms" onKeyDown={onKeyDown} className="relative z-[3] flex flex-col gap-0.5">
         {ORDER.map((id) => {
@@ -166,25 +166,41 @@ function RoomHeader() {
 
 function RoomStats() {
   const room = useSelectedRoom()
+  const people = `${room.occupants} ${room.occupants === 1 ? 'person' : 'people'}`
   return (
-    <div className="flex h-8 items-center gap-1.5 px-0.5">
-      <Chip icon={Thermometer} variant="well">
-        <AnimatedNumber value={room.temperature} decimals={1} />
-        °C
-      </Chip>
-      <Chip icon={Users} variant="well" className="min-w-0">
-        {room.occupants ? `Taken (${room.occupants} ${room.occupants === 1 ? 'person' : 'people'})` : 'Vacant'}
-      </Chip>
-      <Chip icon={Droplets} variant="well">
-        <AnimatedNumber value={room.humidity} />% Humidity
-      </Chip>
+    <div className="@container">
+      <div className="flex h-8 items-center gap-1.5 px-0.5">
+        <Chip icon={Thermometer} variant="well">
+          <AnimatedNumber value={room.temperature} decimals={1} />
+          °C
+        </Chip>
+        <Chip icon={Users} variant="well">
+          {room.occupants ? (
+            <>
+              <span className="hidden @min-[350px]:inline">Taken ({people})</span>
+              <span className="@min-[350px]:hidden">{people}</span>
+            </>
+          ) : (
+            'Vacant'
+          )}
+        </Chip>
+        <Chip icon={Droplets} variant="well">
+          <AnimatedNumber value={room.humidity} />% Humidity
+        </Chip>
+      </div>
     </div>
   )
 }
 
 export function RoomPanel() {
   return (
-    <Glass variant="frost" radius={30} specular={0.5} className="flex h-full w-full flex-col p-3">
+    <Glass
+      variant="frost"
+      radius={30}
+      specular={0.5}
+      className="flex h-full w-full flex-col p-3"
+      style={{ background: 'linear-gradient(150deg, rgb(178 172 163 / 0.34) 0%, rgb(96 92 86 / 0.3) 100%)' }}
+    >
       <div className="relative z-[4] mt-2">
         <RoomHeader />
       </div>

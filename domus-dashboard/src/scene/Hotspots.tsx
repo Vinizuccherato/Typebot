@@ -177,13 +177,13 @@ const common = { center: true, zIndexRange: [6, 0] as number[], pointerEvents: '
 export function Hotspots() {
   return (
     <group>
-      <Html position={[-3.6, ARRAY.y + 1.7, ARRAY.z0 + 1.3]} {...common}>
+      <Html position={[-3.6, ARRAY.y + 2.9, ARRAY.z0 + 1.0]} {...common}>
         <SolarPill />
       </Html>
-      <Html position={[PAV.x0 + 1.35, PAV.y0 + 2.2, PAV.z1 + 0.55]} {...common}>
+      <Html position={[PAV.x0 + 1.9, PAV.y0 + 2.5, PAV.z1 + 0.55]} {...common}>
         <HallPill />
       </Html>
-      <Html position={[DOOR.x1 + 1.4, PAV.y0 + 0.55, PAV.z1 + 1.4]} {...common}>
+      <Html position={[DOOR.x1 + 3.4, PAV.y0 + 1.7, PAV.z1 + 0.45]} {...common}>
         <DoorPill />
       </Html>
     </group>

@@ -9,16 +9,12 @@ type Tree = { p: [number, number, number]; s: number; dark?: boolean }
 
 // Hand-placed so the composition matches the reference: canopy at bottom-left & bottom-right, backdrop behind.
 const TREES: Tree[] = [
-  { p: [-15.5, 0, 8.5], s: 0.95 },
-  { p: [-18.5, 0, 3], s: 1.2, dark: true },
-  { p: [15.5, 0, 10.5], s: 1.05 },
-  { p: [19, 0, 5], s: 1.35, dark: true },
-  { p: [21, 0, -2.5], s: 1.5 },
-  { p: [17, 0, -11], s: 1.8, dark: true },
-  { p: [-16, 0, -12], s: 1.7, dark: true },
-  { p: [-6, 0, -19], s: 2, dark: true },
-  { p: [6, 0, -20], s: 2.1, dark: true },
-  { p: [-22, 0, -5], s: 1.5 },
+  { p: [-21, 0, 12], s: 1.0 },
+  { p: [-24, 0, 7], s: 1.2, dark: true },
+  { p: [19, 0, 13], s: 1.05 },
+  { p: [22, 0, 6.5], s: 1.3, dark: true },
+  { p: [22, 0, -3], s: 1.45 },
+  { p: [18, 0, -13], s: 1.6, dark: true },
 ]
 
 /** Soft canopy = a few smooth, gently lumpy spheres merged (lumps are position-hashed → no cracks). */
@@ -61,12 +57,12 @@ export function Landscape() {
       {/* ground — dissolves radially into the backdrop */}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.001, 0]} receiveShadow>
         <circleGeometry args={[34, 64]} />
-        <meshStandardMaterial color="#a9a39a" roughness={1} metalness={0} transparent alphaMap={fade} depthWrite={false} />
+        <meshStandardMaterial color="#c7c1b8" roughness={1} metalness={0} transparent alphaMap={fade} depthWrite={false} />
       </mesh>
       {/* shadow catcher for crisper contact */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.002, 0]} receiveShadow>
         <circleGeometry args={[30, 48]} />
-        <shadowMaterial transparent opacity={0.2} depthWrite={false} />
+        <shadowMaterial transparent opacity={0.16} depthWrite={false} />
       </mesh>
 
       {trees.map((t, i) => (

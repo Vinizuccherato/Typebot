@@ -47,15 +47,20 @@ export function Popover({ open, align = 'right', width = 300, className, childre
           aria-label={label}
           className={cn('absolute top-[calc(100%+12px)] z-50', align === 'right' ? 'right-0' : 'left-0')}
           style={{ width, transformOrigin: align === 'right' ? 'top right' : 'top left' }}
-          initial={{ opacity: 0, scale: 0.92, y: -6, filter: 'blur(6px)' }}
-          animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, scale: 0.95, y: -4, filter: 'blur(4px)', transition: { duration: 0.16 } }}
+          // transform-only wrapper: filter/opacity here would make it a backdrop root
+          // and the glass inside would stop blurring the panels behind it
+          initial={{ scale: 0.92, y: -6 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: -4, transition: { duration: 0.16 } }}
           transition={springs.snappy}
         >
           <Glass
             variant="frost"
             radius={24}
             specular={0.8}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.18 } }}
+            exit={{ opacity: 0, transition: { duration: 0.14 } }}
             className={cn('p-2 text-white', className)}
             style={{
               ['--g-fill-a' as string]: 'rgb(120 116 108 / 0.55)',

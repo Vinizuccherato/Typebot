@@ -99,8 +99,8 @@ export function SolarArray() {
     const breathe = eco ? 0.86 + 0.14 * Math.sin(t * 1.7) : 1
     const k = g.level * breathe
     if (lineMat.current) lineMat.current.color.copy(LIME).multiplyScalar(0.6 + 1.5 * k)
-    if (dotMat.current) dotMat.current.color.copy(LIME).multiplyScalar(0.8 + 2.2 * k)
-    if (haloMat.current) haloMat.current.opacity = 0.15 + 0.6 * k
+    if (dotMat.current) dotMat.current.color.copy(LIME).multiplyScalar(0.8 + 2.8 * k)
+    if (haloMat.current) haloMat.current.opacity = 0.2 + 0.8 * k
     // reticle
     if (reticle.current) reticle.current.rotation.y = t * 0.25
     if (pulse.current && pulseMat.current) {

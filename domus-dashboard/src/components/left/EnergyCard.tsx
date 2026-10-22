@@ -192,12 +192,12 @@ function StepChart({ onHover }: { onHover?: (h: number | null) => void }) {
         {hover === null && (
           <g transform={`translate(${X(nowH)} ${Y(series[nowH])})`}>
             <motion.circle
-              r="3"
+              r={3}
               fill="none"
               stroke="#c6ef8e"
               strokeWidth="1.2"
-              initial={{ scale: 1, opacity: 0.7 }}
-              animate={{ scale: [1, 3.4], opacity: [0.7, 0] }}
+              initial={{ r: 3, scale: 1, opacity: 0.7 }}
+              animate={{ r: 3, scale: [1, 3.4], opacity: [0.7, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
               style={{ transformBox: 'fill-box', originX: 0.5, originY: 0.5 }}
             />

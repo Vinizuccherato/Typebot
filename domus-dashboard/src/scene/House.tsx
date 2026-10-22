@@ -13,7 +13,7 @@ import { Interior } from './Interior'
 const M = 0.07 // mullion width
 const FRONT_MULLIONS = [FIN_X1, -5.4, -3.8, -2.2, -0.6, 0.95, DOOR.x0, DOOR.x1, 5.3]
 const SIDE_MULLIONS = [-3.3, -1.7, -0.1, 1.5, 3.05]
-const TOWER_MULLIONS = [-1.6, 0, 1.6, 3.2, 4.8, 6.4, 8.0]
+const TOWER_MULLIONS = [-3.2, -1.6, 0, 1.6, 3.2, 4.8, 6.4, 8.0]
 
 function useGeometry() {
   return useMemo(() => {
@@ -35,10 +35,10 @@ function useGeometry() {
     const ty0 = SLAB.y1
     const ty1 = 7.45
     for (const x of TOWER_MULLIONS) frames.push([x - M / 2, x + M / 2, ty0, ty1, tz - 0.05, tz + 0.05])
-    frames.push([-2.4, TOWER.x1, ty1 - 0.08, ty1, tz - 0.06, tz + 0.06])
-    frames.push([-2.4, TOWER.x1, ty0, ty0 + 0.08, tz - 0.06, tz + 0.06])
+    frames.push([TOWER.x0 + 0.8, TOWER.x1, ty1 - 0.08, ty1, tz - 0.06, tz + 0.06])
+    frames.push([TOWER.x0 + 0.8, TOWER.x1, ty0, ty0 + 0.08, tz - 0.06, tz + 0.06])
     // tower horizontal transom (gives the "grid" reading of the reference)
-    frames.push([-2.4, TOWER.x1, 6.45, 6.5, tz - 0.04, tz + 0.04])
+    frames.push([TOWER.x0 + 0.8, TOWER.x1, 6.45, 6.5, tz - 0.04, tz + 0.04])
     // wing glazing
     for (let z = WING.z0 + 0.2; z <= WING.z1; z += 1.55) frames.push([WING.x1 - 0.04, WING.x1 + 0.06, 0.45, 2.85, z - 0.035, z + 0.035])
     for (let x = WING.x0 + 0.9; x <= WING.x1; x += 1.6) frames.push([x - 0.035, x + 0.035, 0.45, 2.85, WING.z1 - 0.04, WING.z1 + 0.06])
@@ -53,7 +53,7 @@ function useGeometry() {
       panes.push({ axis: 'z', at: zf, a0: fx[i], a1: fx[i + 1], y0: PAV.y0 + 0.08, y1: PAV.y1 - 0.08 })
     }
     panes.push({ axis: 'x', at: xr, a0: PAV.z0, a1: PAV.z1, y0: PAV.y0 + 0.08, y1: PAV.y1 - 0.08, flip: false })
-    panes.push({ axis: 'z', at: tz, a0: -2.4, a1: TOWER.x1, y0: ty0, y1: ty1 })
+    panes.push({ axis: 'z', at: tz, a0: TOWER.x0 + 0.8, a1: TOWER.x1, y0: ty0, y1: ty1 })
     panes.push({ axis: 'x', at: WING.x1 + 0.01, a0: WING.z0, a1: WING.z1, y0: 0.45, y1: 2.85 })
     panes.push({ axis: 'z', at: WING.z1 + 0.01, a0: WING.x0, a1: WING.x1, y0: 0.45, y1: 2.85 })
 
@@ -63,7 +63,7 @@ function useGeometry() {
       [PAV.x0, PAV.x1, PAV.y0, PAV.y1, PAV.z0, PAV.z0 + 0.3], // back wall
       [0.9, 2.2, PAV.y0, PAV.y1, PAV.z0, -0.2], // service core
       // tower body
-      [TOWER.x0, -2.4, ty0 - 1, ty1 + 0.3, TOWER.z0, TOWER.z1 + 0.02], // tower left pier
+      [TOWER.x0, TOWER.x0 + 0.8, ty0 - 1, ty1 + 0.3, TOWER.z0, TOWER.z1 + 0.02], // tower left pier
       [TOWER.x0, TOWER.x1, ty0 - 1, ty1, TOWER.z0, TOWER.z1 - 0.6], // tower mass
       // wing body
       [WING.x0, WING.x1, 0, 0.45, WING.z0, WING.z1 + 0.05],
@@ -76,7 +76,7 @@ function useGeometry() {
       walls.push([STAIRS.x0, STAIRS.x1, 0, top, PLINTH.z1 + i * STAIRS.tread, PLINTH.z1 + (i + 1) * STAIRS.tread])
     }
     // dark reveal under the tower roof
-    const reveals: BoxSpec[] = [[-2.6, TOWER.x1 + 0.1, ty1, ty1 + 0.3, TOWER.z1 - 0.3, TOWER.z1 - 0.1]]
+    const reveals: BoxSpec[] = [[TOWER.x0 + 0.6, TOWER.x1 + 0.1, ty1, ty1 + 0.3, TOWER.z1 - 0.3, TOWER.z1 - 0.1]]
     // lower-level glazing band
     const bandGlass: Parameters<typeof mergePlanes>[0] = [
       { axis: 'z', at: PLINTH.z1 + 0.005, a0: PLINTH.x0 + 0.3, a1: STAIRS.x0 - 0.3, y0: 0.16, y1: 0.84 },
@@ -88,8 +88,8 @@ function useGeometry() {
       [SLAB.x0 + 0.1, SLAB.x0 + 0.32, SLAB.y1, SLAB.y1 + 0.12, SLAB.z0 + 0.1, SLAB.z1 - 0.1],
       [SLAB.x1 - 0.32, SLAB.x1 - 0.1, SLAB.y1, SLAB.y1 + 0.12, SLAB.z0 + 0.1, SLAB.z1 - 0.1],
     ]
-    const skylights: BoxSpec[] = Array.from({ length: 5 }, (_, i): BoxSpec => {
-      const x0 = -1.6 + i * 2.25
+    const skylights: BoxSpec[] = Array.from({ length: 6 }, (_, i): BoxSpec => {
+      const x0 = TOWER.x0 + 1.1 + i * 2.2
       return [x0, x0 + 2.05, 8.95, 9.0, TOWER.z0 + 0.9, TOWER.z1 - 0.9]
     })
 

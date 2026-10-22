@@ -18,9 +18,9 @@ function ToastPill({ t }: { t: Toast }) {
   return (
     <motion.li
       layout
-      initial={{ opacity: 0, y: -18, scale: 0.9, filter: 'blur(8px)' }}
-      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-      exit={{ opacity: 0, y: -10, scale: 0.92, filter: 'blur(6px)', transition: { duration: 0.2 } }}
+      initial={{ y: -18, scale: 0.9 }}
+      animate={{ y: 0, scale: 1 }}
+      exit={{ y: -10, scale: 0.92, transition: { duration: 0.2 } }}
       transition={springs.bouncy}
       className="pointer-events-auto list-none"
     >
@@ -28,6 +28,9 @@ function ToastPill({ t }: { t: Toast }) {
         variant="pill"
         radius={999}
         specular={0.7}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.22 } }}
+        exit={{ opacity: 0, transition: { duration: 0.18 } }}
         className="cursor-pointer"
         style={{
           ['--g-fill-a' as string]: 'rgb(92 89 83 / 0.62)',

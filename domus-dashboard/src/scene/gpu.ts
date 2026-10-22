@@ -7,3 +7,8 @@ export function isSoftwareRenderer(gl: THREE.WebGLRenderer) {
   const name = String(ext ? ctx.getParameter(ext.UNMASKED_RENDERER_WEBGL) : ctx.getParameter(ctx.RENDERER))
   return /swiftshader|llvmpipe|software/i.test(name)
 }
+
+/** Headless / automation or explicit `?lowfx`: lean profile so a frame lands fast. */
+export const isAutomation = () => typeof navigator !== 'undefined' && navigator.webdriver === true
+
+export const wantsNoFx = () => typeof location !== 'undefined' && new URLSearchParams(location.search).has('lowfx')

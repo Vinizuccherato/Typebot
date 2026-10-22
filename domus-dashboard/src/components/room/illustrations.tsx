@@ -137,15 +137,13 @@ export function SonosIllustration({ on, className }: IllustrationProps) {
       <path d="M33 9.4 L67 9.4" stroke="#fff" strokeOpacity="0.25" strokeWidth="0.5" />
       {/* touch strip & LED */}
       <rect x="43" y="10.2" width="14" height="0.9" rx="0.45" fill="#000" fillOpacity="0.5" />
-      <motion.circle
-        cx="50"
-        cy="16"
-        r="3"
-        fill={`url(#${id}-led)`}
+      <motion.g
         initial={false}
         animate={{ opacity: on ? [0.65, 1, 0.65] : 0 }}
         transition={on && !reduced() ? { duration: 2.6, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
-      />
+      >
+        <circle cx="50" cy="16" r="3" fill={`url(#${id}-led)`} />
+      </motion.g>
       <circle cx="50" cy="16" r="0.8" fill={on ? '#f2ffe4' : '#3a3a3a'} />
     </svg>
   )
@@ -191,19 +189,13 @@ export function CleanBotIllustration({ on, className }: IllustrationProps) {
       {/* button */}
       <ellipse cx="66" cy="49.5" rx="3.4" ry="1.3" fill="#d9d6d0" stroke="#000" strokeOpacity="0.12" strokeWidth="0.4" />
       {/* status ring around turret */}
-      <motion.ellipse
-        cx="50"
-        cy="43"
-        rx="11.5"
-        ry="4.4"
-        fill="none"
-        stroke="#c6ef8e"
-        strokeWidth="1.6"
-        filter={`url(#${id}-glow)`}
+      <motion.g
         initial={false}
         animate={{ opacity: on ? [0.35, 1, 0.35] : 0 }}
         transition={on && !reduced() ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
-      />
+      >
+        <ellipse cx="50" cy="43" rx="11.5" ry="4.4" fill="none" stroke="#c6ef8e" strokeWidth="1.6" filter={`url(#${id}-glow)`} />
+      </motion.g>
       <ellipse cx="50" cy="43" rx="11.5" ry="4.4" fill="none" stroke={on ? '#c6ef8e' : '#b8b5ae'} strokeOpacity={on ? 0.9 : 0.5} strokeWidth="0.7" />
       {/* lidar turret */}
       <path d="M41 36 L59 36 L59 42 A9 3.4 0 0 1 41 42 Z" fill={`url(#${id}-turret)`} />

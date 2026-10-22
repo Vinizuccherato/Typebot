@@ -169,11 +169,17 @@ export function ZonalClimate() {
   const [startX] = pt(-HALF)
 
   return (
-    <Glass variant="inset" radius={26} specular={0.6} className={cn('relative h-full w-full', settingsOpen && 'z-30')}>
+    <Glass
+      variant="inset"
+      radius={26}
+      specular={0.6}
+      className={cn('relative h-full w-full', settingsOpen && 'z-30')}
+      style={{ background: 'linear-gradient(150deg, rgb(255 255 255 / 0.1) 0%, rgb(38 36 33 / 0.16) 100%)' }}
+    >
       {/* label + status */}
       <div className="absolute left-[18px] top-[17px] z-[3]">
-        <div className="text-[13px] leading-none text-white/72">Zonal climate control</div>
-        <div className="mt-[7px] flex items-center gap-1.5 text-[11px] leading-none text-white/45">
+        <div className="text-[13px] leading-none text-white/80">Zonal climate control</div>
+        <div className="mt-[7px] flex items-center gap-1.5 text-[11px] leading-none text-white/50">
           <span
             className={cn(
               'h-1.5 w-1.5 rounded-full transition-colors duration-500',
@@ -200,12 +206,12 @@ export function ZonalClimate() {
             <Glass
               variant="smoke"
               radius={20}
-              initial={{ opacity: 0, y: -6, scale: 0.96, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -6, scale: 0.97, filter: 'blur(4px)' }}
+              initial={{ opacity: 0, y: -6, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.97 }}
+              style={{ background: 'linear-gradient(150deg, rgb(52 50 46 / 0.9), rgb(28 27 25 / 0.88))' }}
               transition={springs.snappy}
-              className="w-[232px] origin-top-right p-3"
-              style={{ position: 'absolute', right: 0, top: 48 }}
+              className="absolute right-0 top-[48px] w-[232px] origin-top-right p-3"
               role="dialog"
               aria-label="Climate settings"
             >
@@ -307,8 +313,23 @@ export function ZonalClimate() {
             })}
 
             {/* knob */}
-            <motion.circle cx={knobX} cy={knobY} r={12} fill="#e6ffc8" opacity={dragging ? 0.9 : 0.55} filter="url(#zc-knob)" />
-            <motion.circle cx={knobX} cy={knobY} r={dragging ? 7 : 5.5} fill="#fff" style={{ filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 0.35))' }} />
+            <motion.circle
+              cx={knobX}
+              cy={knobY}
+              fill="#e6ffc8"
+              filter="url(#zc-knob)"
+              initial={{ r: 12, opacity: 0.55 }}
+              animate={{ r: 12, opacity: dragging ? 0.9 : 0.55 }}
+            />
+            <motion.circle
+              cx={knobX}
+              cy={knobY}
+              fill="#fff"
+              style={{ filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 0.35))' }}
+              initial={{ r: 5.5 }}
+              animate={{ r: dragging ? 7 : 5.5 }}
+              transition={springs.snappy}
+            />
           </svg>
 
           {/* readout */}

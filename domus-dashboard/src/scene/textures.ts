@@ -62,13 +62,13 @@ export function solarCellTexture() {
   const S = 512
   const [c, g] = canvas(S)
   const base = g.createLinearGradient(0, 0, S, S)
-  base.addColorStop(0, '#1b2438')
-  base.addColorStop(0.5, '#0e1524')
-  base.addColorStop(1, '#162035')
+  base.addColorStop(0, '#1d2740')
+  base.addColorStop(0.5, '#101830')
+  base.addColorStop(1, '#1a2540')
   g.fillStyle = base
   g.fillRect(0, 0, S, S)
-  const cols = 6
-  const rows = 6
+  const cols = 3
+  const rows = 5
   const cw = S / cols
   const ch = S / rows
   for (let i = 0; i < cols; i++)
@@ -81,12 +81,11 @@ export function solarCellTexture() {
       g.fillStyle = cg
       g.fillRect(x + 3, y + 3, cw - 6, ch - 6)
       // busbars
-      g.fillStyle = 'rgba(150,165,190,0.18)'
-      g.fillRect(x + cw * 0.33, y + 3, 1.2, ch - 6)
-      g.fillRect(x + cw * 0.66, y + 3, 1.2, ch - 6)
+      g.fillStyle = 'rgba(150,165,190,0.08)'
+      g.fillRect(x + cw * 0.5, y + 3, 1, ch - 6)
     }
-  g.strokeStyle = 'rgba(200,210,228,0.62)'
-  g.lineWidth = 3
+  g.strokeStyle = 'rgba(190,200,220,0.38)'
+  g.lineWidth = 2.5
   for (let i = 0; i <= cols; i++) {
     g.beginPath()
     g.moveTo(i * cw, 0)

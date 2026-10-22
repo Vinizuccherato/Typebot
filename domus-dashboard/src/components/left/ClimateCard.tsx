@@ -215,16 +215,16 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
         {/* knob */}
         <motion.g style={{ x: kx, y: ky }}>
           <motion.circle
-            r="15"
-            initial={false}
-            animate={{ fill: mode.color, opacity: dragging ? 0.28 : 0.16, scale: dragging ? 1.25 : 1 }}
+            r={15}
+            initial={{ r: 15, fill: mode.color, opacity: 0.16, scale: 1 }}
+            animate={{ r: 15, fill: mode.color, opacity: dragging ? 0.28 : 0.16, scale: dragging ? 1.25 : 1 }}
             transition={springs.soft}
           />
           <motion.circle
-            r="8.5"
+            r={8.5}
             fill="white"
-            initial={false}
-            animate={{ stroke: mode.color, scale: dragging ? 1.15 : 1 }}
+            initial={{ r: 8.5, stroke: mode.color, scale: 1 }}
+            animate={{ r: 8.5, stroke: mode.color, scale: dragging ? 1.15 : 1 }}
             strokeWidth="3"
             transition={springs.bouncy}
             style={{ filter: 'drop-shadow(0 2px 4px rgb(0 0 0 / 0.35))' }}
@@ -316,8 +316,7 @@ function ModeList() {
             {on && (
               <motion.span
                 layoutId="climate-mode"
-                className="glass glass-pill inset-0 rounded-full"
-                style={{ position: 'absolute' }}
+                className="glass glass-pill absolute inset-0 rounded-full"
                 transition={springs.snappy}
               />
             )}

@@ -259,13 +259,9 @@ export function AssistantCard() {
         initial={false}
         animate={{ height: open ? Math.max(OPEN_H, baseH) : baseH }}
         transition={springs.glide}
-        className="flex flex-col overflow-hidden"
+        className={cn('absolute inset-x-0 bottom-0 flex flex-col overflow-hidden', open && 'z-50')}
         style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: open ? 50 : undefined,
+          background: 'linear-gradient(150deg, rgb(186 180 170 / 0.32) 0%, rgb(100 96 89 / 0.28) 100%)',
           boxShadow: glow
             ? 'inset 0 1px 0 rgb(255 255 255 / 0.3), 0 0 0 1px rgb(198 239 142 / 0.18), 0 0 46px -8px rgb(198 239 142 / 0.45), 0 24px 60px -24px rgb(20 18 14 / 0.5)'
             : undefined,
@@ -346,7 +342,10 @@ export function AssistantCard() {
                   ))}
                   <AnimatePresence>{thinking && <Thinking key="thinking" />}</AnimatePresence>
                 </div>
-                <div className="flex shrink-0 gap-1.5 overflow-x-auto px-[18px] pb-2.5 pt-1 [scrollbar-width:none]">
+                <div
+                  className="flex shrink-0 gap-1.5 overflow-x-auto px-[18px] pb-2.5 pt-1 [scrollbar-width:none]"
+                  style={{ maskImage: 'linear-gradient(to right, transparent 0, #000 16px, #000 calc(100% - 24px), transparent 100%)' }}
+                >
                   {SUGGESTIONS[lang].map((sug, i) => (
                     <motion.button
                       key={sug}
@@ -377,7 +376,13 @@ export function AssistantCard() {
             void ask(value)
           }}
         >
-          <div className="glass glass-well flex h-[46px] items-center gap-2 rounded-full pl-[18px] pr-[6px]">
+          <div
+            className="glass glass-well flex h-[46px] items-center gap-2 rounded-full pl-[18px] pr-[6px]"
+            style={{
+              boxShadow: focused ? 'inset 0 0 0 1px rgb(198 239 142 / 0.4), 0 0 0 3px rgb(198 239 142 / 0.1), 0 12px 30px -20px rgb(0 0 0 / 0.6)' : undefined,
+              transition: 'box-shadow 0.35s var(--ease-glass)',
+            }}
+          >
             <div className="relative z-[3] min-w-0 flex-1">
               <input
                 ref={inputRef}
@@ -392,7 +397,7 @@ export function AssistantCard() {
                 aria-label="Ask the home assistant"
                 enterKeyHint="send"
                 autoComplete="off"
-                className="h-[46px] w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/50"
+                className="h-[46px] w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/50 focus-visible:outline-none"
               />
               {speech.listening && !speech.interim && (
                 <div className="pointer-events-none absolute inset-0 flex items-center gap-2.5">

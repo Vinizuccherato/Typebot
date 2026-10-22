@@ -10,7 +10,7 @@ import { Landscape } from './Landscape'
 import { Hotspots } from './Hotspots'
 import { CameraRig } from './CameraRig'
 import { backgroundTexture, neutralCompensate } from './textures'
-import { isSoftwareRenderer } from './gpu'
+import { isAutomation, isSoftwareRenderer, wantsNoFx } from './gpu'
 
 /** Backdrop identical to the CSS body gradient + matching fog. */
 function Atmosphere() {
@@ -92,20 +92,20 @@ function Studio({ lowPower }: { lowPower: boolean }) {
   )
 }
 
-function Effects({ msaa }: { msaa: number }) {
+function Effects({ msaa, lean }: { msaa: number; lean: boolean }) {
   return (
     <EffectComposer multisampling={msaa} enableNormalPass={false}>
-      <Bloom mipmapBlur luminanceThreshold={1.5} luminanceSmoothing={0.3} intensity={1.1} radius={0.8} levels={7} />
+      <Bloom mipmapBlur luminanceThreshold={1.5} luminanceSmoothing={0.3} intensity={0.75} radius={0.6} levels={lean ? 5 : 7} />
       <ToneMapping mode={ToneMappingMode.NEUTRAL} />
     </EffectComposer>
   )
 }
 
 export function SceneCanvas() {
-  const [dpr, setDpr] = useState(() => Math.min(2, window.devicePixelRatio || 1))
-  const [fx, setFx] = useState(true)
-  // Software rasterisers (SwiftShader / llvmpipe) get a lean profile.
-  const [lowPower, setLowPower] = useState(false)
+  const [dpr, setDpr] = useState(() => (isAutomation() ? 1 : Math.min(2, window.devicePixelRatio || 1)))
+  const [fx, setFx] = useState(() => !wantsNoFx())
+  // Software rasterisers (SwiftShader / llvmpipe) and automation get a lean profile.
+  const [lowPower, setLowPower] = useState(() => isAutomation())
 
   return (
     <div className="fixed inset-0 z-0" role="img" aria-label="Interactive 3D view of the residence">
@@ -141,7 +141,7 @@ export function SceneCanvas() {
         <Landscape />
         <Hotspots />
         <CameraRig />
-        {fx && <Effects msaa={lowPower || dpr >= 2 ? 0 : 4} />}
+        {fx && <Effects lean={lowPower} msaa={lowPower || dpr >= 2 ? 0 : 4} />}
       </Canvas>
     </div>
   )

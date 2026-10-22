@@ -443,15 +443,18 @@ export function CommandPalette() {
               }}
             >
               <motion.div
-                initial={{ opacity: 0, y: -14, scale: 0.96, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -8, scale: 0.97, filter: 'blur(6px)', transition: { duration: 0.16 } }}
+                initial={{ y: -14, scale: 0.96 }}
+                animate={{ y: 0, scale: 1 }}
+                exit={{ y: -8, scale: 0.97, transition: { duration: 0.16 } }}
                 transition={springs.snappy}
               >
                 <Glass
                   variant="frost"
                   radius={28}
                   specular={0.6}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, transition: { duration: 0.2 } }}
+                  exit={{ opacity: 0, transition: { duration: 0.14 } }}
                   role="dialog"
                   aria-modal="true"
                   aria-label="Command palette"

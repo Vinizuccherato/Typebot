@@ -70,8 +70,8 @@ function NodeTile({ id }: { id: NodeId }) {
 
 export function NodesGrid() {
   return (
-    <Glass variant="inset" radius={26} className="flex h-full w-full flex-col px-3 pb-3 pt-[15px]">
-      <div className="relative z-[3] px-1.5 text-[13px] leading-none text-white/72">Nodes connected in a room</div>
+    <Glass variant="inset" radius={26} className="flex h-full w-full flex-col px-3 pb-3 pt-[15px]" style={{ background: 'linear-gradient(150deg, rgb(255 255 255 / 0.1) 0%, rgb(38 36 33 / 0.16) 100%)' }}>
+      <div className="relative z-[3] px-1.5 text-[13px] leading-none text-white/80">Nodes connected in a room</div>
       <div className="relative z-[3] mt-3 grid min-h-0 flex-1 grid-cols-3 gap-2.5">
         <NodeTile id="tv" />
         <NodeTile id="sonos" />

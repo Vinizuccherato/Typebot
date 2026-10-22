@@ -7,7 +7,7 @@ import { useDomus, type FocusId } from '../store'
 import { useArtboard } from '../layout/Artboard'
 import { prefersReducedMotion } from '../lib/utils'
 import { ARRAY_CENTER, DOOR, PAV } from './layout'
-import { isSoftwareRenderer } from './gpu'
+import { isAutomation, isSoftwareRenderer } from './gpu'
 
 const { ACTION } = CameraControlsImpl
 
@@ -20,7 +20,7 @@ interface View {
 
 /** Camera "shots". Overview reproduces the reference: elevated 3/4 from the front-right. */
 const VIEWS: Record<FocusId, View> = {
-  overview: { target: [-0.4, 3.4, -0.8], az: 0.98, polar: 1.22, k: 1 },
+  overview: { target: [-1.6, 3.4, -0.6], az: 0.82, polar: 1.12, k: 1 },
   solar: { target: [ARRAY_CENTER[0], ARRAY_CENTER[1], ARRAY_CENTER[2]], az: 0.45, polar: 0.72, k: 0.6 },
   'main-hall': { target: [-5.6, 2.5, 1.2], az: 0.42, polar: 1.2, k: 0.46 },
   'front-door': { target: [(DOOR.x0 + DOOR.x1) / 2, 2.2, PAV.z1 + 0.6], az: 0.3, polar: 1.3, k: 0.4 },
@@ -49,10 +49,10 @@ function useFraming() {
       const dist = 27 / (0.96 * 2 * halfH * aspect)
       return { fov, dist: Math.max(46, dist), ox: 0.5, oy: aspect < 0.8 ? 0.33 : 0.4 }
     }
-    const fov = 28
+    const fov = 22
     const ref = 16 / 9
     // keep the house width constant relative to the artboard on narrower screens
-    const dist = 60 * Math.max(1, Math.pow(ref / aspect, 0.85))
+    const dist = 63 * Math.max(1, Math.pow(ref / aspect, 0.85))
     return { fov, dist, ox: 0.535, oy: 0.37 }
   }, [size.width, size.height, mode])
 }
@@ -70,7 +70,7 @@ export function CameraRig() {
   const dragging = useRef(false)
   const pointer = useRef({ x: 0, y: 0 })
   const applied = useRef({ az: 0, polar: 0 })
-  const reduced = useMemo(() => prefersReducedMotion() || isSoftwareRenderer(gl), [gl])
+  const reduced = useMemo(() => prefersReducedMotion() || isAutomation() || isSoftwareRenderer(gl), [gl])
 
   /* principal-point shift + fov */
   useLayoutEffect(() => {
