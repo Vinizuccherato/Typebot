@@ -6,12 +6,12 @@ import { easing } from 'maath'
 import { useDomus } from '../store'
 import { materials } from './materials'
 import { mergeBoxes, mergePlanes, type BoxSpec } from './geometry'
-import { DOOR, FIN_X1, PAV, PLINTH, SLAB, STAIRS, TOWER, WING, cx, cy, cz, sx, sy, sz } from './layout'
+import { DOOR, FIN_X1, PAV, PLINTH, SLAB, STAIRS, TOWER, TOWER_GLASS, WING, cx, cy, cz, sx, sy, sz } from './layout'
 import { SolarArray } from './SolarArray'
 import { Interior } from './Interior'
 
 const M = 0.07 // mullion width
-const FRONT_MULLIONS = [FIN_X1, -5.4, -3.8, -2.2, -0.6, 0.95, DOOR.x0, DOOR.x1, 5.3]
+const FRONT_MULLIONS = [FIN_X1, -5.4, -3.8, -2.2, -0.6, 0.95, 2.4, DOOR.x0, DOOR.x1]
 const SIDE_MULLIONS = [-3.3, -1.7, -0.1, 1.5, 3.05]
 const TOWER_MULLIONS = [-3.2, -1.6, 0, 1.6, 3.2, 4.8, 6.4, 8.0]
 
@@ -32,13 +32,13 @@ function useGeometry() {
     frames.push([xr - 0.06, xr + 0.06, PAV.y0, PAV.y0 + 0.08, PAV.z0, PAV.z1])
     // tower glazing above the slab
     const tz = TOWER.z1
-    const ty0 = SLAB.y1
-    const ty1 = 7.45
+    const ty0 = TOWER_GLASS.y0
+    const ty1 = TOWER_GLASS.y1
     for (const x of TOWER_MULLIONS) frames.push([x - M / 2, x + M / 2, ty0, ty1, tz - 0.05, tz + 0.05])
     frames.push([TOWER.x0 + 0.8, TOWER.x1, ty1 - 0.08, ty1, tz - 0.06, tz + 0.06])
     frames.push([TOWER.x0 + 0.8, TOWER.x1, ty0, ty0 + 0.08, tz - 0.06, tz + 0.06])
     // tower horizontal transom (gives the "grid" reading of the reference)
-    frames.push([TOWER.x0 + 0.8, TOWER.x1, 6.45, 6.5, tz - 0.04, tz + 0.04])
+    frames.push([TOWER.x0 + 0.8, TOWER.x1, (ty0 + ty1) / 2, (ty0 + ty1) / 2 + 0.05, tz - 0.04, tz + 0.04])
     // wing glazing
     for (let z = WING.z0 + 0.2; z <= WING.z1; z += 1.55) frames.push([WING.x1 - 0.04, WING.x1 + 0.06, 0.45, 2.85, z - 0.035, z + 0.035])
     for (let x = WING.x0 + 0.9; x <= WING.x1; x += 1.6) frames.push([x - 0.035, x + 0.035, 0.45, 2.85, WING.z1 - 0.04, WING.z1 + 0.06])
@@ -58,10 +58,13 @@ function useGeometry() {
     panes.push({ axis: 'z', at: WING.z1 + 0.01, a0: WING.x0, a1: WING.x1, y0: 0.45, y1: 2.85 })
 
     /* ── white masonry (merged) ── */
-    const walls: BoxSpec[] = [
+    // interior faces get the softly self-lit interior material (fakes bounce light under the slab)
+    const inner: BoxSpec[] = [
       [PAV.x0, PAV.x0 + 0.3, PAV.y0, PAV.y1, PAV.z0, PAV.z1], // left end wall
       [PAV.x0, PAV.x1, PAV.y0, PAV.y1, PAV.z0, PAV.z0 + 0.3], // back wall
       [0.9, 2.2, PAV.y0, PAV.y1, PAV.z0, -0.2], // service core
+    ]
+    const walls: BoxSpec[] = [
       // tower body
       [TOWER.x0, TOWER.x0 + 0.8, ty0 - 1, ty1 + 0.3, TOWER.z0, TOWER.z1 + 0.02], // tower left pier
       [TOWER.x0, TOWER.x1, ty0 - 1, ty1, TOWER.z0, TOWER.z1 - 0.6], // tower mass
@@ -90,10 +93,11 @@ function useGeometry() {
     ]
     const skylights: BoxSpec[] = Array.from({ length: 6 }, (_, i): BoxSpec => {
       const x0 = TOWER.x0 + 1.1 + i * 2.2
-      return [x0, x0 + 2.05, 8.95, 9.0, TOWER.z0 + 0.9, TOWER.z1 - 0.9]
+      return [x0, x0 + 2.05, TOWER_GLASS.y1 + 1.5, TOWER_GLASS.y1 + 1.55, TOWER.z0 + 0.9, TOWER.z1 - 0.9]
     })
 
     return {
+      inner: mergeBoxes(inner),
       lip: mergeBoxes(lip),
       skylights: mergeBoxes(skylights),
       frames: mergeBoxes(frames),
@@ -205,6 +209,7 @@ export function House() {
 
       {/* Masonry */}
       <mesh geometry={geo.walls} material={mats.concrete} castShadow receiveShadow />
+      <mesh geometry={geo.inner} material={mats.wallInner} castShadow receiveShadow />
       <mesh geometry={geo.reveals} material={mats.darkMatte} />
 
       {/* Roof slab over the pavilion */}
@@ -223,7 +228,7 @@ export function House() {
       {/* Tower roof (taller back-right volume) */}
       <RoundedBox
         args={[sx(TOWER) + 1.1, 1.2, sz(TOWER) + 1.1]}
-        position={[cx(TOWER) + 0.1, 7.75 + 0.6, cz(TOWER)]}
+        position={[cx(TOWER) + 0.1, TOWER_GLASS.y1 + 0.3 + 0.6, cz(TOWER)]}
         radius={0.22}
         smoothness={4}
         material={mats.concrete}

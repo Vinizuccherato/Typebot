@@ -37,16 +37,18 @@ export function Interior() {
   )
 
   /* ── live refs ── */
-  const lampLight = useRef<THREE.PointLight>(null)
+  const lampLight = useRef<THREE.SpotLight>(null)
   const lampShade = useRef<THREE.MeshBasicMaterial>(null)
   const ledCove = useRef<THREE.MeshBasicMaterial>(null)
   const ledFrame = useRef<THREE.MeshBasicMaterial>(null)
   const tvScreen = useRef<THREE.MeshBasicMaterial>(null)
-  const tvLight = useRef<THREE.PointLight>(null)
+  const tvLight = useRef<THREE.SpotLight>(null)
   const bot = useRef<THREE.Group>(null)
   const botLed = useRef<THREE.MeshBasicMaterial>(null)
   const botState = useRef({ t: 0, x: -7.5, z: 3.4, heading: 0 })
   const tv = useMemo(() => screenTexture(), [])
+  const lampTarget = useMemo(() => new THREE.Object3D(), [])
+  const tvTarget = useMemo(() => new THREE.Object3D(), [])
 
   useFrame((state, dt) => {
     const s = useDomus.getState()
@@ -138,7 +140,18 @@ export function Interior() {
         <planeGeometry args={[TV.w, TV.h]} />
         <meshBasicMaterial ref={tvScreen} map={tv} toneMapped={false} />
       </mesh>
-      <pointLight ref={tvLight} position={[TV.x, TV.y, TV.z + 1.2]} color="#9aa7ff" intensity={0} distance={6} decay={2} />
+      <spotLight
+        ref={tvLight}
+        position={[TV.x, TV.y, TV.z + 0.3]}
+        target={tvTarget}
+        angle={1.0}
+        penumbra={1}
+        color="#9aa7ff"
+        intensity={0}
+        distance={7}
+        decay={2}
+      />
+      <primitive object={tvTarget} position={[TV.x, Y, TV.z + 4]} />
 
       {/* Sonos Era 300 on the console */}
       <RoundedBox args={[0.34, 0.22, 0.26]} position={[-4.85, Y + 0.53, -0.1]} radius={0.08} smoothness={3} material={mats.darkMatte} castShadow />
@@ -161,7 +174,19 @@ export function Interior() {
           <sphereGeometry args={[0.26, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
           <meshBasicMaterial ref={lampShade} toneMapped={false} side={THREE.DoubleSide} />
         </mesh>
-        <pointLight ref={lampLight} position={[0, 1.55, 0.25]} color={WARM} intensity={10} distance={9} decay={1.6} />
+        {/* spot, not point: a cone aimed down never leaks through the roof slab onto the array */}
+        <spotLight
+          ref={lampLight}
+          position={[0, 1.6, 0]}
+          target={lampTarget}
+          angle={1.15}
+          penumbra={1}
+          color={WARM}
+          intensity={10}
+          distance={10}
+          decay={1.6}
+        />
+        <primitive object={lampTarget} position={[0.6, -1.6, 0.9]} />
       </group>
 
       {/* pendant over the dining table */}
@@ -180,17 +205,18 @@ export function Interior() {
             <cylinderGeometry args={[0.28, 0.22, 0.56, 24]} />
           </mesh>
           <mesh position={[0, 0.95, 0]} material={mats.leaf} castShadow>
-            <icosahedronGeometry args={[0.5, 1]} />
+            <sphereGeometry args={[0.5, 20, 14]} />
           </mesh>
           <mesh position={[0.18, 1.3, 0.1]} material={mats.leafDark} castShadow>
-            <icosahedronGeometry args={[0.34, 1]} />
+            <sphereGeometry args={[0.34, 16, 12]} />
           </mesh>
         </group>
       ))}
 
       {/* Aether CleanBot V4 */}
       <group ref={bot}>
-        <mesh position={[0, 0.06, 0]} material={mats.white} castShadow>
+        {/* no castShadow: shadows are baked on demand and the bot moves continuously */}
+        <mesh position={[0, 0.06, 0]} material={mats.white}>
           <cylinderGeometry args={[0.34, 0.34, 0.1, 40]} />
         </mesh>
         <mesh position={[0, 0.13, -0.08]} material={mats.white}>

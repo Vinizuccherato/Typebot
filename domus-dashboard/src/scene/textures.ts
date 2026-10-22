@@ -9,7 +9,6 @@ const canvas = (w: number, h = w) => {
   return [c, c.getContext('2d')!] as const
 }
 
-const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4))
 const toSrgb = (c: number) => (c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055)
 
 /**
@@ -17,26 +16,28 @@ const toSrgb = (c: number) => (c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 
  * (it subtracts ~0.04 linear), so WebGL pixels match the CSS body gradient.
  */
 export function neutralCompensate(hex: string) {
+  // THREE.Color stores linear-sRGB components (colour management is on)
   const c = new THREE.Color(hex)
-  const f = (v: number) => {
-    const lin = toLinear(v)
-    return toSrgb(Math.min(1, lin + (lin < 0.08 ? lin * 0.5 : 0.04)))
-  }
+  const f = (lin: number) => toSrgb(Math.min(1, lin + (lin < 0.08 ? lin * 0.5 : 0.04)))
   return `rgb(${Math.round(f(c.r) * 255)}, ${Math.round(f(c.g) * 255)}, ${Math.round(f(c.b) * 255)})`
 }
 
 let bg: THREE.CanvasTexture | null = null
-/** Same recipe as the CSS body: radial-gradient(120% 90% at 50% 20%, top, mid 48%, bottom). */
+/**
+ * Studio backdrop in the body palette, but lit where the house stands (the
+ * reference reads as a misty light-grey halo around the building).
+ */
 export function backgroundTexture() {
   if (bg) return bg
   const [c, g] = canvas(512)
   g.save()
-  g.translate(256, 0.2 * 512)
-  g.scale(1.2, 0.9)
+  g.translate(0.56 * 512, 0.36 * 512)
+  g.scale(1.25, 0.95)
   const r = 512
   const grad = g.createRadialGradient(0, 0, 0, 0, 0, r)
-  grad.addColorStop(0, neutralCompensate('#cbc6bf'))
-  grad.addColorStop(0.48, neutralCompensate('#a9a39a'))
+  grad.addColorStop(0, neutralCompensate('#d3d0ca'))
+  grad.addColorStop(0.42, neutralCompensate('#bab5ad'))
+  grad.addColorStop(0.75, neutralCompensate('#948f87'))
   grad.addColorStop(1, neutralCompensate('#6f6a63'))
   g.fillStyle = grad
   g.fillRect(-512, -512, 2048, 2048)
@@ -84,8 +85,8 @@ export function solarCellTexture() {
       g.fillStyle = 'rgba(150,165,190,0.08)'
       g.fillRect(x + cw * 0.5, y + 3, 1, ch - 6)
     }
-  g.strokeStyle = 'rgba(205,214,232,0.5)'
-  g.lineWidth = 2.5
+  g.strokeStyle = 'rgba(214,222,238,0.62)'
+  g.lineWidth = 3.5
   for (let i = 0; i <= cols; i++) {
     g.beginPath()
     g.moveTo(i * cw, 0)

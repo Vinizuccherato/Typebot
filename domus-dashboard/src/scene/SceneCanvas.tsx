@@ -17,7 +17,7 @@ function Atmosphere() {
   const scene = useThree((s) => s.scene)
   useLayoutEffect(() => {
     scene.background = backgroundTexture()
-    scene.fog = new THREE.Fog(neutralCompensate('#aaa49b'), 45, 115)
+    scene.fog = new THREE.Fog(neutralCompensate('#b6b1a9'), 45, 115)
     return () => {
       scene.background = null
       scene.fog = null
@@ -53,11 +53,11 @@ function ShadowPolicy() {
 function Lights({ shadowSize }: { shadowSize: number }) {
   return (
     <>
-      <hemisphereLight args={['#f3efe8', '#5e5953', 0.45]} />
+      <hemisphereLight args={['#f1f1f0', '#6b665f', 0.5]} />
       <directionalLight
         position={[-16, 30, 22]}
-        intensity={1.75}
-        color="#fff3e2"
+        intensity={1.8}
+        color="#fffaf3"
         castShadow
         shadow-mapSize={[shadowSize, shadowSize]}
         shadow-bias={-0.0004}
@@ -95,7 +95,7 @@ function Studio({ lowPower }: { lowPower: boolean }) {
 function Effects({ msaa, lean }: { msaa: number; lean: boolean }) {
   return (
     <EffectComposer multisampling={msaa} enableNormalPass={false}>
-      <Bloom mipmapBlur luminanceThreshold={1.5} luminanceSmoothing={0.3} intensity={0.75} radius={0.6} levels={lean ? 5 : 7} />
+      <Bloom mipmapBlur luminanceThreshold={1.3} luminanceSmoothing={0.3} intensity={0.95} radius={0.62} levels={lean ? 5 : 7} />
       <ToneMapping mode={ToneMappingMode.NEUTRAL} />
     </EffectComposer>
   )

@@ -4,7 +4,7 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { easing } from 'maath'
 import { useDomus } from '../store'
 import { materials } from './materials'
-import { ARRAY, ARRAY_CENTER } from './layout'
+import { ARRAY, ARRAY_CENTER, RETICLE } from './layout'
 import { haloTexture } from './textures'
 
 const W = ARRAY.x1 - ARRAY.x0
@@ -63,7 +63,7 @@ export function SolarArray() {
     const pts: Array<[number, number]> = []
     for (let x = -hw; x <= hw; x += step) pts.push([x, -hd], [x, hd])
     for (let z = -hd + step; z < hd; z += step) pts.push([-hw, z], [hw, z])
-    const ring = ringGeometry(W + pad * 2 - 0.1, D + pad * 2 - 0.1, 0.18, 0.05)
+    const ring = ringGeometry(W + pad * 2 - 0.14, D + pad * 2 - 0.14, 0.18, 0.13)
     const halo = haloTexture((W + 3) / (D + 3), 3 / (W + 3) * 2 * 0.5)
     return { pw, pd, count, dotPositions: pts, ring, halo }
   }, [])
@@ -144,7 +144,7 @@ export function SolarArray() {
 
       {/* LED border: dotted emitters + continuous line + soft spill */}
       <instancedMesh ref={dots} args={[undefined, undefined, dotPositions.length]}>
-        <boxGeometry args={[0.07, 0.035, 0.07]} />
+        <boxGeometry args={[0.085, 0.05, 0.085]} />
         <meshBasicMaterial ref={dotMat} toneMapped={false} />
       </instancedMesh>
       <mesh geometry={ring} position={[ARRAY_CENTER[0], ARRAY.y + 0.045, ARRAY_CENTER[2]]}>
@@ -163,7 +163,7 @@ export function SolarArray() {
       </mesh>
 
       {/* target reticle */}
-      <group position={[ARRAY_CENTER[0] + 0.3, ARRAY.y + 0.12, ARRAY_CENTER[2] - 0.4]}>
+      <group position={[RETICLE[0], RETICLE[1] + 0.12, RETICLE[2]]}>
         <group ref={reticle}>
           <mesh rotation-x={-Math.PI / 2}>
             <ringGeometry args={[0.42, 0.5, 48]} />

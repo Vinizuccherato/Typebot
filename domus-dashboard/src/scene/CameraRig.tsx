@@ -20,7 +20,7 @@ interface View {
 
 /** Camera "shots". Overview reproduces the reference: elevated 3/4 from the front-right. */
 const VIEWS: Record<FocusId, View> = {
-  overview: { target: [-1.6, 3.4, -0.6], az: 0.88, polar: 1.07, k: 1 },
+  overview: { target: [-1.6, 3.4, -0.6], az: 0.69, polar: 1.33, k: 1 },
   solar: { target: [ARRAY_CENTER[0], ARRAY_CENTER[1], ARRAY_CENTER[2]], az: 0.45, polar: 0.72, k: 0.6 },
   'main-hall': { target: [-5.6, 2.5, 1.2], az: 0.42, polar: 1.2, k: 0.46 },
   'front-door': { target: [(DOOR.x0 + DOOR.x1) / 2, 2.2, PAV.z1 + 0.6], az: 0.3, polar: 1.3, k: 0.4 },
@@ -43,17 +43,18 @@ function useFraming() {
   return useMemo(() => {
     const aspect = size.width / Math.max(1, size.height)
     if (mode === 'compact') {
-      const fov = 34
-      // fit ~27 m of house across 96% of the width
+      // same long-lens shot; fit ~23 m of house across the width, centred in the hero window
+      const fov = 20
       const halfH = Math.tan(THREE.MathUtils.degToRad(fov / 2))
-      const dist = 27 / (0.96 * 2 * halfH * aspect)
-      return { fov, dist: Math.max(46, dist), ox: 0.5, oy: aspect < 0.8 ? 0.33 : 0.4 }
+      const dist = 23 / (2 * halfH * aspect)
+      return { fov, dist: Math.max(60, dist), ox: 0.52, oy: aspect < 0.8 ? 0.42 : 0.45 }
     }
-    const fov = 22
+    // long lens, low camera — parameters least-squares fitted to landmarks of the reference shot
+    const fov = 16
     const ref = 16 / 9
     // keep the house width constant relative to the artboard on narrower screens
-    const dist = 63 * Math.max(1, Math.pow(ref / aspect, 0.85))
-    return { fov, dist, ox: 0.53, oy: 0.35 }
+    const dist = 72.5 * Math.max(1, Math.pow(ref / aspect, 0.85))
+    return { fov, dist, ox: 0.58, oy: 0.38 }
   }, [size.width, size.height, mode])
 }
 
@@ -104,7 +105,7 @@ export function CameraRig() {
     c.touches.two = mode === 'compact' ? ACTION.NONE : ACTION.TOUCH_DOLLY
     c.touches.three = ACTION.NONE
     c.minPolarAngle = 0.5
-    c.maxPolarAngle = 1.38
+    c.maxPolarAngle = 1.42
     c.minAzimuthAngle = -0.45
     c.maxAzimuthAngle = 1.55
     c.minDistance = framing.dist * 0.3
@@ -139,14 +140,6 @@ export function CameraRig() {
     }
     c.setLookAt(px, py, pz, ...v.target, true)
   }, [focus, framing.dist, reduced])
-
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      const c = controls.current
-      console.log('[scene]', JSON.stringify({ pos: camera.position.toArray().map((v) => +v.toFixed(2)), az: c?.azimuthAngle, polar: c?.polarAngle, dist: c?.distance, fd: framing.dist, view: camera.view }))
-    }, 6000)
-    return () => window.clearTimeout(id)
-  }, [camera, framing])
 
   /* pointer parallax source (window-level: the UI covers most of the canvas) */
   useEffect(() => {

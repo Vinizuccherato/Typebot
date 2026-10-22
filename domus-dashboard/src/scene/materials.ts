@@ -6,7 +6,7 @@ import { solarCellTexture } from './textures'
 let cache: ReturnType<typeof build> | null = null
 
 function build() {
-  const concrete = new THREE.MeshStandardMaterial({ color: '#f3f1ec', roughness: 0.62, metalness: 0, envMapIntensity: 0.9 })
+  const concrete = new THREE.MeshStandardMaterial({ color: '#f1f0ed', roughness: 0.62, metalness: 0, envMapIntensity: 0.9 })
   const concreteShade = new THREE.MeshStandardMaterial({ color: '#e3e0da', roughness: 0.7, metalness: 0, envMapIntensity: 0.7 })
   const frame = new THREE.MeshStandardMaterial({ color: '#121212', roughness: 0.38, metalness: 0.55, envMapIntensity: 1 })
   const glass = new THREE.MeshPhysicalMaterial({
@@ -26,8 +26,8 @@ function build() {
   const glassDark = glass.clone()
   glassDark.color.set('#3a4144')
   glassDark.opacity = 0.62
-  const floor = new THREE.MeshStandardMaterial({ color: '#5a554e', roughness: 0.3, metalness: 0.05, envMapIntensity: 0.9, emissive: '#15130f' })
-  const wallInner = new THREE.MeshStandardMaterial({ color: '#e9e6e0', roughness: 0.85, metalness: 0, emissive: '#2c2925' })
+  const floor = new THREE.MeshStandardMaterial({ color: '#5a554e', roughness: 0.3, metalness: 0.05, envMapIntensity: 0.9, emissive: '#211e1a' })
+  const wallInner = new THREE.MeshStandardMaterial({ color: '#e9e6e0', roughness: 0.85, metalness: 0, emissive: '#4a4640' })
   const fabric = new THREE.MeshStandardMaterial({ color: '#8f897f', roughness: 0.96, metalness: 0 })
   const wood = new THREE.MeshStandardMaterial({ color: '#7b6550', roughness: 0.6, metalness: 0 })
   const darkMatte = new THREE.MeshStandardMaterial({ color: '#1c1c1c', roughness: 0.55, metalness: 0.2 })

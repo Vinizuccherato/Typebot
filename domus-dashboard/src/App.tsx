@@ -67,7 +67,7 @@ function CompactLayout() {
       </div>
       <Greeting />
       {/* window onto the 3D house */}
-      <div aria-hidden className="h-[46vh] min-h-[280px]" />
+      <div aria-hidden className="pointer-events-none h-[46vh] min-h-[280px]" />
       <div className="h-[258px]">
         <EnergyCard />
       </div>

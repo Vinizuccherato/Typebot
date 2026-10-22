@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Lock, LockOpen, Sofa } from 'lucide-react'
 import { useDomus } from '../store'
 import { AnimatedNumber } from '../ui/AnimatedNumber'
+import { useArtboard } from '../layout/Artboard'
 import { ARRAY, DOOR, PAV } from './layout'
 
 /** lucide has no solar-panel glyph — drawn to match the reference icon. */
@@ -19,7 +20,10 @@ function SolarGlyph({ size = 14 }: { size?: number }) {
 
 const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-interface PillProps {
+/** Pill scale on top of the artboard scale (compact screens get slightly smaller tags). */
+type Scaled = { k: number }
+
+interface PillProps extends Scaled {
   icon: ReactNode
   title: ReactNode
   meta?: ReactNode
@@ -31,9 +35,9 @@ interface PillProps {
 }
 
 /** Liquid-glass hotspot pill. Scales with the artboard (--s). */
-function Pill({ icon, title, meta, detail, stacked, active, onActivate, label }: PillProps) {
+function Pill({ icon, title, meta, detail, stacked, active, onActivate, label, k }: PillProps) {
   return (
-    <div style={{ transform: 'scale(var(--s, 1))', transformOrigin: 'center' }}>
+    <div style={{ transform: `scale(calc(var(--s, 1) * ${k}))`, transformOrigin: 'center' }}>
       <motion.button
         type="button"
         aria-label={label}
@@ -71,23 +75,22 @@ function Pill({ icon, title, meta, detail, stacked, active, onActivate, label }:
           {meta && <span className={`tabular text-white/70 ${stacked ? 'text-[10.5px]' : 'text-[11px]'}`}>{meta}</span>}
         </span>
         {/* hover detail reveal */}
-        <span className="relative z-[3] grid grid-cols-[0fr] opacity-0 transition-all duration-500 ease-[var(--ease-glass)] group-hover:grid-cols-[1fr] group-hover:opacity-100 group-focus-visible:grid-cols-[1fr] group-focus-visible:opacity-100">
-          <span className="overflow-hidden">
-            <span className="block pl-1 text-[10.5px] text-[#c6ef8e]">{detail}</span>
-          </span>
+        <span className="relative z-[3] max-w-0 overflow-hidden opacity-0 transition-[max-width,opacity] duration-500 ease-[var(--ease-glass)] group-hover:max-w-[150px] group-hover:opacity-100 group-focus-visible:max-w-[150px] group-focus-visible:opacity-100">
+          <span className="block pl-1 text-[10.5px] text-[#c6ef8e]">{detail}</span>
         </span>
       </motion.button>
     </div>
   )
 }
 
-function SolarPill() {
+function SolarPill({ k }: Scaled) {
   const kw = useDomus((s) => s.solar.kw)
   const peak = useDomus((s) => s.solar.peak)
   const eco = useDomus((s) => s.eco.active)
   const focus = useDomus((s) => s.focus)
   return (
     <Pill
+      k={k}
       label={`Solar array, producing ${kw} kilowatts`}
       icon={<SolarGlyph />}
       title="Solar"
@@ -108,11 +111,12 @@ function SolarPill() {
   )
 }
 
-function HallPill() {
+function HallPill({ k }: Scaled) {
   const room = useDomus((s) => s.rooms['main-hall'])
   const focus = useDomus((s) => s.focus)
   return (
     <Pill
+      k={k}
       stacked
       label={`Main Hall, ${room.temperature} degrees, ${room.devices} devices`}
       icon={<Sofa size={14} strokeWidth={1.6} />}
@@ -134,11 +138,12 @@ function HallPill() {
   )
 }
 
-function DoorPill() {
+function DoorPill({ k }: Scaled) {
   const locked = useDomus((s) => s.door.locked)
   const focus = useDomus((s) => s.focus)
   return (
     <Pill
+      k={k}
       label={`Front door, ${locked ? 'locked' : 'unlocked'}. Toggle lock`}
       icon={
         <AnimatePresence mode="popLayout" initial={false}>
@@ -175,16 +180,17 @@ function DoorPill() {
 const common = { center: true, zIndexRange: [6, 0] as number[], pointerEvents: 'auto' as const }
 
 export function Hotspots() {
+  const k = useArtboard().mode === 'compact' ? 0.82 : 1
   return (
     <group>
-      <Html position={[-3.6, ARRAY.y + 2.9, ARRAY.z0 + 1.0]} {...common}>
-        <SolarPill />
+      <Html position={[-5.4, ARRAY.y + 1.35, ARRAY.z0 + 1.6]} {...common}>
+        <SolarPill k={k} />
       </Html>
       <Html position={[PAV.x0 + 1.9, PAV.y0 + 2.5, PAV.z1 + 0.55]} {...common}>
-        <HallPill />
+        <HallPill k={k} />
       </Html>
-      <Html position={[DOOR.x1 + 3.4, PAV.y0 + 1.7, PAV.z1 + 0.45]} {...common}>
-        <DoorPill />
+      <Html position={[DOOR.x0 - 0.2, PAV.y0 + 1.05, PAV.z1 + 1.0]} {...common}>
+        <DoorPill k={k} />
       </Html>
     </group>
   )

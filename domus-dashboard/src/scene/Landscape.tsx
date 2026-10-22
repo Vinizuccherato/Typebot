@@ -1,20 +1,20 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
+import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
 import { materials } from './materials'
-import { radialFadeTexture } from './textures'
+import { softDotTexture } from './textures'
 import { PLINTH, STAIRS } from './layout'
 
 type Tree = { p: [number, number, number]; s: number; dark?: boolean }
 
 // Hand-placed so the composition matches the reference: canopy at bottom-left & bottom-right, backdrop behind.
 const TREES: Tree[] = [
-  { p: [-11, 0, 17], s: 1.0 },
-  { p: [-15, 0, 15], s: 1.15, dark: true },
   { p: [17, 0, 13], s: 1.05 },
   { p: [21, 0, 6.5], s: 1.3, dark: true },
   { p: [22, 0, -3], s: 1.45 },
   { p: [18, 0, -13], s: 1.6, dark: true },
+  { p: [3.5, 0, 18.5], s: 0.8 },
+  { p: [1.2, 0, 21], s: 0.65, dark: true },
 ]
 
 /** Soft canopy = a few smooth, gently lumpy spheres merged (lumps are position-hashed → no cracks). */
@@ -25,7 +25,8 @@ function canopyGeometry(seed: number) {
   const n = 3 + Math.floor(rnd() * 3)
   const v = new THREE.Vector3()
   for (let i = 0; i < n; i++) {
-    const g = new THREE.IcosahedronGeometry(1, 3)
+    // icospheres are non-indexed: weld so normals smooth across faces
+    const g = mergeVertices(new THREE.IcosahedronGeometry(1, 3).deleteAttribute('normal').deleteAttribute('uv'))
     const R = 1.0 + rnd() * 0.6
     const phase = rnd() * 10
     const pos = g.attributes.position
@@ -47,22 +48,27 @@ function canopyGeometry(seed: number) {
 
 export function Landscape() {
   const mats = materials()
-  const fade = radialFadeTexture()
+  const blob = softDotTexture()
 
   const trees = useMemo(() => TREES.map((t, i) => ({ ...t, geo: canopyGeometry(i + 1) })), [])
+  const shrub = useMemo(() => {
+    const g = mergeVertices(new THREE.IcosahedronGeometry(1, 2).deleteAttribute('normal').deleteAttribute('uv'))
+    g.computeVertexNormals()
+    return g
+  }, [])
   const trunk = useMemo(() => new THREE.CylinderGeometry(0.12, 0.18, 2.8, 6).translate(0, 1.4, 0), [])
 
   return (
     <group>
-      {/* ground — dissolves radially into the backdrop */}
-      <mesh rotation-x={-Math.PI / 2} position={[0, -0.001, 0]} receiveShadow>
-        <circleGeometry args={[34, 64]} />
-        <meshStandardMaterial color="#c7c1b8" roughness={1} metalness={0} transparent alphaMap={fade} depthWrite={false} />
+      {/* no visible ground: the house floats on the backdrop like a product render —
+          only a soft contact shadow + the real cast shadows ground it */}
+      <mesh rotation-x={-Math.PI / 2} position={[-1, 0.003, -1.5]} renderOrder={-1}>
+        <planeGeometry args={[44, 30]} />
+        <meshBasicMaterial map={blob} color="#3d3a35" transparent opacity={0.32} depthWrite={false} toneMapped={false} />
       </mesh>
-      {/* shadow catcher for crisper contact */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.002, 0]} receiveShadow>
         <circleGeometry args={[30, 48]} />
-        <shadowMaterial transparent opacity={0.16} depthWrite={false} />
+        <shadowMaterial transparent opacity={0.18} depthWrite={false} />
       </mesh>
 
       {trees.map((t, i) => (
@@ -79,9 +85,7 @@ export function Landscape() {
         [STAIRS.x1 + 0.9, PLINTH.z1 + 1.0, 0.5],
         [STAIRS.x1 + 1.8, PLINTH.z1 + 0.8, 0.38],
       ].map(([x, z, s], i) => (
-        <mesh key={i} position={[x, s * 0.7, z]} scale={s} material={i % 2 ? mats.leafDark : mats.leaf} castShadow>
-          <icosahedronGeometry args={[1, 1]} />
-        </mesh>
+        <mesh key={i} position={[x, s * 0.7, z]} scale={s} geometry={shrub} material={i % 2 ? mats.leafDark : mats.leaf} castShadow />
       ))}
     </group>
   )
