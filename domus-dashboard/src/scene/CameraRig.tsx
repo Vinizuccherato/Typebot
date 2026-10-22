@@ -20,7 +20,7 @@ interface View {
 
 /** Camera "shots". Overview reproduces the reference: elevated 3/4 from the front-right. */
 const VIEWS: Record<FocusId, View> = {
-  overview: { target: [-1.6, 3.4, -0.6], az: 0.82, polar: 1.12, k: 1 },
+  overview: { target: [-1.6, 3.4, -0.6], az: 0.88, polar: 1.07, k: 1 },
   solar: { target: [ARRAY_CENTER[0], ARRAY_CENTER[1], ARRAY_CENTER[2]], az: 0.45, polar: 0.72, k: 0.6 },
   'main-hall': { target: [-5.6, 2.5, 1.2], az: 0.42, polar: 1.2, k: 0.46 },
   'front-door': { target: [(DOOR.x0 + DOOR.x1) / 2, 2.2, PAV.z1 + 0.6], az: 0.3, polar: 1.3, k: 0.4 },
@@ -53,7 +53,7 @@ function useFraming() {
     const ref = 16 / 9
     // keep the house width constant relative to the artboard on narrower screens
     const dist = 63 * Math.max(1, Math.pow(ref / aspect, 0.85))
-    return { fov, dist, ox: 0.535, oy: 0.37 }
+    return { fov, dist, ox: 0.53, oy: 0.35 }
   }, [size.width, size.height, mode])
 }
 

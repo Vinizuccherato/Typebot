@@ -26,17 +26,17 @@ function build() {
   const glassDark = glass.clone()
   glassDark.color.set('#3a4144')
   glassDark.opacity = 0.62
-  const floor = new THREE.MeshStandardMaterial({ color: '#46423d', roughness: 0.32, metalness: 0.05, envMapIntensity: 0.8 })
-  const wallInner = new THREE.MeshStandardMaterial({ color: '#e9e6e0', roughness: 0.85, metalness: 0 })
+  const floor = new THREE.MeshStandardMaterial({ color: '#5a554e', roughness: 0.3, metalness: 0.05, envMapIntensity: 0.9, emissive: '#15130f' })
+  const wallInner = new THREE.MeshStandardMaterial({ color: '#e9e6e0', roughness: 0.85, metalness: 0, emissive: '#2c2925' })
   const fabric = new THREE.MeshStandardMaterial({ color: '#8f897f', roughness: 0.96, metalness: 0 })
   const wood = new THREE.MeshStandardMaterial({ color: '#7b6550', roughness: 0.6, metalness: 0 })
   const darkMatte = new THREE.MeshStandardMaterial({ color: '#1c1c1c', roughness: 0.55, metalness: 0.2 })
   const solar = new THREE.MeshStandardMaterial({
     map: solarCellTexture(),
     color: '#ffffff',
-    roughness: 0.22,
-    metalness: 0.55,
-    envMapIntensity: 1.6,
+    roughness: 0.34,
+    metalness: 0.3,
+    envMapIntensity: 1.4,
   })
   const solarFrame = new THREE.MeshStandardMaterial({ color: '#e6e9ee', roughness: 0.3, metalness: 0.4 })
   const leaf = new THREE.MeshStandardMaterial({ color: '#6f7a5c', roughness: 0.95, metalness: 0 })

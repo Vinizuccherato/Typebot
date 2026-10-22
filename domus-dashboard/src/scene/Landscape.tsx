@@ -9,10 +9,10 @@ type Tree = { p: [number, number, number]; s: number; dark?: boolean }
 
 // Hand-placed so the composition matches the reference: canopy at bottom-left & bottom-right, backdrop behind.
 const TREES: Tree[] = [
-  { p: [-21, 0, 12], s: 1.0 },
-  { p: [-24, 0, 7], s: 1.2, dark: true },
-  { p: [19, 0, 13], s: 1.05 },
-  { p: [22, 0, 6.5], s: 1.3, dark: true },
+  { p: [-11, 0, 17], s: 1.0 },
+  { p: [-15, 0, 15], s: 1.15, dark: true },
+  { p: [17, 0, 13], s: 1.05 },
+  { p: [21, 0, 6.5], s: 1.3, dark: true },
   { p: [22, 0, -3], s: 1.45 },
   { p: [18, 0, -13], s: 1.6, dark: true },
 ]

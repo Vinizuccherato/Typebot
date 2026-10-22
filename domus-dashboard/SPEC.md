@@ -46,3 +46,9 @@ Components fill their slot (`h-full w-full`) and must also work in compact mode
 | Smart devices | `src/components/devices/**` |
 | Room & assistant | `src/components/room/**`, `src/components/assistant/**` |
 | Fidelity QA | read-only + `.qa/**` report |
+
+## Glass gotchas
+- An ancestor with `opacity < 1`, `filter`, `mask`, `clip-path` or `backdrop-filter` is a *backdrop root*:
+  glass inside it only blurs that ancestor's content. Animate transform on wrappers and fade the
+  `Glass` element itself; render floating popovers outside other glass surfaces (portal).
+- Nested inset/well/pill/solid surfaces drop their own backdrop blur (invisible there, expensive); nested popovers should use frost/smoke.

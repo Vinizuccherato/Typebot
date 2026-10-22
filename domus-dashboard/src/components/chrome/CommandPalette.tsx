@@ -337,7 +337,8 @@ export function CommandPalette() {
       restoreFocus.current = document.activeElement as HTMLElement | null
       setQ('')
       setActive(0)
-      requestAnimationFrame(() => inputRef.current?.focus())
+      // focus synchronously (the input is mounted in this commit) so no keystroke is lost
+      inputRef.current?.focus({ preventScroll: true })
     } else {
       restoreFocus.current?.focus?.({ preventScroll: true })
     }

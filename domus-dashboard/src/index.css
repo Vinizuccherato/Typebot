@@ -159,6 +159,15 @@ textarea {
   mix-blend-mode: soft-light;
 }
 
+/* A backdrop-filter element is a backdrop root: nested glass can only sample its
+   parent's own (already smooth) fill, so a second blur is invisible but costs a
+   full GPU pass. Nested static surfaces keep their tint, edge and bevel only
+   (frost/smoke keep blur: nested popovers must still frost what lies under them). */
+.glass :is(.glass-inset, .glass-well, .glass-pill, .glass-solid) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 /* Frosted (default) — floating panels over the 3D scene */
 .glass-frost {
 }

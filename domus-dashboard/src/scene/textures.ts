@@ -62,9 +62,9 @@ export function solarCellTexture() {
   const S = 512
   const [c, g] = canvas(S)
   const base = g.createLinearGradient(0, 0, S, S)
-  base.addColorStop(0, '#1d2740')
-  base.addColorStop(0.5, '#101830')
-  base.addColorStop(1, '#1a2540')
+  base.addColorStop(0, '#2a3552')
+  base.addColorStop(0.5, '#1a2340')
+  base.addColorStop(1, '#26314e')
   g.fillStyle = base
   g.fillRect(0, 0, S, S)
   const cols = 3
@@ -84,7 +84,7 @@ export function solarCellTexture() {
       g.fillStyle = 'rgba(150,165,190,0.08)'
       g.fillRect(x + cw * 0.5, y + 3, 1, ch - 6)
     }
-  g.strokeStyle = 'rgba(190,200,220,0.38)'
+  g.strokeStyle = 'rgba(205,214,232,0.5)'
   g.lineWidth = 2.5
   for (let i = 0; i <= cols; i++) {
     g.beginPath()
