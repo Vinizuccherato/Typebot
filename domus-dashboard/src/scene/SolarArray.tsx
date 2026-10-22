@@ -169,7 +169,7 @@ export function SolarArray() {
         <group ref={reticle}>
           <mesh rotation-x={-Math.PI / 2}>
             <ringGeometry args={[0.42, 0.5, 48]} />
-            <meshBasicMaterial color={[2.2, 2.2, 2.2]} toneMapped={false} transparent opacity={0.95} depthWrite={false} />
+            <meshBasicMaterial color={[3, 3, 3]} toneMapped={false} transparent opacity={0.95} depthWrite={false} />
           </mesh>
           <mesh rotation-x={-Math.PI / 2}>
             <ringGeometry args={[0.62, 0.65, 48, 1, 0, Math.PI * 0.4]} />
@@ -182,7 +182,7 @@ export function SolarArray() {
         </group>
         <mesh rotation-x={-Math.PI / 2}>
           <circleGeometry args={[0.13, 32]} />
-          <meshBasicMaterial color={[2.4, 2.4, 2.4]} toneMapped={false} />
+          <meshBasicMaterial color={[3.2, 3.2, 3.2]} toneMapped={false} />
         </mesh>
         <mesh ref={pulse} rotation-x={-Math.PI / 2}>
           <ringGeometry args={[0.5, 0.54, 48]} />

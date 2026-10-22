@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useSpring, useTransform } from 'motion/react'
 import { Leaf, Minus, Plus, SlidersHorizontal, UserCheck } from 'lucide-react'
 import { Glass } from '../../ui/Glass'
@@ -64,6 +64,21 @@ export function ZonalClimate() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [followOccupancy, setFollowOccupancy] = useState(true)
   const [dragging, setDragging] = useState(false)
+
+  /* tall cards (4:3 screens) get a schedule strip under the gauge instead of empty glass */
+  const card = useRef<HTMLDivElement | null>(null)
+  const [cardH, setCardH] = useState(H)
+  useLayoutEffect(() => {
+    const el = card.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setCardH(el.offsetHeight))
+    ro.observe(el)
+    setCardH(el.offsetHeight)
+    return () => ro.disconnect()
+  }, [])
+  const tall = cardH >= 340
+  const SCHED_H = 132
+  const gaugeTop = tall ? Math.max(40, (cardH - SCHED_H - H) / 2 + 8) : undefined
 
   const target = room.target
   const set = useCallback((v: number) => setRoomTarget(room.id, snap(v)), [room.id, setRoomTarget])
@@ -172,6 +187,7 @@ export function ZonalClimate() {
 
   return (
     <Glass
+      ref={card}
       variant="inset"
       radius={26}
       specular={0.6}
@@ -267,7 +283,10 @@ export function ZonalClimate() {
       </div>
 
       {/* gauge box — keeps reference proportions at any card width */}
-      <div className="absolute inset-x-0 top-1/2 z-[3] mx-auto aspect-[364/208] w-full max-w-[364px] -translate-y-1/2">
+      <div
+        className={cn('absolute inset-x-0 z-[3] mx-auto aspect-[364/208] w-full max-w-[364px]', !tall && 'top-1/2 -translate-y-1/2')}
+        style={tall ? { top: gaugeTop } : undefined}
+      >
         <div
           ref={(el) => {
             drag.ref.current = el
@@ -374,6 +393,48 @@ export function ZonalClimate() {
           />
         </div>
       </div>
+      {/* schedule strip — only when the card has room for it */}
+      <AnimatePresence>
+        {tall && (
+          <motion.div
+            key="schedule"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={springs.soft}
+            className="absolute inset-x-3 bottom-3 z-[3]"
+            style={{ height: SCHED_H - 12 }}
+          >
+            <div className="px-2 pb-2 text-[11px] uppercase tracking-[0.08em] text-white/45">Today's schedule</div>
+            <div className="grid grid-cols-3 gap-2">
+              {SCHEDULE.map((row) => {
+                const current = Math.abs(row.temp - target) < 0.05
+                return (
+                  <button
+                    key={row.time}
+                    type="button"
+                    onClick={() => set(row.temp)}
+                    aria-pressed={current}
+                    className={cn(
+                      'glass glass-well flex h-[84px] cursor-pointer flex-col justify-between rounded-[18px] px-3 py-2.5 text-left transition-colors',
+                      current ? 'text-white' : 'text-white/70 hover:text-white',
+                    )}
+                    style={current ? { boxShadow: 'inset 0 0 0 1px rgb(198 239 142 / 0.35), 0 0 18px -6px rgb(198 239 142 / 0.45)' } : undefined}
+                  >
+                    <span className="relative z-[3] text-[11px] text-white/50">
+                      <span className="tabular">{row.time}</span> · {row.label}
+                    </span>
+                    <span className="tabular relative z-[3] text-[22px] font-light leading-none">
+                      {row.temp.toFixed(1)}
+                      <span className="text-[12px] text-white/60">°C</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Glass>
   )
 }

@@ -285,7 +285,7 @@ export function AssistantCard() {
         {/* lime aurora */}
         <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[inherit]">
           <motion.div
-            className="absolute -bottom-[38%] -left-[18%] h-[120%] w-[78%] rounded-full"
+            className="absolute -bottom-[64px] -left-[18%] h-[200px] w-[78%] rounded-full"
             style={{ background: 'radial-gradient(closest-side, rgb(198 239 142 / 0.62), rgb(169 215 124 / 0.22) 55%, transparent 100%)', filter: 'blur(18px)' }}
             animate={
               prefersReducedMotion()
@@ -295,7 +295,7 @@ export function AssistantCard() {
             transition={{ duration: thinking ? 1.6 : 6, repeat: glow && !prefersReducedMotion() ? Infinity : 0, ease: 'easeInOut' }}
           />
           <motion.div
-            className="absolute -right-[22%] bottom-[2%] h-[90%] w-[46%] rounded-full"
+            className="absolute -right-[22%] bottom-[4px] h-[146px] w-[46%] rounded-full"
             style={{ background: 'radial-gradient(closest-side, rgb(198 239 142 / 0.32), transparent 100%)', filter: 'blur(22px)' }}
             animate={{ opacity: glow ? 0.95 : 0.55 }}
             transition={{ duration: 0.8 }}
@@ -306,7 +306,7 @@ export function AssistantCard() {
           />
           {/* top-right lime-cream sheen */}
           <div
-            className="absolute -right-[10%] -top-[30%] h-[80%] w-[60%] rounded-full"
+            className="absolute -right-[10%] -top-[48px] h-[130px] w-[60%] rounded-full"
             style={{ background: 'radial-gradient(closest-side, rgb(232 246 196 / 0.28), transparent 100%)', filter: 'blur(16px)' }}
           />
         </div>

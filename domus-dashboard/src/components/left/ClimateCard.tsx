@@ -204,7 +204,7 @@ function Dial({ chip }: { chip?: React.ReactNode }) {
               key={v}
               cx={pt.x}
               cy={pt.y}
-              initial={{ r: major ? 1.4 : 1 }}
+              initial={{ r: major ? 1.4 : 1, opacity: major ? 0.38 : 0.2 }}
               animate={{
                 r: major ? 1.4 : 1,
                 opacity: dragging && settable ? (v <= climate.target ? 0.9 : 0.5) : major ? 0.38 : 0.2,
