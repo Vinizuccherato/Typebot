@@ -61,7 +61,10 @@ function DesktopLayout() {
 /** Phones / tablets / portrait: same components, natural vertical flow over the fixed 3D scene. */
 function CompactLayout() {
   return (
-    <main className="relative z-10 mx-auto flex max-w-[720px] flex-col gap-4 px-4 pb-10 pt-4">
+    <main
+      className="relative z-10 mx-auto flex max-w-[720px] flex-col gap-4 pb-10 pt-4"
+      style={{ paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))', paddingRight: 'max(16px, env(safe-area-inset-right, 0px))' }}
+    >
       <div className="min-h-[46px]">
         <Header />
       </div>
