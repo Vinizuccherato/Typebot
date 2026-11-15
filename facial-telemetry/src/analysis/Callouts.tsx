@@ -12,7 +12,10 @@ import { MINT, OVERLAY_ORDER, RevealLine } from './primitives'
    the Hemodynamic Index leader. Both live in head space and track scan/vitals. */
 
 const GRID: [number, number][] = []
-for (let iy = 0; iy < 10; iy++) for (let ix = 0; ix < 10; ix++) GRID.push([0.27 + ix * 0.032, -0.2 - iy * 0.032])
+for (let iy = 0; iy < 10; iy++) for (let ix = 0; ix < 10; ix++) GRID.push([0.27 + ix * 0.032, -0.3 - iy * 0.032])
+
+const PILL: [number, number][] = [[0.42, -0.46]]
+const SRC: [number, number][] = [[0.56, -0.38]]
 
 const dummy = new Object3D()
 const c = new Color()
@@ -35,7 +38,7 @@ function useSurface(space: React.RefObject<Group | null>, xy: [number, number][]
 export function ScanPatch({ space }: { space: React.RefObject<Group | null> }) {
   const inst = useRef<InstancedMesh>(null)
   const pts = useSurface(space, GRID, 0.01)
-  const pill = useSurface(space, [[0.42, -0.34]], 0.03)
+  const pill = useSurface(space, PILL, 0.03)
   const label = useRef<HTMLSpanElement>(null)
   const wrap = useRef<HTMLDivElement>(null)
 
@@ -96,15 +99,15 @@ export function ScanPatch({ space }: { space: React.RefObject<Group | null> }) {
 }
 
 export function Hemodynamic({ space }: { space: React.RefObject<Group | null> }) {
-  const src = useSurface(space, [[0.56, -0.3]], 0.012)
+  const src = useSurface(space, SRC, 0.012)
   const value = useRef<HTMLSpanElement>(null)
   const wrap = useRef<HTMLDivElement>(null)
   const dot = useRef<Group>(null)
 
   const path = useMemo(() => {
     const s = src[0]
-    const elbow = new Vector3(0.86, -0.3, s.z + 0.12)
-    const end = new Vector3(1.02, -0.3, s.z + 0.12)
+    const elbow = new Vector3(0.86, -0.42, s.z + 0.12)
+    const end = new Vector3(1.02, -0.42, s.z + 0.12)
     return { s, elbow, end, line: [s, elbow, end] }
   }, [src])
 
