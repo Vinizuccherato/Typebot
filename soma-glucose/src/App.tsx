@@ -76,7 +76,7 @@ function CompactLayout() {
         <div className="h-[130px]"><Expiration /></div>
         <div className="h-[130px]"><Signal /></div>
       </div>
-      <div className="h-[200px]"><ScoreCalc /></div>
+      <div className="h-[184px]"><ScoreCalc /></div>
       <div className="grid grid-cols-[1.4fr_1fr] gap-4">
         <div className="h-[246px]"><Cholesterol /></div>
         <div className="h-[246px]"><Goals /></div>
@@ -95,8 +95,9 @@ function Shell() {
   }, [tick])
   return (
     <>
-      <SceneCanvas />
       {mode === 'desktop' ? <DesktopLayout /> : <CompactLayout />}
+      {/* after the layout in DOM order so Tab starts at the header (stacking is set by z-index) */}
+      <SceneCanvas />
       <ExpandedCard />
       <Toasts />
     </>

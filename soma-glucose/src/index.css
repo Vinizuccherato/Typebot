@@ -77,8 +77,8 @@ textarea {
   /* Liquid glass. Layers: tinted fill → backdrop blur → hairline refraction edge
      (masked gradient) → inner bevel → pointer-following specular (--mx/--my). */
   .glass {
-    --g-fill-a: rgb(255 255 255 / 0.62);
-    --g-fill-b: rgb(255 255 255 / 0.38);
+    --g-fill-a: rgb(255 255 255 / 0.5);
+    --g-fill-b: rgb(250 250 249 / 0.28);
     --g-blur: 22px;
     --g-sat: 140%;
     --g-edge-a: rgb(255 255 255 / 1);
@@ -127,8 +127,8 @@ textarea {
   }
   /* smoke — dark smoked glass over the figure (Glucose, Score Calculation, Cholesterol) */
   .glass-smoke {
-    --g-fill-a: rgb(58 57 54 / 0.62);
-    --g-fill-b: rgb(26 26 25 / 0.5);
+    --g-fill-a: rgb(56 53 50 / 0.86);
+    --g-fill-b: rgb(40 38 36 / 0.8);
     --g-blur: 26px;
     --g-sat: 120%;
     --g-edge-a: rgb(255 255 255 / 0.4);
