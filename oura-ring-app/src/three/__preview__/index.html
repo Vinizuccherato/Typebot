@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ring preview</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #b9c8cf; font: 13px system-ui, sans-serif; color: #2b3a42; }
+      #root { display: flex; gap: 24px; padding: 20px; }
+      .hero { width: 390px; height: 560px; position: relative; border-radius: 24px; overflow: hidden;
+        background: radial-gradient(70% 55% at 55% 45%, #f2dccf 0%, #b7cbd5 55%, #8fadbb 100%); }
+      .arc { position: absolute; inset: 0; pointer-events: none; }
+      .grid { display: grid; grid-template-columns: repeat(2, 240px); gap: 16px; align-content: start; }
+      .card { width: 240px; height: 170px; border-radius: 20px; background: rgb(255 255 255 / 0.35); position: relative; }
+      .card span { position: absolute; left: 12px; top: 10px; }
+      button { margin-top: 12px; }
+      .hero-canvas, .ring-canvas { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./preview.tsx"></script>
+  </body>
+</html>
