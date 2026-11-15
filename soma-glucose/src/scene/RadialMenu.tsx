@@ -6,11 +6,11 @@ import { springs } from '../lib/utils'
 import { coreCss } from './Figure'
 
 /* Menu geometry in design px around the sensor centre (container 400×400). */
-const C = 200
-const R0 = 72 // inner radius (just clear of the puck)
-const R1 = 150 // outer radius
-const R1_SEL = 176 // selected segment pops out
-const CORNER = 9
+const C = 140
+const R0 = 50 // inner radius (just clear of the puck)
+const R1 = 98 // outer radius — thin dark-glass band
+const R1_SEL = 113 // selected segment pops out
+const CORNER = 7
 
 interface Seg {
   id: MetricId
@@ -21,10 +21,10 @@ interface Seg {
 }
 
 const SEGS: Seg[] = [
-  { id: 'hemoglobin', label: 'Hemoglobin', icon: Droplet, a0: -124, a1: -79 },
-  { id: 'ketones', label: 'Ketones', icon: FlaskConical, a0: -76, a1: -31 },
+  { id: 'hemoglobin', label: 'Hemoglobin', icon: Droplet, a0: -128, a1: -80 },
+  { id: 'ketones', label: 'Ketones', icon: FlaskConical, a0: -77, a1: -30 },
   { id: 'glucose', label: 'Glucose', icon: Activity, a0: -28, a1: 22 },
-  { id: 'cholesterol', label: 'Cholesterol', icon: HeartPulse, a0: 25, a1: 70 },
+  { id: 'cholesterol', label: 'Cholesterol', icon: HeartPulse, a0: 25, a1: 80 },
 ]
 
 const rad = (d: number) => (d * Math.PI) / 180
@@ -67,7 +67,7 @@ function Segment({ seg, selected, onSelect, focusable }: { seg: Seg; selected: b
   const d = useTransform(r1, (r) => sector(R0, r, seg.a0, seg.a1))
   const x = useTransform(lift, (l) => Math.cos(rad(mid)) * l)
   const y = useTransform(lift, (l) => Math.sin(rad(mid)) * l)
-  const labelR = useTransform(r1, (r) => (R0 + r) / 2 + (selected ? 4 : 0))
+  const labelR = useTransform(r1, (r) => (R0 + r) / 2 + (selected ? 3 : 1))
   const lx = useTransform(labelR, (r) => C + Math.cos(rad(mid)) * r)
   const ly = useTransform(labelR, (r) => C + Math.sin(rad(mid)) * r)
   const Icon = seg.icon
@@ -110,11 +110,11 @@ function Segment({ seg, selected, onSelect, focusable }: { seg: Seg; selected: b
       </svg>
       {/* label */}
       <motion.span
-        className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[3px] whitespace-nowrap"
+        className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[2px] whitespace-nowrap"
         style={{ left: lx, top: ly }}
       >
-        <Icon size={13} strokeWidth={1.7} className={selected ? 'text-[#161616]' : 'text-white/75'} />
-        <span className={`text-[10.5px] font-medium tracking-[0.01em] ${selected ? 'text-[#161616]' : 'text-white/80'}`}>{seg.label}</span>
+        <Icon size={11} strokeWidth={1.8} className={selected ? 'text-[#161616]' : 'text-white/75'} />
+        <span className={`text-[9.5px] font-medium tracking-[-0.01em] ${selected ? 'text-[#161616]' : 'text-white/80'}`}>{seg.label}</span>
       </motion.span>
     </motion.button>
   )
@@ -140,7 +140,7 @@ export const RadialMenu = forwardRef<HTMLDivElement, { reading: number }>(functi
         key={`${reading}-${metric}`}
         aria-hidden
         className="absolute rounded-full border"
-        style={{ left: C - 58, top: C - 58, width: 116, height: 116, borderColor: coreCss[metric] }}
+        style={{ left: C - 42, top: C - 42, width: 84, height: 84, borderColor: coreCss[metric] }}
         initial={{ scale: 0.9, opacity: 0.85 }}
         animate={{ scale: 1.5, opacity: 0 }}
         transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
@@ -160,12 +160,12 @@ export const RadialMenu = forwardRef<HTMLDivElement, { reading: number }>(functi
         ))}
       </div>
       {/* separator dots along the outer edge */}
-      {[-77.5, -29.5, 23.5].map((a) => (
+      {[-78.5, -28.5, 23.5].map((a) => (
         <span
           key={a}
           aria-hidden
           className="absolute h-[4px] w-[4px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/55"
-          style={{ left: C + Math.cos(rad(a)) * (R1 + 12), top: C + Math.sin(rad(a)) * (R1 + 12) }}
+          style={{ left: C + Math.cos(rad(a)) * (R1 + 8), top: C + Math.sin(rad(a)) * (R1 + 8) }}
         />
       ))}
     </div>

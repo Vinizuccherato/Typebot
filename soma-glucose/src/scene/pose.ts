@@ -13,13 +13,13 @@ export type V3 = [number, number, number]
 export const F = 14 // camera distance to the design plane (world units)
 
 /* Upper-arm round cone (must match FIGURE_GLSL). */
-export const ARM_A: V3 = [0.0, 1.5, 0.0]
-export const ARM_B: V3 = [-1.9, -5.8, 0.4]
-export const ARM_RA = 1.05
-export const ARM_RB = 0.85
+export const ARM_A: V3 = [-0.45, 1.55, 0.0]
+export const ARM_B: V3 = [-2.0, -5.9, 0.35]
+export const ARM_RA = 0.95
+export const ARM_RB = 0.74
 
 /** Design point the sensor is aimed at (back of the upper arm). */
-const SENSOR_DESIGN = { u: 655, v: 472 }
+const SENSOR_DESIGN = { u: 615, v: 470 }
 
 const sub = (a: V3, b: V3): V3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
 const dot = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
@@ -43,7 +43,7 @@ export const SENSOR = (() => {
 })()
 
 /** Sensor puck radius in world units (≈ 55 design px). */
-export const SENSOR_R = 0.55
+export const SENSOR_R = 0.4
 
 /** Maps design px → CSS px for the current layout. */
 export interface ViewMap {

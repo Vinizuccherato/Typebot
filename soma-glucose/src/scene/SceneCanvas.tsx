@@ -40,7 +40,7 @@ export function SceneCanvas() {
       const vw = window.innerWidth
       const vh = window.innerHeight
       const sc = Math.min(1, Math.max(0.42, vw / 760))
-      const anchor = { u: 690, v: 470 }
+      const anchor = { u: 650, v: 470 }
       const target = { x: vw / 2, y: 290 + vh * 0.24 }
       view.current = { scale: sc, originX: target.x - anchor.u * sc, originY: target.y - anchor.v * sc }
     }
