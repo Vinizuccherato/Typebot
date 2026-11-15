@@ -409,3 +409,22 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
 }
 
 export const fmt = (v: number, unit: Unit) => (unit === 'ratio' ? v.toFixed(2) : unit === '°' ? `${v.toFixed(1)}°` : unit === '%' ? `${v.toFixed(1)}%` : `${v.toFixed(1)} mm`)
+
+/** Project arbitrary frontal (x, y) points onto the head surface (same rules as landmarks). */
+export function projectFrontal(mesh: Mesh | null, space: Object3D | null, xy: [number, number][], lift = 0.006): Vector3[] {
+  if (mesh && space) {
+    mesh.updateWorldMatrix(true, false)
+    space.updateWorldMatrix(true, false)
+    inv.copy(space.matrixWorld).invert()
+  }
+  return xy.map(([x, y]) => {
+    if (mesh && space) {
+      tmpO.set(x, y, 2).applyMatrix4(space.matrixWorld)
+      tmpD.set(x, y, -2).applyMatrix4(space.matrixWorld).sub(tmpO).normalize()
+      ray.set(tmpO, tmpD)
+      const hit = ray.intersectObject(mesh, false)[0]
+      if (hit) return hit.point.clone().applyMatrix4(inv).add(new Vector3(0, 0, lift))
+    }
+    return new Vector3(x, y, placeholderZ(x, y) + lift)
+  })
+}
