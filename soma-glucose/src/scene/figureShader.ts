@@ -78,15 +78,16 @@ void parts(vec3 p, out float arm, out float back, out float head) {
   q.y += 0.22 * q.x;
   // flattened ellipsoid: organic silhouette, broad and shallow; right edge runs off-canvas
   float plane = sdEllipsoid(q, vec3(3.7, 4.4, 0.85));
-  float blade = sdEllipsoid(p - vec3(1.3, 0.9, -0.78), vec3(0.9, 1.0, 0.32));
-  float trap = sdRoundCone(p, vec3(0.1, 2.2, -0.45), vec3(0.55, 2.9, -1.3), 0.7, 0.45);
-  float neck = sdRoundCone(p, vec3(0.5, 2.7, -1.35), vec3(0.3, 3.8, -1.8), 0.4, 0.36);
-  back = smin(plane, blade, 0.45);
-  back = smin(back, trap, 0.6);
-  back = smin(back, neck, 0.3);
+  float blade = sdEllipsoid(p - vec3(1.3, 0.9, -0.82), vec3(1.0, 1.1, 0.3));
+  // trapezius rises from the shoulder cap into a thick, short, angled neck as one slope
+  float trap = sdRoundCone(p, vec3(0.0, 2.2, -0.4), vec3(0.45, 2.85, -1.3), 0.78, 0.7);
+  float neck = sdRoundCone(p, vec3(0.45, 2.6, -1.25), vec3(0.28, 3.35, -1.8), 0.72, 0.66);
+  back = smin(plane, blade, 0.6);
+  back = smin(back, trap, 0.9);
+  back = smin(back, neck, 0.7);
 
   // hair: soft gathered mass behind, with a bun
-  head = smin(sdEllipsoid(p - vec3(0.3, 3.9, -2.3), vec3(1.0, 1.05, 0.95)), length(p - vec3(0.45, 4.75, -2.6)) - 0.55, 0.4);
+  head = sdEllipsoid(p - vec3(0.35, 3.5, -2.3), vec3(1.5, 1.15, 1.15));
 }
 
 float sdSensor(vec3 p) {
@@ -102,7 +103,7 @@ float mapD(vec3 p) {
   float arm, back, head;
   parts(p, arm, back, head);
   float body = smin(arm, back, 0.26);
-  body = smin(body, head, 0.18);
+  body = smin(body, head, 0.55);
   return min(body, sdSensor(p));
 }
 
@@ -244,8 +245,8 @@ void main() {
   } else {
     p = ro + rd * tBest;
     // out-of-focus hair edge, crisp elsewhere
-    float far = max(smoothstep(2.9, 4.0, p.y - uBreath), smoothstep(-0.7, -2.6, p.z));
-    float soft = pf * mix(1.6, 22.0, far);
+    float far = max(smoothstep(2.6, 4.2, p.y - uBreath), smoothstep(-0.7, -2.6, p.z));
+    float soft = pf * mix(1.6, 30.0, far);
     alpha = 1.0 - smoothstep(0.0, soft, minR);
     if (alpha <= 0.002) discard;
   }
@@ -254,8 +255,10 @@ void main() {
   vec3 col = shade(p, rd, id);
   if (id < 3.0) {
     // shallow depth of field: focus on the shoulder/sensor plane, far parts melt toward the studio
-    float defocus = max(smoothstep(2.9, 4.4, p.y - uBreath), smoothstep(-0.9, -2.8, p.z) * 0.8);
+    float defocus = max(smoothstep(2.7, 4.4, p.y - uBreath), smoothstep(-0.9, -2.8, p.z) * 0.8);
     col = mix(col, vec3(0.13, 0.12, 0.115), defocus * 0.45);
+    // hair melts into the studio toward its top
+    if (id > 1.5) col = mix(col, vec3(0.62, 0.61, 0.6), smoothstep(3.6, 4.6, p.y - uBreath) * 0.55);
   }
   // filmic + sRGB
   col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
