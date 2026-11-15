@@ -71,23 +71,26 @@ void parts(vec3 p, out float arm, out float back, out float head) {
 
   float cap = length(p - vec3(0.25, 1.62, -0.15)) - 0.95;
   float trap = sdRoundCone(p, vec3(0.3, 1.8, -0.25), vec3(0.62, 2.55, -1.05), 0.78, 0.56);
-  float neck = sdRoundCone(p, vec3(0.55, 2.35, -1.05), vec3(0.08, 3.9, -1.55), 0.58, 0.5);
-  float torso = sdEllipsoid(p - vec3(2.65, -1.5, -1.35), vec3(2.35, 4.3, 1.3));
+  float neck = sdRoundCone(p, vec3(0.55, 2.35, -1.05), vec3(0.08, 3.9, -1.6), 0.5, 0.44);
+  // back: slanted so the shoulder line falls away to the right, as in a 3/4 back view
+  vec3 tq = p - vec3(2.7, -2.0, -1.35);
+  tq.y += 0.2 * tq.x;
+  float torso = sdEllipsoid(tq, vec3(2.55, 4.3, 1.3));
   // shoulder blade, a soft swell under the fabric
   float blade = sdEllipsoid(p - vec3(1.75, 0.2, -0.32), vec3(0.95, 1.2, 0.35));
   back = smin(smin(cap, trap, 0.55), torso, 0.9);
   back = smin(back, blade, 0.45);
   back = smin(back, neck, 0.35);
 
-  head = sdEllipsoid(p - vec3(-0.12, 4.6, -1.8), vec3(1.05, 1.28, 1.12));
+  head = sdEllipsoid(p - vec3(0.15, 4.05, -2.25), vec3(1.2, 1.38, 1.15));
 }
 
 float sdSensor(vec3 p) {
   vec3 q = p - uSP;
   float h = dot(q, uSN);
   float r = length(q - uSN * h);
-  vec2 w = vec2(r - 0.48, abs(h - 0.03) - 0.06);
-  return min(max(w.x, w.y), 0.0) + length(max(w, 0.0)) - 0.07;
+  vec2 w = vec2(r - 0.5, abs(h - 0.04) - 0.03);
+  return min(max(w.x, w.y), 0.0) + length(max(w, 0.0)) - 0.055;
 }
 
 float mapD(vec3 p) {
@@ -109,11 +112,11 @@ float material(vec3 p) {
   parts(b, arm, back, head);
   float body = smin(arm, back, 0.26);
   float sens = sdSensor(b);
-  if (sens < body + 0.002 && sens < head) return (h > 0.1 && sr < 0.25) ? 4.0 : 3.0;
+  if (sens < body + 0.002 && sens < head) return (h > 0.09 && sr < 0.25) ? 4.0 : 3.0;
   if (head < body - 0.02) return 2.0;
   if (back < arm - 0.04) {
     // tank top: covers the back below a neckline, plus a strap over the trapezius
-    float neckline = 1.15 - 0.32 * (b.x - 0.6);
+    float neckline = 2.05 - 0.12 * (b.x - 0.6);
     float strap = sdSegment(b, vec3(0.72, 2.35, -0.95), vec3(1.45, 0.3, -0.25));
     if (b.y < neckline || strap < 0.26) return 1.0;
   }
@@ -134,7 +137,7 @@ float calcAO(vec3 p, vec3 n) {
     occ += (h - mapD(p + n * h)) * sca;
     sca *= 0.6;
   }
-  return clamp(1.0 - 1.4 * occ, 0.0, 1.0);
+  return clamp(1.0 - 1.8 * occ, 0.0, 1.0);
 }
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
@@ -156,14 +159,14 @@ vec3 shade(vec3 p, vec3 rd, float id) {
   vec3 col;
   if (id < 0.5) {
     // skin — warm umber satin with a wrapped (subsurface-like) terminator
-    vec3 alb = vec3(0.135, 0.078, 0.052);
+    vec3 alb = vec3(0.078, 0.05, 0.036);
     float wrap = max((ndl + 0.38) / 1.38, 0.0);
     float sss = smoothstep(0.0, 0.35, wrap) * smoothstep(0.75, 0.15, wrap);
     col = alb * (uKeyCol * wrap * 1.15 + amb * 0.9 + vec3(0.28, 0.33, 0.42) * max(dot(n, Lf), 0.0) * 0.35);
     col += vec3(0.32, 0.09, 0.04) * sss * 0.22;
-    float spec = pow(max(dot(n, H), 0.0), 26.0) * 0.55 + pow(max(dot(n, H), 0.0), 6.0) * 0.06;
+    float spec = pow(max(dot(n, H), 0.0), 34.0) * 0.95 + pow(max(dot(n, H), 0.0), 7.0) * 0.08;
     col += uKeyCol * spec * fres * 3.2 * max(ndl, 0.0);
-    col += uRimCol * rim * 0.55;
+    col += uRimCol * rim * 0.8;
   } else if (id < 1.5) {
     // fabric — near-black jersey, faint sheen and weave
     vec3 alb = vec3(0.016, 0.016, 0.018) * (0.92 + 0.16 * hash(floor(p.xy * 160.0)));
@@ -181,7 +184,7 @@ vec3 shade(vec3 p, vec3 rd, float id) {
     float h = dot(q, uSN);
     float r = length(q - uSN * h);
     vec3 body = vec3(0.028, 0.028, 0.031);
-    float groove = smoothstep(0.012, 0.0, abs(r - 0.36)) * step(0.1, h);
+    float groove = smoothstep(0.012, 0.0, abs(r - 0.36)) * step(0.09, h);
     col = body * (uKeyCol * max(ndl, 0.0) * 0.9 + amb * 1.4) * (1.0 - groove * 0.6);
     col += uKeyCol * pow(max(dot(n, H), 0.0), 70.0) * 0.9 * fres * 4.0;
     col += vec3(0.6) * pow(1.0 - ndv, 4.0) * 0.08;
@@ -237,7 +240,7 @@ void main() {
   } else {
     p = ro + rd * tBest;
     // out-of-focus hair edge, crisp elsewhere
-    float soft = pf * mix(1.6, 14.0, smoothstep(3.2, 4.2, p.y - uBreath));
+    float soft = pf * mix(1.6, 22.0, smoothstep(2.9, 4.0, p.y - uBreath));
     alpha = 1.0 - smoothstep(0.0, soft, minR);
     if (alpha <= 0.002) discard;
   }
@@ -246,8 +249,8 @@ void main() {
   vec3 col = shade(p, rd, id);
   if (id < 0.5 || id > 1.5 && id < 2.5) {
     // the head sits behind the focal plane — soften toward the studio grey
-    float defocus = smoothstep(3.3, 4.6, p.y - uBreath);
-    col = mix(col, vec3(0.26, 0.25, 0.24), defocus * 0.35);
+    float defocus = smoothstep(2.9, 4.4, p.y - uBreath);
+    col = mix(col, vec3(0.16, 0.15, 0.145), defocus * 0.5);
   }
   // filmic + sRGB
   col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
