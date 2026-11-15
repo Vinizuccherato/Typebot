@@ -16,9 +16,9 @@
 
 :root {
   color-scheme: dark;
-  --bg-a: #12201d;
-  --bg-b: #0b1312;
-  --bg-c: #050908;
+  --bg-a: #142825;
+  --bg-b: #0d1917;
+  --bg-c: #070e0d;
   --text: #f2f7f5;
   --text-2: rgb(242 247 245 / 0.66);
   --text-3: rgb(242 247 245 / 0.44);
@@ -74,14 +74,14 @@ textarea {
   /* Liquid glass, dark. Layers: tinted fill → backdrop blur → hairline refraction edge
      (masked gradient) → inner bevel → pointer-following specular (--mx/--my). */
   .glass {
-    --g-fill-a: rgb(30 42 39 / 0.62);
-    --g-fill-b: rgb(12 19 18 / 0.55);
+    --g-fill-a: rgb(26 31 31 / 0.62);
+    --g-fill-b: rgb(11 14 14 / 0.55);
     --g-blur: 22px;
     --g-sat: 140%;
     --g-edge-a: rgb(255 255 255 / 0.26);
     --g-edge-b: rgb(255 255 255 / 0.06);
     --g-edge-c: rgb(255 255 255 / 0.02);
-    --g-edge-d: rgb(143 240 192 / 0.14);
+    --g-edge-d: rgb(143 240 192 / 0.08);
     --g-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.7), 0 2px 6px -2px rgb(0 0 0 / 0.3);
     --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.08), inset 0 0 30px rgb(143 240 192 / 0.025);
     --g-spec: rgb(143 240 192 / 0.12);
