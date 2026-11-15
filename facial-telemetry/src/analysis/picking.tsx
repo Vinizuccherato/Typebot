@@ -3,7 +3,7 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { AdditiveBlending, Color, Matrix4, Mesh, ShaderMaterial, SphereGeometry, Vector3, type BufferGeometry, type Group } from 'three'
 import { headRegistry, type FeatureId } from '../lib/face'
 import { useFace } from '../store'
-import { classify, FEATURE_ORDER } from './model'
+import { classify, FEATURE_ORDER, REGION_ELLIPSES } from './model'
 import { MINT } from './primitives'
 
 /* Invisible-until-needed twin of the head: receives pointer events for feature
@@ -37,7 +37,8 @@ const vert = /* glsl */ `
   }
 `
 
-// Must mirror classify() in model.ts.
+// Mirrors classify() in model.ts (same ellipses).
+const ELLIPSES = REGION_ELLIPSES.map((e) => `vec4(${e.map((n) => n.toFixed(3)).join(', ')})`).join(', ')
 const frag = /* glsl */ `
   uniform float uHover;
   uniform float uSel;
@@ -48,15 +49,18 @@ const frag = /* glsl */ `
   varying vec3 vPos;
   varying vec3 vViewN;
 
+  const vec4 E[8] = vec4[8](${ELLIPSES});
   float region(vec3 p) {
-    if (p.z < -0.32 || p.y > 0.78 || p.y < -1.32 || abs(p.x) > 0.84) return -1.0;
+    if (p.z < -0.32) return -1.0;
     float ax = abs(p.x);
-    if (p.y > 0.26) return 0.0;
-    if (p.y > 0.05) return ax < 0.1 ? 0.0 : 1.0;
-    if (p.y > -0.14) return ax < 0.11 ? 3.0 : (ax < 0.6 ? 2.0 : 4.0);
-    if (p.y > -0.62) return ax < 0.22 ? 3.0 : 4.0;
-    if (p.y > -0.95) return ax < 0.34 ? 5.0 : 6.0;
-    return ax < 0.3 ? 7.0 : 6.0;
+    float best = -1.0;
+    float bd = 2.6;
+    for (int i = 0; i < 8; i++) {
+      vec4 e = E[i];
+      float d = pow((ax - e.x) / e.z, 2.0) + pow((p.y - e.y) / e.w, 2.0);
+      if (d < bd) { bd = d; best = float(i); }
+    }
+    return best;
   }
 
   void main() {

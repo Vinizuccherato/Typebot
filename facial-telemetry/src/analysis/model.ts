@@ -91,16 +91,32 @@ export function placeholderPoints() {
 
 export const FEATURE_ORDER: FeatureId[] = ['forehead', 'brows', 'eyes', 'nose', 'cheekbones', 'lips', 'jaw', 'chin']
 
+/** Elliptical influence zones per feature (|x| mirrored); regions are their weighted Voronoi cells. */
+export const REGION_ELLIPSES: [cx: number, cy: number, rx: number, ry: number][] = [
+  [0, 0.45, 0.55, 0.28], // forehead
+  [0.39, 0.15, 0.26, 0.085], // brows
+  [0.33, -0.04, 0.21, 0.095], // eyes
+  [0, -0.3, 0.14, 0.32], // nose
+  [0.55, -0.33, 0.22, 0.27], // cheekbones
+  [0, -0.78, 0.3, 0.13], // lips
+  [0.52, -0.92, 0.22, 0.25], // jaw
+  [0, -1.12, 0.24, 0.14], // chin
+]
+
 /** Which facial feature a head-local surface point belongs to (null = off-face). */
 export function classify(x: number, y: number, z: number): FeatureId | null {
-  if (z < -0.32 || y > 0.78 || y < -1.32 || Math.abs(x) > 0.84) return null
+  if (z < -0.32) return null
   const ax = Math.abs(x)
-  if (y > 0.26) return 'forehead'
-  if (y > 0.05) return ax < 0.1 ? 'forehead' : 'brows'
-  if (y > -0.14) return ax < 0.11 ? 'nose' : ax < 0.6 ? 'eyes' : 'cheekbones'
-  if (y > -0.62) return ax < 0.22 ? 'nose' : 'cheekbones'
-  if (y > -0.95) return ax < 0.34 ? 'lips' : 'jaw'
-  return ax < 0.3 ? 'chin' : 'jaw'
+  let best = -1
+  let bd = 2.6
+  REGION_ELLIPSES.forEach(([cx, cy, rx, ry], i) => {
+    const d = ((ax - cx) / rx) ** 2 + ((y - cy) / ry) ** 2
+    if (d < bd) {
+      bd = d
+      best = i
+    }
+  })
+  return best < 0 ? null : FEATURE_ORDER[best]
 }
 
 /* ── measurements ── */
@@ -150,7 +166,8 @@ export function angleAt(p: Points, a: LandmarkId, v: LandmarkId, b: LandmarkId) 
   return (Math.acos(Math.min(1, Math.max(-1, u.dot(w)))) * 180) / Math.PI
 }
 
-const scoreOf = (value: number, ideal?: number, tol?: number) => (ideal === undefined || !tol ? 100 : Math.max(0, Math.round(100 - (Math.abs(value - ideal) / tol) * 100)))
+/** 100 at the ideal, 50 one tolerance away (gaussian falloff). */
+const scoreOf = (value: number, ideal?: number, tol?: number) => (ideal === undefined || !tol ? 100 : Math.round(100 * Math.exp(-0.693 * ((value - ideal) / tol) ** 2)))
 
 const m = (id: string, label: string, value: number, unit: Unit, ideal?: number, tol?: number): Measure => ({
   id,

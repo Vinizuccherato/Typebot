@@ -40,7 +40,8 @@ function Thirds({ p }: { p: Points }) {
 function Fifths({ p }: { p: Points }) {
   const g = useMemo(() => {
     const z = front(p)
-    const eye = ((p.endoR.distanceTo(p.exoR) + p.endoL.distanceTo(p.exoL)) / 2)
+    // frontal eye width (x only) so the five segments are directly comparable
+    const eye = (Math.abs(p.endoR.x - p.exoR.x) + Math.abs(p.endoL.x - p.exoL.x)) / 2
     const xs = [p.exoR.x - eye, p.exoR.x, p.endoR.x, p.endoL.x, p.exoL.x, p.exoL.x + eye]
     const top = p.glabella.y + 0.18
     const bottom = p.menton.y + 0.02
@@ -92,7 +93,7 @@ function Golden({ p }: { p: Points }) {
       {g.cuts.map((l, i) => (
         <RevealLine key={i} points={l} opacity={0.4} width={1} delay={0.3 + i * 0.1} />
       ))}
-      <RevealLine points={g.spiral} color="#c8ffe2" opacity={0.75} width={1.3} duration={1.4} delay={0.2} />
+      <RevealLine points={g.spiral} color="#c8ffe2" opacity={0.55} width={1.2} duration={1.4} delay={0.2} />
       <Tag at={g.labelAt}>
         <span className="text-[var(--text-2)]">φ length : width</span> <span className="text-[var(--mint)]">{g.ratio.toFixed(2)}</span>{' '}
         <span className="text-[var(--text-3)]">/ 1.62</span>

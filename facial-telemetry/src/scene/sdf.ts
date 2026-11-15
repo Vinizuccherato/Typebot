@@ -87,9 +87,9 @@ export function sdfHead(x: number, y: number, z: number): number {
   // closed eyelids
   d = smin(d, ell(ax - 0.32, y + 0.05, z + 0.2, 0.145, 0.09, 0.1), 0.04)
   // nose: bridge, tip, alae, columella, nostrils
-  d = smin(d, capsule(x, y, z, 0, 0, -0.06, 0, -0.38, 0.13, 0.065), 0.08)
+  d = smin(d, capsule(x, y, z, 0, 0, -0.07, 0, -0.38, 0.12, 0.075), 0.12)
   d = smin(d, sphere(x, y + 0.43, z - 0.165, 0.08), 0.07)
-  d = smin(d, sphere(ax - 0.14, y + 0.5, z, 0.075), 0.06)
+  d = smin(d, sphere(ax - 0.13, y + 0.5, z - 0.005, 0.064), 0.09)
   d = smin(d, ell(x, y + 0.56, z - 0.03, 0.07, 0.05, 0.07), 0.05)
   d = smax(d, -sphere(ax - 0.065, y + 0.545, z - 0.09, 0.03), 0.02)
   // philtrum
@@ -100,7 +100,7 @@ export function sdfHead(x: number, y: number, z: number): number {
   d = smin(d, ell(x, y + 0.85, z + 0.05, 0.21, 0.07, 0.11), 0.05)
   d = smax(d, -ell(x, y + 0.78, z - 0.06, 0.25, 0.012, 0.09), 0.015)
   // ears
-  d = smin(d, ell(ax - 0.76, y + 0.14, z + 0.95, 0.07, 0.3, 0.17), 0.05)
+  d = smin(d, ell(ax - 0.75, y + 0.15, z + 0.95, 0.095, 0.27, 0.16), 0.07)
   d = smax(d, -ell(ax - 0.8, y + 0.12, z + 0.93, 0.03, 0.2, 0.1), 0.03)
   // neck
   d = smin(d, capsule(x, y, z, 0, -0.85, -0.95, 0, -2.6, -0.85, 0.52), 0.22)
@@ -111,6 +111,23 @@ export function sdfHead(x: number, y: number, z: number): number {
 export function sdfFigure(x: number, y: number, z: number): number {
   const ax = abs(x)
   let d = sdfHead(x, y, z)
+  if (y < -1.05) {
+    d = smin(d, capsule(ax, y, z, 0.2, -1.9, -1.0, 1.5, -2.45, -0.95, 0.36), 0.3)
+    d = smin(d, capsule(ax, y, z, 1.2, -2.55, -0.9, 2.1, -2.8, -0.85, 0.42), 0.25)
+    d = smin(d, ell(x, y + 3.05, z + 0.75, 1.65, 0.62, 0.58), 0.3)
+  }
+  return d
+}
+
+/** The big masses only (cranium, face, jaw, chin, neck, shoulders) — drives the thermal silhouette rim. */
+export function sdfBase(x: number, y: number, z: number): number {
+  const ax = abs(x)
+  let d = ell(x, y - 0.36, z + 0.95, 0.75, 0.74, 0.92)
+  d = smin(d, ell(x, y - 0.12, z + 1.25, 0.66, 0.62, 0.62), 0.25)
+  d = smin(d, ell(x, y + 0.2, z + 0.42, 0.7, 0.62, 0.5), 0.3)
+  d = smin(d, ell(x, y + 0.78, z + 0.45, 0.6, 0.48, 0.5), 0.3)
+  d = smin(d, ell(x, y + 1.08, z + 0.15, 0.24, 0.2, 0.16), 0.2)
+  d = smin(d, capsule(x, y, z, 0, -0.85, -0.95, 0, -2.6, -0.85, 0.52), 0.3)
   if (y < -1.05) {
     d = smin(d, capsule(ax, y, z, 0.2, -1.9, -1.0, 1.5, -2.45, -0.95, 0.36), 0.3)
     d = smin(d, capsule(ax, y, z, 1.2, -2.55, -0.9, 2.1, -2.8, -0.85, 0.42), 0.25)

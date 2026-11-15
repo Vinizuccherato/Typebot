@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { BufferAttribute, BufferGeometry } from 'three'
 
-type Packed = { position: Float32Array; normal: Float32Array; cavity: Float32Array; index: Uint32Array | Uint16Array }
+type Packed = { position: Float32Array; normal: Float32Array; cavity: Float32Array; baseNormal: Float32Array; index: Uint32Array | Uint16Array }
 
 const unpack = (p: Packed) => {
   const g = new BufferGeometry()
   g.setAttribute('position', new BufferAttribute(p.position, 3))
   g.setAttribute('normal', new BufferAttribute(p.normal, 3))
   g.setAttribute('cavity', new BufferAttribute(p.cavity, 1))
+  g.setAttribute('baseNormal', new BufferAttribute(p.baseNormal, 3))
   g.setIndex(new BufferAttribute(p.index, 1))
   g.computeBoundingSphere()
   g.computeBoundingBox()

@@ -7,6 +7,7 @@ import { BufferAttribute, BufferGeometry } from 'three'
    - one vertex per sign-changing cell, projected onto the surface (Newton)
    - normals from the SDF gradient → perfectly smooth shading
    - per-vertex `cavity` (0 convex … 1 deep crease) from SDF occlusion probes
+   - optional `baseNormal` from a coarse-shape SDF (silhouette rim without small-feature rims)
    ────────────────────────────────────────────────────────────── */
 
 export type Sdf = (x: number, y: number, z: number) => number
@@ -16,7 +17,7 @@ export interface Bounds {
   max: [number, number, number]
 }
 
-export function meshSdf(sdf: Sdf, bounds: Bounds, h: number): BufferGeometry {
+export function meshSdf(sdf: Sdf, bounds: Bounds, h: number, base: Sdf = sdf): BufferGeometry {
   const [x0, y0, z0] = bounds.min
   const nx = Math.ceil((bounds.max[0] - x0) / h) + 1
   const ny = Math.ceil((bounds.max[1] - y0) / h) + 1
@@ -150,6 +151,7 @@ export function meshSdf(sdf: Sdf, bounds: Bounds, h: number): BufferGeometry {
   const P = new Float32Array(pos)
   const N = new Float32Array(vc * 3)
   const C = new Float32Array(vc)
+  const B = new Float32Array(vc * 3)
   const e = h * 0.25
   for (let q = 0; q < vc; q++) {
     let x = P[q * 3]
@@ -179,6 +181,20 @@ export function meshSdf(sdf: Sdf, bounds: Bounds, h: number): BufferGeometry {
     N[q * 3] = gx
     N[q * 3 + 1] = gy
     N[q * 3 + 2] = gz
+    if (base === sdf) {
+      B[q * 3] = gx
+      B[q * 3 + 1] = gy
+      B[q * 3 + 2] = gz
+    } else {
+      const be = 0.04
+      const bx = base(x + be, y, z) - base(x - be, y, z)
+      const by = base(x, y + be, z) - base(x, y - be, z)
+      const bz = base(x, y, z + be) - base(x, y, z - be)
+      const bl = Math.sqrt(bx * bx + by * by + bz * bz) || 1
+      B[q * 3] = bx / bl
+      B[q * 3 + 1] = by / bl
+      B[q * 3 + 2] = bz / bl
+    }
     let occ = 0
     let w = 1
     for (let s = 1; s <= 3; s++) {
@@ -193,6 +209,7 @@ export function meshSdf(sdf: Sdf, bounds: Bounds, h: number): BufferGeometry {
   g.setAttribute('position', new BufferAttribute(P, 3))
   g.setAttribute('normal', new BufferAttribute(N, 3))
   g.setAttribute('cavity', new BufferAttribute(C, 1))
+  g.setAttribute('baseNormal', new BufferAttribute(B, 3))
   g.setIndex(vc > 65535 ? new BufferAttribute(new Uint32Array(idx), 1) : new BufferAttribute(new Uint16Array(idx), 1))
   g.computeBoundingSphere()
   g.computeBoundingBox()
