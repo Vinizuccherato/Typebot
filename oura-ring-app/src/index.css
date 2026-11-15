@@ -109,6 +109,18 @@ body {
   to { transform: translateX(220%); }
 }
 
+/* Phones: keep the painted light still (moving blobs force the glass to re-blur every
+   frame) and use a slightly lighter blur on the sheet. */
+@media (hover: none) and (pointer: coarse) {
+  .drift {
+    animation: none !important;
+  }
+  .frost {
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

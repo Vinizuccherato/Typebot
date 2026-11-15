@@ -6,6 +6,11 @@ import { RingsSheet } from './app/RingsSheet'
 import { Toast } from './app/Toast'
 import { UiScale } from './lib/uiScale'
 
+/* Phones: `zoom` lays the 390pt column out at device size, so Safari/Chrome rasterise
+   text, glass and canvases at full resolution. A transform would be rasterised at 1×
+   and stretched — the soft, blurry look on iOS. */
+const ZOOM = typeof CSS !== 'undefined' && CSS.supports('zoom', '1.5')
+
 export default function App() {
   const screen = useScreen()
   const tick = useRings((s) => s.tick)
@@ -24,8 +29,12 @@ export default function App() {
       <Backdrop />
       {screen.mode === 'mobile' ? (
         <div
-          className="absolute left-1/2 top-0 origin-top"
-          style={{ width: SCREEN_W, height: screen.height, transform: `translateX(-50%) scale(${screen.scale})` }}
+          className="absolute inset-x-0 top-0 mx-auto"
+          style={
+            ZOOM
+              ? { width: SCREEN_W, height: screen.height, zoom: screen.scale }
+              : { width: SCREEN_W, height: screen.height, left: '50%', right: 'auto', transformOrigin: 'top', transform: `translateX(-50%) scale(${screen.scale})` }
+          }
         >
           <UiScale.Provider value={screen.scale}>
             <Hero />

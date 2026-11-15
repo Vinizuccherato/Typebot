@@ -149,7 +149,7 @@ function ProductRig({ finish, pulse, drag }: { finish: FinishId; pulse: number; 
           </group>
         </group>
       </group>
-      <ContactShadows position={[0, -1.02, 0]} opacity={0.22} scale={4.6} blur={3.2} far={1.6} resolution={256} color="#45535b" />
+      <ContactShadows frames={1} position={[0, -1.02, 0]} opacity={0.22} scale={4.6} blur={3.2} far={1.6} resolution={256} color="#45535b" />
     </>
   )
 }
@@ -182,7 +182,7 @@ function HeroRig({ finish, pulse }: { finish: FinishId; pulse: number }) {
 
   return (
     <>
-      <CameraFit fit={{ w: 6.8, h: 7.6 }} />
+      <CameraFit fit={{ w: 6.8, h: 4.2 }} />
       <directionalLight position={[3, 3, 4]} intensity={0.8} color="#fff1e6" />
       <directionalLight position={[-4, 1, 2]} intensity={0.6} color="#d9ecf6" />
       <ambientLight intensity={0.3} />
@@ -207,7 +207,8 @@ const isSoftware = () =>
 export function RingScene({ finish, variant, pulse = 0, resolution = 1, className }: RingSceneProps) {
   const [degraded, setDegraded] = useState(false)
   const k = Math.max(1, resolution)
-  const dpr: number | [number, number] = isSoftware() ? 1 : degraded ? k : [k, 2 * k]
+  const floor = typeof window === 'undefined' ? 1 : Math.max(1, Math.min(1.5, window.devicePixelRatio))
+  const dpr: number | [number, number] = isSoftware() ? 1 : degraded ? floor * k : [k, 2 * k]
   const drag = useRef<DragState>({ dragging: false, lastX: 0, spin: 0, velocity: 0 })
   const wrap = useRef<HTMLDivElement>(null)
   const product = variant === 'product'

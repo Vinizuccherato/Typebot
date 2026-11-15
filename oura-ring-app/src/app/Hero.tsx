@@ -21,15 +21,15 @@ export function Backdrop() {
       />
       <div aria-hidden className="absolute inset-0 overflow-hidden">
         <div
-          className="absolute left-[8%] top-[6%] h-[48%] w-[84%] rounded-full blur-[38px]"
+          className="drift absolute left-[8%] top-[6%] h-[48%] w-[84%] rounded-full blur-[38px]"
           style={{ background: 'radial-gradient(closest-side, rgb(247 249 248 / 0.95), rgb(236 238 232 / 0.55) 55%, transparent)', animation: 'drift-a 14s ease-in-out infinite' }}
         />
         <div
-          className="absolute left-[30%] top-[28%] h-[34%] w-[56%] rounded-full blur-[44px]"
+          className="drift absolute left-[30%] top-[28%] h-[34%] w-[56%] rounded-full blur-[44px]"
           style={{ background: 'radial-gradient(closest-side, rgb(236 182 158 / 0.75), rgb(226 176 160 / 0.3) 60%, transparent)', animation: 'drift-b 17s ease-in-out infinite' }}
         />
         <div
-          className="absolute -left-[10%] top-[40%] h-[30%] w-[50%] rounded-full blur-[50px]"
+          className="drift absolute -left-[10%] top-[40%] h-[30%] w-[50%] rounded-full blur-[50px]"
           style={{ background: 'radial-gradient(closest-side, rgb(150 182 196 / 0.8), transparent)', animation: 'drift-a 19s ease-in-out infinite reverse' }}
         />
         <div className="grain absolute inset-0 opacity-[0.18]" />
@@ -47,7 +47,7 @@ export function Hero() {
   return (
     <div className="absolute inset-0">
       {/* floating 3D ring */}
-      <RingScene variant="hero" finish={activeId} pulse={pulse} resolution={resolution} className="absolute inset-x-0 top-[60px] h-[700px]" />
+      <RingScene variant="hero" finish={activeId} pulse={pulse} resolution={resolution} className="absolute inset-x-0 top-[282px] h-[250px]" />
 
       {/* top glyph */}
       <motion.div
