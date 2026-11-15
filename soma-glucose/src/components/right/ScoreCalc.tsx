@@ -58,7 +58,7 @@ function PartGauge({ label, value, max, hot, onHover, active }: { label: string;
       <span className="-mt-[30px] text-[19px] font-light tabular">
         <AnimatedNumber value={value} />
       </span>
-      <span className={`mt-1.5 text-[10px] transition-colors ${active ? 'text-white' : 'text-white/50'}`}>{label}</span>
+      <span className={`mt-1.5 text-[10px] transition-colors ${active ? 'text-white' : 'text-white/60'}`}>{label}</span>
     </div>
   )
 }
@@ -74,19 +74,21 @@ export function ScoreCalc() {
     <Glass variant="smoke" radius={26} specular={0.7} className="on-dark h-full w-full overflow-hidden">
       {/* light pooling at the bottom edge, as in the reference */}
       <div aria-hidden className="pointer-events-none absolute -bottom-16 left-1/2 h-[120px] w-[220px] -translate-x-1/2 rounded-full" style={{ background: 'radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent)', filter: 'blur(10px)' }} />
-      <div className="relative z-[3] flex h-full flex-col px-[18px] pb-[12px] pt-[16px]">
+      <div className="relative z-[3] flex h-full flex-col justify-between px-[18px] pb-[12px] pt-[16px]">
+        <div>
         <div className="flex items-center justify-between gap-3">
           <CardLabel className="text-white/85">Score calculation</CardLabel>
           <span className="ml-auto flex items-baseline gap-1">
             <AnimatedNumber value={score.total} className="text-[26px] font-light leading-none tracking-[-0.02em]" />
-            <span className="text-[10.5px] text-white/45">/100</span>
+            <span className="text-[10.5px] text-white/55">/100</span>
           </span>
           <ExpandButton label="Expand score breakdown" onClick={() => setExpanded('score')} />
         </div>
-        <motion.p key={hovered?.id ?? 'none'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-1 text-[11px] text-white/55">
+        <motion.p key={hovered?.id ?? 'none'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="-mt-1 text-[11px] text-white/60">
           {hovered ? `${hovered.label}: ${WHY[hovered.id]} · ${hovered.value}/${hovered.max}` : 'Metabolic score from four signals — hover a gauge'}
         </motion.p>
-        <div className="mt-auto flex items-end gap-2">
+        </div>
+        <div className="flex items-end gap-2">
           {score.parts.map((p) => (
             <PartGauge key={p.id} label={p.label} value={p.value} max={p.max} hot={p.id === strongest.id} active={hover === p.id} onHover={(on) => setHover(on ? p.id : null)} />
           ))}

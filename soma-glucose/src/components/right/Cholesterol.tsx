@@ -32,7 +32,7 @@ export function Cholesterol() {
         </div>
         <div className="mt-2 flex items-baseline gap-1.5">
           <AnimatedNumber value={c.daysLogged} className="text-[38px] font-light leading-none tracking-[-0.03em]" />
-          <span className="text-[11.5px] text-white/50">/{c.ofDays} days logged</span>
+          <span className="text-[11.5px] text-white/60">/{c.ofDays} days logged</span>
         </div>
 
         <div className="relative mt-auto" role="img" aria-label={`Total cholesterol ${total} mg/dl, ${m.status}. Desirable band ${m.low}–${m.high}.`}>
@@ -50,8 +50,8 @@ export function Cholesterol() {
               <circle r="9" fill="#dcec55" opacity="0.25" />
               <circle r="4.5" fill="#dcec55" stroke="#1d1d1c" strokeWidth="1.5" />
             </motion.g>
-            <text x={CX - R} y={CY + 6} fontSize="9" fill="white" fillOpacity="0.4" textAnchor="middle">{MIN}</text>
-            <text x={CX + R} y={CY + 6} fontSize="9" fill="white" fillOpacity="0.4" textAnchor="middle">{MAX}</text>
+            <text x={CX - R} y={CY + 6} fontSize="9" fill="white" fillOpacity="0.5" textAnchor="middle">{MIN}</text>
+            <text x={CX + R} y={CY + 6} fontSize="9" fill="white" fillOpacity="0.5" textAnchor="middle">{MAX}</text>
           </svg>
           <div className="absolute inset-x-0 bottom-[2px] flex flex-col items-center">
             <span className="flex items-baseline gap-1">
@@ -68,9 +68,9 @@ export function Cholesterol() {
             ['LDL', c.ldl, '< 100'],
           ].map(([k, v, t]) => (
             <span key={k as string} className="flex items-baseline justify-between rounded-full bg-white/[0.07] px-2.5 py-1 ring-1 ring-white/10">
-              <span className="text-white/55">{k}</span>
+              <span className="text-white/65">{k}</span>
               <span className="tabular whitespace-nowrap">
-                {v} <span className="text-white/40 max-lg:hidden">{t}</span>
+                {v} <span className="text-white/50 max-lg:hidden">{t}</span>
               </span>
             </span>
           ))}

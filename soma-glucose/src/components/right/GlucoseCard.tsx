@@ -1,11 +1,10 @@
-import { useMemo } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useSoma, type Metric } from '../../store'
 import { Glass } from '../../ui/Glass'
 import { AnimatedNumber } from '../../ui/AnimatedNumber'
 import { CardLabel, ExpandButton, Tip, smoothPath, useScrub } from './kit'
 
-const W = 264
 const H = 104
 const PAD_Y = 14
 
@@ -17,8 +16,24 @@ const smooth = (s: number[], k = 3) => s.map((_, i) => {
   return sum / n
 })
 
+/** Container width in unscaled CSS px (offsetWidth is immune to the artboard transform). */
+function useWidth<T extends HTMLElement>(fallback: number) {
+  const ref = useRef<T>(null)
+  const [w, setW] = useState(fallback)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setW(el.offsetWidth || fallback))
+    ro.observe(el)
+    setW(el.offsetWidth || fallback)
+    return () => ro.disconnect()
+  }, [fallback])
+  return [ref, w] as const
+}
+
 function Chart({ metric, nowHour }: { metric: Metric; nowHour: number }) {
   const { index, handlers } = useScrub(24)
+  const [box, W] = useWidth<HTMLDivElement>(264)
   const { readings, trend, xs } = useMemo(() => {
     // soften meal spikes so the two traces read as calm interwoven waves (as in the reference)
     const s = smooth(metric.series, 1)
@@ -33,7 +48,7 @@ function Chart({ metric, nowHour }: { metric: Metric; nowHour: number }) {
     const xs = s.map((_, i) => (i / (s.length - 1)) * W)
     const ys = (arr: number[]) => arr.map((v) => PAD_Y + (1 - (squash(v) - lo) / span) * (H - PAD_Y * 2))
     return { readings: ys(s), trend: ys(t2), xs }
-  }, [metric.series])
+  }, [metric.series, W])
 
   const rPts = readings.map((y, i) => [xs[i], y] as [number, number])
   const tPts = trend.map((y, i) => [xs[i], y] as [number, number])
@@ -42,13 +57,14 @@ function Chart({ metric, nowHour }: { metric: Metric; nowHour: number }) {
 
   return (
     <div
+      ref={box}
       className="relative mt-auto cursor-crosshair outline-none"
       tabIndex={0}
       role="img"
       aria-label={`${metric.name} over the last 24 hours. Use arrow keys to inspect each hour.`}
       {...handlers}
     >
-      <svg width="100%" viewBox={`0 0 ${W} ${H + 18}`} className="block overflow-visible">
+      <svg width={W} height={H + 18} viewBox={`0 0 ${W} ${H + 18}`} className="block overflow-visible">
         <defs>
           <linearGradient id="gc-read" x1="0" x2="1">
             <stop offset="0" stopColor="white" stopOpacity="0.35" />
@@ -92,7 +108,7 @@ function Chart({ metric, nowHour }: { metric: Metric; nowHour: number }) {
         <circle cx={xs[hi]} cy={readings[hi]} r="7" fill="#dcec55" opacity="0.6" filter="url(#gc-glow)" />
         <circle cx={xs[hi]} cy={readings[hi]} r="3.4" fill="#dcec55" stroke="#1a1a19" strokeWidth="1.2" />
         {['00', '06', '12', '18', '24'].map((l, i) => (
-          <text key={l} x={(i / 4) * W} y={H + 15} fill="white" fillOpacity="0.42" fontSize="9.5" textAnchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'}>
+          <text key={l} x={(i / 4) * W} y={H + 15} fill="white" fillOpacity="0.52" fontSize="9.5" textAnchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'}>
             {l}
           </text>
         ))}
@@ -131,7 +147,7 @@ export function GlucoseCard() {
                 <CardLabel className="text-white/85">{metric.id === 'hemoglobin' ? 'Hba1c' : metric.name}</CardLabel>
               </motion.span>
             </AnimatePresence>
-            <span className="flex items-center gap-1 text-[10.5px] text-white/55">
+            <span className="flex items-center gap-1 text-[10.5px] text-white/60">
               <span className="relative grid h-2 w-2 place-items-center">
                 {live && <span className="absolute inset-0 animate-ping rounded-full bg-[#dcec55]/70" />}
                 <span className={`h-1.5 w-1.5 rounded-full ${live ? 'bg-[#dcec55]' : 'bg-white/40'}`} />

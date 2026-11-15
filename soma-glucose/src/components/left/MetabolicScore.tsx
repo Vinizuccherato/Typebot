@@ -45,8 +45,8 @@ export function MetabolicScore() {
   const plotW = Math.max(0, w - AXIS_W)
   const plotH = Math.max(0, h - X_H)
   const x = (i: number) => 8 + (i / LAST) * (plotW - 16)
-  // domain hugs the day (never tighter than 60–150) so swings read clearly
-  const yMax = Math.max(150, ...hours.map((c) => (c ? c.max + 10 : 0)))
+  // fixed 60–180 scale (as in the reference), widened only if the day peaks higher
+  const yMax = Math.max(180, ...hours.map((c) => (c ? c.max + 10 : 0)))
   const y = (v: number) => 4 + (1 - (Math.min(yMax, Math.max(Y_MIN, v)) - Y_MIN) / (yMax - Y_MIN)) * (plotH - 8)
 
   const pick = (clientX: number, el: HTMLElement) => {
@@ -99,7 +99,7 @@ export function MetabolicScore() {
         {w > 0 && (
           <svg width={w} height={h} className="absolute inset-0 overflow-visible" aria-hidden>
             {/* target band */}
-            <rect x={0} y={y(RANGE_HIGH)} width={plotW} height={y(RANGE_LOW) - y(RANGE_HIGH)} fill="rgb(220 236 85 / 0.07)" />
+            <rect x={0} y={y(RANGE_HIGH)} width={plotW} height={y(RANGE_LOW) - y(RANGE_HIGH)} fill="rgb(18 18 18 / 0.025)" />
             {[RANGE_LOW, RANGE_HIGH].map((v) => (
               <line key={v} x1={0} x2={plotW} y1={y(v)} y2={y(v)} stroke="rgb(18 18 18 / 0.28)" strokeDasharray="2 3" />
             ))}

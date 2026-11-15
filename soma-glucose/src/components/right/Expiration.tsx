@@ -38,14 +38,14 @@ export function Expiration() {
           </span>
           <span className="relative grid h-[70px] w-[70px] place-items-center">
             <svg width="70" height="70" viewBox="0 0 70 70" className="absolute inset-0 -rotate-90">
-              <circle cx="35" cy="35" r={R} fill="none" stroke="rgb(18 18 18 / 0.08)" strokeWidth="5" />
+              <circle cx="35" cy="35" r={R} fill="none" stroke="rgb(18 18 18 / 0.1)" strokeWidth="2" />
               <motion.circle
                 cx="35"
                 cy="35"
                 r={R}
                 fill="none"
-                stroke="rgb(18 18 18 / 0.82)"
-                strokeWidth="5"
+                stroke="rgb(18 18 18 / 0.55)"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeDasharray={C}
                 initial={{ strokeDashoffset: C }}

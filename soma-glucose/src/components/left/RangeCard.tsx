@@ -96,15 +96,16 @@ export function RangeCard() {
               aria-valuenow={band[w]}
               onKeyDown={key(w)}
               onKeyUp={(e) => (e.key === 'ArrowUp' || e.key === 'ArrowDown') && commit(band)}
-              className="absolute inset-x-0 h-0 outline-none"
+              className="group absolute inset-x-0 h-4 -translate-y-1/2 cursor-ns-resize"
+              style={{ outline: 'none' }}
               initial={false}
               animate={{ top: yOf(band[w]) }}
               transition={{ type: 'spring', stiffness: 500, damping: 40 }}
             >
-              <span className="absolute inset-x-0 border-t border-dashed border-[rgb(18_18_18/0.45)]" />
-              <span className="absolute -right-1 -top-[5px] h-[10px] w-[10px] rounded-full border-[1.5px] border-[var(--ink)] bg-white" />
+              <span className="absolute inset-x-0 top-1/2 border-t border-dashed border-[rgb(18_18_18/0.45)]" />
+              <span className="absolute -right-1 top-1/2 h-[10px] w-[10px] -translate-y-1/2 rounded-full border-[1.5px] border-[var(--ink)] bg-white transition-shadow group-focus-visible:shadow-[0_0_0_3px_var(--volt),0_0_0_4.5px_var(--ink)]" />
               {active === w && (
-                <span className="absolute -left-1 -translate-x-full -translate-y-1/2">
+                <span className="absolute -left-1 top-1/2 -translate-x-full -translate-y-1/2">
                   <Tip>{band[w]}</Tip>
                 </span>
               )}

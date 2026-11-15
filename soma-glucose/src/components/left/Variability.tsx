@@ -29,8 +29,8 @@ export function Variability() {
         const v = series[slot]
         const dev = (v - avg) / avg
         const a = (k / N) * Math.PI * 2 - Math.PI / 2
-        const r = R0 + Math.max(-8, Math.min(9, dev * 42))
-        return { k, slot, v, x: 60 + Math.cos(a) * r, y: 60 + Math.sin(a) * r, hot: Math.abs(dev) > 0.22, past: slot <= now }
+        const r = R0 + Math.max(-3, Math.min(3, dev * 14))
+        return { k, slot, v, x: 60 + Math.cos(a) * r, y: 60 + Math.sin(a) * r, hot: Math.abs(dev) > 0.15, past: slot <= now }
       }),
     [series, now, avg],
   )
@@ -44,7 +44,7 @@ export function Variability() {
       />
       <div className="relative z-[3] mx-auto mt-1 aspect-square w-full max-w-[124px] flex-1">
         <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full overflow-visible">
-          <circle cx={60} cy={60} r={R0} fill="none" stroke="rgb(18 18 18 / 0.1)" strokeDasharray="1.5 3" />
+          <circle cx={60} cy={60} r={R0 - 10} fill="none" stroke="rgb(18 18 18 / 0.12)" strokeDasharray="1 4" />
           <path d="M57 60h6M60 57v6" stroke="rgb(18 18 18 / 0.35)" strokeWidth={1} />
           <motion.g
             animate={hover === null ? { rotate: 360 } : undefined}

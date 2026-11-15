@@ -228,6 +228,7 @@ function Notifications() {
           setUnread(0)
         }}
         size={38}
+        variant="ink"
       />
       <Popover anchor={anchor} open={open} onClose={() => setOpen(false)} width={300} label="Notifications">
         <p className="label px-3 pb-1.5 pt-2 text-[var(--ink-3)]">Notifications</p>
@@ -273,7 +274,7 @@ function Settings() {
 
   return (
     <>
-      <IconButton ref={anchor} icon={Settings2} label="Settings" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)} size={38} />
+      <IconButton ref={anchor} icon={Settings2} label="Settings" variant="ink" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)} size={38} />
       <Popover anchor={anchor} open={open} onClose={() => setOpen(false)} width={290} label="Settings">
         <p className="label px-3 pb-1 pt-2 text-[var(--ink-3)]">Settings</p>
         <Row
@@ -310,8 +311,8 @@ function Profile() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.92 }}
         transition={springs.snappy}
-        className="grid h-[38px] w-[38px] cursor-pointer place-items-center rounded-full text-[12px] font-semibold text-[var(--ink)] outline-none"
-        style={{ background: 'radial-gradient(circle at 30% 25%, #fbffd9, #dcec55 45%, #9fb127)', boxShadow: '0 6px 16px -8px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.7)' }}
+        className="grid h-[38px] w-[38px] cursor-pointer place-items-center rounded-full text-[12px] font-semibold text-white outline-none"
+        style={{ background: 'radial-gradient(circle at 30% 25%, #3a3a38, #121212 65%)', boxShadow: '0 6px 16px -8px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.14)' }}
       >
         JR
       </motion.button>
