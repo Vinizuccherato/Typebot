@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { ChevronLeft, ChevronRight, ScanFace, X } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { Glass } from '../ui/Glass'
 import { AnimatedNumber } from '../ui/AnimatedNumber'
 import { FEATURES, type FeatureId } from '../lib/face'
@@ -172,36 +172,76 @@ function RatioVisual({ r }: { r: NonNullable<FeatureReport['ratio']> }) {
 
 function Idle() {
   const summary = useAnalysis((s) => s.summary)
-  const fromMesh = useAnalysis((s) => s.fromMesh)
   const progress = useFace((s) => s.scan.progress)
+  const [open, setOpen] = useState(false)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const stats = [
+    { k: 'L : W', v: summary.lengthRatio.toFixed(2) },
+    { k: 'Symmetry', v: `${summary.symmetry}%` },
+    { k: 'Thirds', v: summary.thirds.map((t) => Math.round(t)).join('·') },
+  ]
   return (
-    <motion.div key="idle" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="label">Visagism</div>
-          <div className="mt-0.5 text-[22px] font-light leading-tight">{summary.shape} face</div>
+    <motion.div
+      key="idle"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25 }}
+      className="flex flex-col gap-2.5"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && open) {
+          e.stopPropagation()
+          setOpen(false)
+          toggleRef.current?.focus()
+        }
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <ScoreRing value={summary.harmony} size={38} />
+        <div className="min-w-0 flex-1">
+          <div className="label truncate">Visagism · {progress < 100 ? `mapping ${Math.floor(progress)}%` : '32 landmarks'}</div>
+          <div className="text-[17px] font-light leading-tight">{summary.shape} face</div>
         </div>
-        <ScoreRing value={summary.harmony} />
+        <button
+          ref={toggleRef}
+          type="button"
+          aria-expanded={open}
+          aria-controls="feature-list"
+          onClick={() => setOpen((o) => !o)}
+          className={`flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-[5px] text-[11px] outline-none transition-colors ${
+            open ? 'border-[var(--mint)]/60 bg-[var(--mint)]/10 text-[var(--mint)]' : 'border-white/12 text-[var(--text-2)] hover:text-[var(--text)]'
+          }`}
+        >
+          Features
+          <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springs.snappy} className="grid place-items-center">
+            <ChevronDown size={12} strokeWidth={1.8} />
+          </motion.span>
+        </button>
       </div>
-      <p className="line-clamp-2 text-[11px] leading-snug text-[var(--text-3)]">{summary.shapeNote}</p>
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { k: 'L : W', v: summary.lengthRatio.toFixed(2) },
-          { k: 'Symmetry', v: `${summary.symmetry}%` },
-          { k: 'Thirds', v: summary.thirds.map((t) => Math.round(t)).join('·') },
-        ].map((x) => (
-          <div key={x.k} className="glass glass-well rounded-[12px] px-2 py-1.5">
-            <div className="relative z-[3] text-[9.5px] text-[var(--text-3)]">{x.k}</div>
-            <div className="tabular relative z-[3] text-[12.5px]">{x.v}</div>
+      <div className="grid grid-cols-3 gap-1.5" title={summary.shapeNote}>
+        {stats.map((x) => (
+          <div key={x.k} className="glass glass-well flex items-baseline justify-between gap-1 rounded-[10px] px-2 py-[5px]">
+            <span className="relative z-[3] text-[9.5px] text-[var(--text-3)]">{x.k}</span>
+            <span className="tabular relative z-[3] text-[11.5px]">{x.v}</span>
           </div>
         ))}
       </div>
-      <div className="hairline" />
-      <div className="flex items-center gap-1.5 text-[10.5px] text-[var(--text-3)]">
-        <ScanFace size={12} strokeWidth={1.6} className="text-[var(--mint)]" />
-        {progress < 100 ? `Mapping landmarks · ${Math.floor(progress)}%` : fromMesh ? '32 landmarks mapped on the 3D scan' : '32 landmarks · estimated surface'}
-      </div>
-      <FeatureChips />
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            id="feature-list"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={springs.soft}
+            className="overflow-hidden"
+          >
+            <div className="pt-1">
+              <FeatureChips compact />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

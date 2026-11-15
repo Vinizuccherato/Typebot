@@ -12,10 +12,10 @@ import { MINT, OVERLAY_ORDER, RevealLine } from './primitives'
    the Hemodynamic Index leader. Both live in head space and track scan/vitals. */
 
 const GRID: [number, number][] = []
-for (let iy = 0; iy < 10; iy++) for (let ix = 0; ix < 10; ix++) GRID.push([0.27 + ix * 0.032, -0.3 - iy * 0.032])
+for (let iy = 0; iy < 10; iy++) for (let ix = 0; ix < 10; ix++) GRID.push([0.27 + ix * 0.032, -0.12 - iy * 0.032])
 
-const PILL: [number, number][] = [[0.42, -0.46]]
-const SRC: [number, number][] = [[0.56, -0.38]]
+const PILL: [number, number][] = [[0.42, -0.27]]
+const SRC: [number, number][] = [[0.57, -0.2]]
 
 const dummy = new Object3D()
 const c = new Color()
@@ -106,8 +106,8 @@ export function Hemodynamic({ space }: { space: React.RefObject<Group | null> })
 
   const path = useMemo(() => {
     const s = src[0]
-    const elbow = new Vector3(0.86, -0.42, s.z + 0.12)
-    const end = new Vector3(1.02, -0.42, s.z + 0.12)
+    const elbow = new Vector3(0.74, -0.15, s.z + 0.12)
+    const end = new Vector3(0.86, -0.15, s.z + 0.12)
     return { s, elbow, end, line: [s, elbow, end] }
   }, [src])
 
