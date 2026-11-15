@@ -84,7 +84,7 @@ function Tabs({ compact }: { compact: boolean }) {
                 }}
               />
             )}
-            <span className="relative">{t.label}</span>
+            <span className="relative">{compact && t.id === 'symmetry' ? 'Symmetry' : t.label}</span>
           </button>
         )
       })}
@@ -210,7 +210,7 @@ export function Header() {
           <SearchButton onOpen={() => setPalette(true)} />
           <Avatar />
         </div>
-        <div className="overflow-x-auto">
+        <div className="flex justify-center">
           <Tabs compact />
         </div>
         <CommandPalette open={palette} onClose={() => setPalette(false)} />

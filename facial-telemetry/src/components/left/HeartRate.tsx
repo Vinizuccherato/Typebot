@@ -4,6 +4,7 @@ import { useFace } from '../../store'
 import { Glass } from '../../ui/Glass'
 import { AnimatedNumber } from '../../ui/AnimatedNumber'
 import { CornerArrow } from './parts'
+import { useArtboard } from '../../layout/Artboard'
 import { useTrace } from './useTrace'
 
 function EcgGlyph() {
@@ -21,6 +22,7 @@ export function HeartRate() {
   const setTab = useFace((s) => s.setTab)
   const trace = useTrace({ samples: 46, color: 'rgb(143, 240, 192)', fill: 0.16 })
   const [beat, setBeat] = useState(0)
+  const compact = useArtboard().mode === 'compact'
 
   // one glow pulse per heartbeat, synced to the live rate
   useEffect(() => {
@@ -50,17 +52,29 @@ export function HeartRate() {
           }}
         />
       </div>
-      <canvas ref={trace} className="relative z-[3] mt-1 h-0 w-full flex-1" aria-hidden />
-      <div className="relative z-[3] mt-1 flex items-end justify-between">
-        <div className="flex flex-col gap-1.5 text-white/60">
-          <EcgGlyph />
-          <span className="text-[11.5px]">bpm</span>
+      {compact ? (
+        <div className="relative z-[3] mt-auto flex items-end gap-3">
+          <canvas ref={trace} className="h-[46px] min-w-0 flex-1" aria-hidden />
+          <p className="flex items-baseline gap-1 leading-none">
+            <AnimatedNumber value={hr} className="text-[36px] font-light tracking-[-0.03em] text-white" />
+            <span className="text-[11px] text-white/55">bpm</span>
+          </p>
         </div>
-        <p className="leading-none" aria-live="off">
-          <AnimatedNumber value={hr} className="text-[44px] font-light tracking-[-0.03em] text-white" />
-          <span className="sr-only"> beats per minute</span>
-        </p>
-      </div>
+      ) : (
+        <>
+          <canvas ref={trace} className="relative z-[3] mt-1 h-0 w-full flex-1" aria-hidden />
+          <div className="relative z-[3] mt-1 flex items-end justify-between">
+            <div className="flex flex-col gap-1.5 text-white/60">
+              <EcgGlyph />
+              <span className="text-[11.5px]">bpm</span>
+            </div>
+            <p className="leading-none" aria-live="off">
+              <AnimatedNumber value={hr} className="text-[44px] font-light tracking-[-0.03em] text-white" />
+              <span className="sr-only"> beats per minute</span>
+            </p>
+          </div>
+        </>
+      )}
     </Glass>
   )
 }
