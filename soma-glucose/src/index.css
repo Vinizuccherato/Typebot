@@ -1,0 +1,208 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/outfit';
+
+/* ──────────────────────────────────────────────────────────────
+   Soma design tokens — light studio, frosted white glass,
+   smoked dark glass over the figure, one chartreuse accent.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: 'Outfit Variable', ui-sans-serif, system-ui, -apple-system, 'SF Pro Display', sans-serif;
+  --color-volt: #dcec55; /* sensor core / accent */
+  --color-volt-deep: #b9cc2c;
+  --color-ink: #121212;
+  --color-ink-2: #2a2a29;
+  --color-mist: #ecebe8;
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: light;
+  --bg-a: #f4f3f1;
+  --bg-b: #e3e2df;
+  --bg-c: #cfcecb;
+  --ink: #121212;
+  --ink-2: rgb(18 18 18 / 0.62);
+  --ink-3: rgb(18 18 18 / 0.42);
+  --ink-4: rgb(18 18 18 / 0.26);
+  --on-dark: #ffffff;
+  --on-dark-2: rgb(255 255 255 / 0.68);
+  --on-dark-3: rgb(255 255 255 / 0.45);
+  --volt: #dcec55;
+  --s: 1;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(110% 90% at 52% 38%, var(--bg-a) 0%, var(--bg-b) 55%, var(--bg-c) 100%);
+  background-color: var(--bg-b);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.compact {
+  overflow-y: auto;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Unlayered on purpose: utilities must not strip it from controls. */
+:where(button, a, [role='slider'], [role='switch'], [role='radio'], [role='option'], [role='tab'], [tabindex='0']):focus-visible {
+  outline: 2px solid rgb(18 18 18 / 0.75);
+  outline-offset: 2px;
+}
+.on-dark :where(button, a, [role='slider'], [role='switch'], [role='radio'], [role='option'], [role='tab'], [tabindex='0']):focus-visible {
+  outline-color: var(--volt);
+}
+
+@layer components {
+  /* Liquid glass. Layers: tinted fill → backdrop blur → hairline refraction edge
+     (masked gradient) → inner bevel → pointer-following specular (--mx/--my). */
+  .glass {
+    --g-fill-a: rgb(255 255 255 / 0.62);
+    --g-fill-b: rgb(255 255 255 / 0.38);
+    --g-blur: 22px;
+    --g-sat: 140%;
+    --g-edge-a: rgb(255 255 255 / 1);
+    --g-edge-b: rgb(255 255 255 / 0.35);
+    --g-edge-c: rgb(255 255 255 / 0.15);
+    --g-edge-d: rgb(255 255 255 / 0.8);
+    --g-shadow: 0 24px 50px -28px rgb(40 38 34 / 0.28), 0 2px 6px -2px rgb(40 38 34 / 0.08);
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 -1px 1px rgb(255 255 255 / 0.25);
+    --g-spec: rgb(255 255 255 / 0.6);
+
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(150deg, var(--g-fill-a) 0%, var(--g-fill-b) 100%);
+    -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat));
+    backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow: var(--g-bevel), var(--g-shadow);
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(145deg, var(--g-edge-a) 0%, var(--g-edge-b) 32%, var(--g-edge-c) 62%, var(--g-edge-d) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--spec-o, 0);
+    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), var(--g-spec) 0%, transparent 55%);
+    transition: opacity 0.5s var(--ease-glass);
+    mix-blend-mode: soft-light;
+  }
+
+  /* frost — white frosted cards (default) */
+  .glass-frost {
+  }
+  /* smoke — dark smoked glass over the figure (Glucose, Score Calculation, Cholesterol) */
+  .glass-smoke {
+    --g-fill-a: rgb(58 57 54 / 0.62);
+    --g-fill-b: rgb(26 26 25 / 0.5);
+    --g-blur: 26px;
+    --g-sat: 120%;
+    --g-edge-a: rgb(255 255 255 / 0.4);
+    --g-edge-b: rgb(255 255 255 / 0.08);
+    --g-edge-c: rgb(255 255 255 / 0.03);
+    --g-edge-d: rgb(255 255 255 / 0.2);
+    --g-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.5);
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.14);
+    --g-spec: rgb(255 255 255 / 0.14);
+    color: var(--on-dark);
+  }
+  /* pill — small frosted controls */
+  .glass-pill {
+    --g-fill-a: rgb(255 255 255 / 0.7);
+    --g-fill-b: rgb(255 255 255 / 0.45);
+    --g-blur: 16px;
+    --g-shadow: 0 6px 16px -10px rgb(40 38 34 / 0.3);
+  }
+  /* well — recessed area inside a card */
+  .glass-well {
+    --g-fill-a: rgb(255 255 255 / 0.35);
+    --g-fill-b: rgb(255 255 255 / 0.18);
+    --g-shadow: none;
+    --g-bevel: inset 0 1px 2px rgb(0 0 0 / 0.06), inset 0 -1px 0 rgb(255 255 255 / 0.6);
+  }
+  .glass-smoke .glass-well,
+  .glass-well.dark {
+    --g-fill-a: rgb(255 255 255 / 0.08);
+    --g-fill-b: rgb(255 255 255 / 0.03);
+    --g-edge-a: rgb(255 255 255 / 0.2);
+    --g-edge-b: rgb(255 255 255 / 0.04);
+    --g-edge-c: rgb(255 255 255 / 0.02);
+    --g-edge-d: rgb(255 255 255 / 0.1);
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+  /* ink — solid black control (active tab, primary buttons) */
+  .glass-ink {
+    --g-fill-a: rgb(28 28 27 / 0.96);
+    --g-fill-b: rgb(10 10 10 / 0.96);
+    --g-blur: 0px;
+    --g-edge-a: rgb(255 255 255 / 0.25);
+    --g-edge-b: rgb(255 255 255 / 0.05);
+    --g-edge-c: rgb(255 255 255 / 0.02);
+    --g-edge-d: rgb(255 255 255 / 0.12);
+    --g-shadow: 0 8px 20px -10px rgb(0 0 0 / 0.45);
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.12);
+    color: #fff;
+  }
+  /* nested static surfaces do not re-blur (backdrop root) */
+  .glass :is(.glass-pill, .glass-well, .glass-ink) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .hairline {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(18 18 18 / 0.12), transparent);
+  }
+  .glass-smoke .hairline {
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.16), transparent);
+  }
+  /* small uppercase card labels, as in the reference */
+  .label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
