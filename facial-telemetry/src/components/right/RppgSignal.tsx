@@ -19,8 +19,23 @@ const backfill = (hr: number, resp: number) =>
     return 0.22 + pulse * 0.6 + 0.08 * Math.sin((t * resp * Math.PI * 2) / 60)
   })
 
-/** 3-tap smoothing for display (the 10 Hz stream is spiky at the systolic peak). */
-const smooth = (a: number[]) => a.map((v, i) => 0.25 * (a[i - 1] ?? v) + 0.5 * v + 0.25 * (a[i + 1] ?? v))
+/** Centred moving average over `k` samples (1 s at 10 Hz) — the calm main stroke. */
+const movingAvg = (a: number[], k = HZ) =>
+  a.map((_, i) => {
+    let sum = 0
+    let n = 0
+    for (let j = i - (k >> 1); j <= i + (k >> 1); j++) if (j >= 0 && j < a.length) (sum += a[j]), n++
+    return sum / n
+  })
+
+/** Maps a series onto [lo, hi] of the plot height (auto-scaled, with a minimum span). */
+const scaler = (a: number[], h: number, lo: number, hi: number) => {
+  let min = Infinity
+  let max = -Infinity
+  for (const v of a) (min = Math.min(min, v)), (max = Math.max(max, v))
+  const span = Math.max(0.04, max - min)
+  return (v: number) => h * hi - ((v - min) / span) * h * (hi - lo)
+}
 
 /** Live remote-photoplethysmography trace with a selectable time window. */
 export function RppgSignal() {
@@ -50,7 +65,8 @@ export function RppgSignal() {
 
   const canvas = useCanvasLoop((ctx, w, h) => {
     const n = useFace.getState().scan.pulseWindow * HZ
-    const data = smooth(buf.current.slice(-n - 1)).slice(1)
+    const raw = buf.current.slice(-n)
+    const data = movingAvg(raw)
     geo.current = { n, w, h }
     const pad = 8
     const step = w / (n - 1)
@@ -72,7 +88,15 @@ export function RppgSignal() {
     if (data.length < 2) return
     const start = n - data.length
     const X = (i: number) => (start + i) * step + off
-    const Y = (v: number) => pad + (1 - Math.min(1.05, Math.max(0, v))) * (h - pad * 2)
+    const Yraw = (v: number) => pad + (1 - Math.min(1.05, Math.max(0, v))) * (h - pad * 2)
+    const Y = scaler(data, h, 0.18, 0.78)
+
+    // raw beat-to-beat trace, faint underneath
+    ctx.beginPath()
+    for (let i = 0; i < raw.length; i++) (i ? ctx.lineTo : ctx.moveTo).call(ctx, X(i), Yraw(raw[i]))
+    ctx.strokeStyle = 'rgba(143,240,192,0.25)'
+    ctx.lineWidth = 1
+    ctx.stroke()
 
     // area
     const grad = ctx.createLinearGradient(0, 0, 0, h)
@@ -100,16 +124,20 @@ export function RppgSignal() {
     }
     ctx.lineTo(X(data.length - 1), Y(data[data.length - 1]))
     ctx.strokeStyle = lg
-    ctx.lineWidth = 1.6
+    ctx.lineWidth = 1.8
     ctx.lineJoin = 'round'
     ctx.shadowColor = 'rgba(143,240,192,0.55)'
     ctx.shadowBlur = 8
     ctx.stroke()
     ctx.shadowBlur = 0
 
-    // latest peak marker (max of the last ~1.2 s)
+    // latest local crest of the smoothed wave
     let pi = data.length - 1
-    for (let i = Math.max(0, data.length - 12); i < data.length; i++) if (data[i] > data[pi]) pi = i
+    for (let i = data.length - 2; i > 0; i--)
+      if (data[i] >= data[i - 1] && data[i] >= data[i + 1]) {
+        pi = i
+        break
+      }
     const px = X(pi)
     const py = Y(data[pi])
     ctx.strokeStyle = 'rgba(143,240,192,0.25)'
@@ -131,11 +159,11 @@ export function RppgSignal() {
     const r = e.currentTarget.getBoundingClientRect()
     const fx = (e.clientX - r.left) / r.width
     const { n, w, h } = geo.current
-    const data = smooth(buf.current.slice(-n - 1)).slice(1)
+    const data = movingAvg(buf.current.slice(-n))
     const i = Math.round(fx * (n - 1)) - (n - data.length)
     if (i < 0 || i >= data.length) return setHover(null)
     const amp = data[i]
-    setHover({ x: fx * w, y: 8 + (1 - Math.min(1.05, amp)) * (h - 16), ago: (n - 1 - Math.round(fx * (n - 1))) / HZ, amp })
+    setHover({ x: fx * w, y: scaler(data, h, 0.18, 0.78)(amp), ago: (n - 1 - Math.round(fx * (n - 1))) / HZ, amp })
   }
 
   return (

@@ -45,7 +45,7 @@ export function AnalyticConfig() {
         <h3 className="text-[14px] font-normal text-white">Analytic Configuration</h3>
       </div>
 
-      <Row label="Scan Mode" hint={scan.mode === 'thermal' ? 'Infrared heat map' : scan.mode === 'depth' ? 'Structured-light depth' : 'Topology wireframe'}>
+      <Row label="Scan Mode" hint={scan.mode === 'thermal' ? 'Infrared heat' : scan.mode === 'depth' ? 'Depth bands' : 'Wireframe'}>
         <Segmented<ScanMode>
           label="Scan mode"
           value={scan.mode}
@@ -74,7 +74,20 @@ export function AnalyticConfig() {
       </Row>
 
       <Row label="Stress Color" hint={PALETTES.find((p) => p.id === scan.palette)?.label}>
-        <div role="radiogroup" aria-label="Stress colour" className="flex gap-2">
+        <div
+          role="radiogroup"
+          aria-label="Stress colour"
+          className="flex gap-2"
+          onKeyDown={(e) => {
+            const i = PALETTES.findIndex((p) => p.id === scan.palette)
+            const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
+            if (!d) return
+            e.preventDefault()
+            const next = PALETTES[(i + d + PALETTES.length) % PALETTES.length]
+            setScan({ palette: next.id })
+            ;(e.currentTarget.querySelector(`[data-id="${next.id}"]`) as HTMLElement | null)?.focus()
+          }}
+        >
           {PALETTES.map((p) => {
             const on = p.id === scan.palette
             return (
@@ -83,6 +96,8 @@ export function AnalyticConfig() {
                 type="button"
                 role="radio"
                 aria-checked={on}
+                tabIndex={on ? 0 : -1}
+                data-id={p.id}
                 aria-label={p.label}
                 onClick={() => setScan({ palette: p.id })}
                 className="relative grid h-7 w-7 cursor-pointer place-items-center rounded-full outline-none"

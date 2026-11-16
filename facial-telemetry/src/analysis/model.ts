@@ -136,11 +136,20 @@ export interface Measure {
   score: number
 }
 
-/** 3D visual primitives for the measurement overlay (head-local landmark ids). */
+/**
+ * 3D visual primitives for the measurement overlay (head-local landmark ids).
+ * Every visual names the Measure it illustrates (`m`); its 3D label shows that
+ * measure's exact label and value, so the face and the inspector always agree.
+ */
 export type Visual =
-  | { kind: 'dim'; a: LandmarkId; b: LandmarkId; axis: 'x' | 'y' | 'free'; offset: number; label: string }
-  | { kind: 'angle'; a: LandmarkId; v: LandmarkId; b: LandmarkId; label: string }
-  | { kind: 'chain'; ids: LandmarkId[]; axis: 'x' | 'y'; offset: number; labels: string[] }
+  | { kind: 'dim'; a: LandmarkId; b: LandmarkId; axis: 'x' | 'y' | 'free'; offset: number; m: string }
+  | { kind: 'angle'; a: LandmarkId; v: LandmarkId; b: LandmarkId; m: string }
+  /** one measure per segment */
+  | { kind: 'chain'; ids: LandmarkId[]; axis: 'x' | 'y'; offset: number; m: string[] }
+  /** baseline a–b with a perpendicular rise to `peak` (e.g. brow arch height) */
+  | { kind: 'rise'; a: LandmarkId; b: LandmarkId; peak: LandmarkId; m: string }
+  /** a→b against the horizontal, with the angle between (e.g. brow tilt) */
+  | { kind: 'slope'; a: LandmarkId; b: LandmarkId; m: string }
 
 export interface FeatureReport {
   id: FeatureId
@@ -204,8 +213,8 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
   const lower = dy(p, 'subnasale', 'menton')
   const icd = dx(p, 'endoR', 'endoL')
   const ipd = dx(p, 'pupilR', 'pupilL')
-  const eyeR = d(p, 'endoR', 'exoR')
-  const eyeL = d(p, 'endoL', 'exoL')
+  const eyeR = dx(p, 'endoR', 'exoR')
+  const eyeL = dx(p, 'endoL', 'exoL')
   const eyeW = (eyeR + eyeL) / 2
 
   // brows
@@ -255,8 +264,8 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
         m('browSpan', 'Forehead width (temples)', brow, 'mm', cheek * 0.88, cheek * 0.12),
       ],
       visuals: [
-        { kind: 'dim', a: 'trichion', b: 'glabella', axis: 'y', offset: -0.95, label: 'Upper third' },
-        { kind: 'dim', a: 'browOuterR', b: 'browOuterL', axis: 'x', offset: 0.36, label: 'Temple width' },
+        { kind: 'dim', a: 'trichion', b: 'glabella', axis: 'y', offset: -0.95, m: 'upper' },
+        { kind: 'dim', a: 'browOuterR', b: 'browOuterL', axis: 'x', offset: 0.36, m: 'browSpan' },
       ],
       score: 0,
       insight: upper > faceLen * 0.36 ? 'Tall upper third — a soft fringe or side part rebalances the thirds.' : upper < faceLen * 0.3 ? 'Compact forehead — swept-back styling opens the upper third.' : 'Upper third in balance with the mid and lower face.',
@@ -268,14 +277,15 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
       measures: [
         m('len', 'Brow length', (browLenR + browLenL) / 2, 'mm', eyeW * 1.55, eyeW * 0.35),
         m('arch', 'Arch height', archH, 'mm', 6, 4),
-        m('archPos', 'Arch vs. outer iris', archPos, 'mm', archIdeal, 6),
+        m('archPos', 'Arch offset from pupil', archPos, 'mm', archIdeal, 6),
         m('tilt', 'Tail tilt', tilt, '°', -4, 10),
         m('sym', 'L/R length Δ', Math.abs(browLenR - browLenL), 'mm', 0, 3),
       ],
       visuals: [
-        { kind: 'dim', a: 'browInnerL', b: 'browOuterL', axis: 'free', offset: 0.06, label: 'Length' },
-        { kind: 'angle', a: 'browInnerR', v: 'browPeakR', b: 'browOuterR', label: 'Arch' },
-        { kind: 'dim', a: 'browPeakL', b: 'pupilL', axis: 'y', offset: 0.2, label: 'Arch rise' },
+        { kind: 'dim', a: 'browInnerL', b: 'browOuterL', axis: 'free', offset: 0.06, m: 'len' },
+        { kind: 'rise', a: 'browInnerR', b: 'browOuterR', peak: 'browPeakR', m: 'arch' },
+        { kind: 'dim', a: 'pupilL', b: 'browPeakL', axis: 'x', offset: 0.17, m: 'archPos' },
+        { kind: 'slope', a: 'browInnerR', b: 'browOuterR', m: 'tilt' },
       ],
       score: 0,
       insight: archPos < archIdeal - 4 ? 'Arch sits inward — shift the peak toward the outer iris to open the eye.' : archPos > archIdeal + 4 ? 'Arch sits late — move the peak inward over the outer iris.' : 'Arch peak aligns with the outer iris — keep the tail on the nose–canthus line.',
@@ -285,14 +295,15 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
       id: 'eyes',
       label: FEATURES.eyes.label,
       measures: [
-        m('width', 'Palpebral width', eyeW, 'mm', 30, 5),
+        m('widthR', 'Palpebral width R', dx(p, 'endoR', 'exoR'), 'mm', 30, 5),
+        m('widthL', 'Palpebral width L', dx(p, 'endoL', 'exoL'), 'mm', 30, 5),
         m('icd', 'Intercanthal distance', icd, 'mm', eyeW, 5),
         m('ipd', 'Interpupillary distance', ipd, 'mm', 63, 6),
         m('fifths', 'Rule of fifths (ICD : eye)', icd / eyeW, 'ratio', 1, 0.25),
       ],
       visuals: [
-        { kind: 'chain', ids: ['exoR', 'endoR', 'endoL', 'exoL'], axis: 'x', offset: -0.16, labels: ['Eye', 'Intercanthal', 'Eye'] },
-        { kind: 'dim', a: 'pupilR', b: 'pupilL', axis: 'x', offset: 0.13, label: 'IPD' },
+        { kind: 'chain', ids: ['exoR', 'endoR', 'endoL', 'exoL'], axis: 'x', offset: -0.16, m: ['widthR', 'icd', 'widthL'] },
+        { kind: 'dim', a: 'pupilR', b: 'pupilL', axis: 'x', offset: 0.13, m: 'ipd' },
       ],
       score: 0,
       insight: icd > eyeW * 1.12 ? 'Wide-set eyes — darker inner-corner definition draws them together.' : icd < eyeW * 0.9 ? 'Close-set eyes — lighten the inner corners and extend the outer liner.' : 'Eye spacing matches one eye width — classic rule of fifths.',
@@ -307,12 +318,14 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
         m('proj', 'Tip projection', tipProj, 'mm', 14, 8),
         m('nf', 'Nasofrontal angle', nasofrontal, '°', 125, 20),
         m('nl', 'Nasolabial angle', nasolabial, '°', 100, 20),
+        m('icd', 'Intercanthal (reference)', icd, 'mm'),
       ],
       visuals: [
-        { kind: 'dim', a: 'nasion', b: 'subnasale', axis: 'y', offset: 0.3, label: 'Length' },
-        { kind: 'dim', a: 'alarR', b: 'alarL', axis: 'x', offset: -0.16, label: 'Alar width' },
-        { kind: 'dim', a: 'endoR', b: 'endoL', axis: 'x', offset: 0.12, label: 'Intercanthal' },
-        { kind: 'angle', a: 'pronasale', v: 'subnasale', b: 'labraleSup', label: 'Nasolabial' },
+        { kind: 'dim', a: 'nasion', b: 'subnasale', axis: 'y', offset: 0.3, m: 'len' },
+        { kind: 'dim', a: 'alarR', b: 'alarL', axis: 'x', offset: -0.16, m: 'alar' },
+        { kind: 'dim', a: 'endoR', b: 'endoL', axis: 'x', offset: 0.12, m: 'icd' },
+        { kind: 'angle', a: 'pronasale', v: 'subnasale', b: 'labraleSup', m: 'nl' },
+        { kind: 'angle', a: 'glabella', v: 'nasion', b: 'pronasale', m: 'nf' },
       ],
       score: 0,
       insight: alar > icd * 1.1 ? 'Alar base wider than the intercanthal line — subtle side contour narrows it visually.' : 'Alar width matches the intercanthal distance — balanced 1:1 nasal base.',
@@ -325,10 +338,11 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
         m('bizyg', 'Bizygomatic width', cheek, 'mm', 140, 14),
         m('lw', 'Face length : width', faceLen / cheek, 'ratio', 1.35, 0.25),
         m('jc', 'Jaw : cheek width', jaw / cheek, 'ratio', 0.86, 0.12),
+        m('len', 'Face length', faceLen, 'mm', cheek * 1.35, 20),
       ],
       visuals: [
-        { kind: 'dim', a: 'zygionR', b: 'zygionL', axis: 'x', offset: -0.04, label: 'Bizygomatic' },
-        { kind: 'dim', a: 'trichion', b: 'menton', axis: 'y', offset: 1.0, label: 'Face length' },
+        { kind: 'dim', a: 'zygionR', b: 'zygionL', axis: 'x', offset: -0.04, m: 'bizyg' },
+        { kind: 'dim', a: 'trichion', b: 'menton', axis: 'y', offset: 1.0, m: 'len' },
       ],
       score: 0,
       insight: jaw / cheek < 0.78 ? 'Cheekbones dominate the width — highlight high on the zygion, soften the jaw.' : 'Cheekbone width carries the face — contour just under the zygion to sculpt.',
@@ -342,11 +356,12 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
         m('ratio', 'Upper : lower lip', lowerLip / Math.max(0.1, upperLip), 'ratio', 1.6, 0.5),
         m('upper', 'Upper vermilion', upperLip, 'mm', 8, 4),
         m('lower', 'Lower vermilion', lowerLip, 'mm', 12, 5),
+        m('ipd', 'Interpupillary (reference)', ipd, 'mm'),
       ],
       visuals: [
-        { kind: 'dim', a: 'cheilionR', b: 'cheilionL', axis: 'x', offset: -0.17, label: 'Mouth width' },
-        { kind: 'chain', ids: ['labraleSup', 'stomion', 'labraleInf'], axis: 'y', offset: 0.42, labels: ['Upper', 'Lower'] },
-        { kind: 'dim', a: 'pupilR', b: 'pupilL', axis: 'x', offset: 0.14, label: 'IPD reference' },
+        { kind: 'dim', a: 'cheilionR', b: 'cheilionL', axis: 'x', offset: -0.17, m: 'width' },
+        { kind: 'chain', ids: ['labraleSup', 'stomion', 'labraleInf'], axis: 'y', offset: 0.42, m: ['upper', 'lower'] },
+        { kind: 'dim', a: 'pupilR', b: 'pupilL', axis: 'x', offset: 0.14, m: 'ipd' },
       ],
       score: 0,
       insight: lowerLip / Math.max(0.1, upperLip) < 1.3 ? 'Full upper lip — define the lower lip centre for a 1:1.6 balance.' : 'Lip balance close to the 1:1.6 golden ratio.',
@@ -357,13 +372,14 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
       label: FEATURES.jaw.label,
       measures: [
         m('bigonial', 'Bigonial width', jaw, 'mm', cheek * 0.86, 12),
-        m('gonial', 'Gonial angle', gonial, '°', 122, 12),
+        m('gonialR', 'Gonial angle R', angleAt(p, 'tragusR', 'gonionR', 'menton'), '°', 122, 12),
+        m('gonialL', 'Gonial angle L', angleAt(p, 'tragusL', 'gonionL', 'menton'), '°', 122, 12),
         m('jc', 'Jaw : cheek ratio', jaw / cheek, 'ratio', 0.86, 0.12),
       ],
       visuals: [
-        { kind: 'dim', a: 'gonionR', b: 'gonionL', axis: 'x', offset: -0.12, label: 'Bigonial' },
-        { kind: 'angle', a: 'tragusR', v: 'gonionR', b: 'menton', label: 'Gonial' },
-        { kind: 'angle', a: 'tragusL', v: 'gonionL', b: 'menton', label: 'Gonial' },
+        { kind: 'dim', a: 'gonionR', b: 'gonionL', axis: 'x', offset: -0.12, m: 'bigonial' },
+        { kind: 'angle', a: 'tragusR', v: 'gonionR', b: 'menton', m: 'gonialR' },
+        { kind: 'angle', a: 'tragusL', v: 'gonionL', b: 'menton', m: 'gonialL' },
       ],
       score: 0,
       insight: gonial < 115 ? 'Square, defined angle — rounded collars and soft layers balance the line.' : gonial > 130 ? 'Soft, oblique jaw — contour below the gonion to sharpen the angle.' : 'Jaw angle in the classic 115–130° band.',
@@ -376,10 +392,12 @@ export function analyse(p: Points): { reports: Record<FeatureId, FeatureReport>;
         m('h', 'Chin height', chinH, 'mm', lower * 0.55, 8),
         m('split', 'Subnasale→stomion : stomion→menton', stomMent / Math.max(0.1, subStom), 'ratio', 2, 0.5),
         m('lower', 'Lower third', lower, 'mm', faceLen / 3, faceLen * 0.08),
+        m('subStom', 'Subnasale → stomion', subStom, 'mm', lower / 3, 6),
+        m('stomMent', 'Stomion → menton', stomMent, 'mm', (lower * 2) / 3, 8),
       ],
       visuals: [
-        { kind: 'chain', ids: ['subnasale', 'stomion', 'menton'], axis: 'y', offset: 0.5, labels: ['1', '2'] },
-        { kind: 'dim', a: 'labraleInf', b: 'menton', axis: 'y', offset: -0.34, label: 'Chin' },
+        { kind: 'chain', ids: ['subnasale', 'stomion', 'menton'], axis: 'y', offset: 0.5, m: ['subStom', 'stomMent'] },
+        { kind: 'dim', a: 'labraleInf', b: 'menton', axis: 'y', offset: -0.34, m: 'h' },
       ],
       score: 0,
       insight: stomMent / Math.max(0.1, subStom) < 1.7 ? 'Short chin segment — a defined pogonion lengthens the lower third.' : 'Lower third follows the classic 1:2 split.',

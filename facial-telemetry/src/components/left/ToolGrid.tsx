@@ -7,12 +7,15 @@ import { useArtboard } from '../../layout/Artboard'
 import { springs, cn } from '../../lib/utils'
 import { Popover } from '../chrome/Popover'
 
-const TOOLS: { id: ToolId; label: string; hint: string; icon: LucideIcon }[] = [
+type Tool = { id: ToolId; label: string; hint: string; icon: LucideIcon }
+
+/** Mutually exclusive viewer modes (radiogroup). Grid order matches the reference: Inspect top-right. */
+const MODES: Tool[] = [
   { id: 'rotate', label: 'Rotate', hint: 'Drag to orbit the head', icon: Rotate3d },
   { id: 'inspect', label: 'Inspect', hint: 'Click a feature to analyse it', icon: ScanFace },
   { id: 'measure', label: 'Measure', hint: 'Show distances between landmarks', icon: Ruler },
-  { id: 'layers', label: 'Layers', hint: 'Proportion overlays', icon: Layers },
 ]
+const LAYERS: Tool = { id: 'layers', label: 'Layers', hint: 'Proportion overlays', icon: Layers }
 
 const OVERLAYS: { id: keyof Overlays; label: string; hint: string }[] = [
   { id: 'thirds', label: 'Facial thirds', hint: 'Hairline · brow · nose · chin' },
@@ -22,17 +25,21 @@ const OVERLAYS: { id: keyof Overlays; label: string; hint: string }[] = [
   { id: 'landmarks', label: 'Landmarks', hint: '32 anatomical points' },
 ]
 
-function Tile({ tool, active, onClick, btnRef }: { tool: (typeof TOOLS)[number]; active: boolean; onClick: () => void; btnRef?: React.Ref<HTMLButtonElement> }) {
+interface TileProps extends Omit<React.ComponentProps<typeof motion.button>, 'ref'> {
+  tool: Tool
+  active: boolean
+  btnRef?: React.Ref<HTMLButtonElement>
+}
+
+function Tile({ tool, active, btnRef, ...aria }: TileProps) {
   const Icon = tool.icon
   return (
     <motion.button
       ref={btnRef}
       type="button"
-      role="radio"
-      aria-checked={active}
       aria-label={`${tool.label} — ${tool.hint}`}
       title={tool.label}
-      onClick={onClick}
+      {...aria}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.9 }}
       transition={springs.snappy}
@@ -74,20 +81,46 @@ export function ToolGrid() {
   const { mode } = useArtboard()
   const [layers, setLayers] = useState(false)
   const layersRef = useRef<HTMLButtonElement>(null)
+  const modeRefs = useRef<(HTMLButtonElement | null)[]>([])
   const compact = mode === 'compact'
 
   return (
     <div className="relative h-full w-full">
-      <div className="grid h-full w-full grid-cols-2 place-items-center gap-3" role="radiogroup" aria-label="Viewer tool">
-        {TOOLS.map((t) => (
-          <Tile
-            key={t.id}
-            tool={t}
-            active={t.id === 'layers' ? layers || tool === 'layers' : tool === t.id}
-            btnRef={t.id === 'layers' ? layersRef : undefined}
-            onClick={() => (t.id === 'layers' ? setLayers((o) => !o) : setTool(t.id))}
-          />
-        ))}
+      <div className="grid h-full w-full grid-cols-2 place-items-center gap-3">
+        {/* `contents` keeps one 2×2 visual grid while Layers (a popover trigger) sits outside the radiogroup */}
+        <div className="contents" role="radiogroup" aria-label="Viewer tool">
+          {MODES.map((t, i) => {
+            const on = tool === t.id
+            return (
+              <Tile
+                key={t.id}
+                tool={t}
+                active={on}
+                btnRef={(el) => void (modeRefs.current[i] = el)}
+                role="radio"
+                aria-checked={on}
+                tabIndex={on || (!MODES.some((m) => m.id === tool) && i === 1) ? 0 : -1}
+                onClick={() => setTool(t.id)}
+                onKeyDown={(e) => {
+                  const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
+                  if (!d) return
+                  e.preventDefault()
+                  const n = (i + d + MODES.length) % MODES.length
+                  setTool(MODES[n].id)
+                  modeRefs.current[n]?.focus()
+                }}
+              />
+            )
+          })}
+        </div>
+        <Tile
+          tool={LAYERS}
+          active={layers}
+          btnRef={layersRef}
+          aria-haspopup="dialog"
+          aria-expanded={layers}
+          onClick={() => setLayers((o) => !o)}
+        />
       </div>
       {!compact && (
         <div className="absolute -left-[58px] top-0 h-full py-1">

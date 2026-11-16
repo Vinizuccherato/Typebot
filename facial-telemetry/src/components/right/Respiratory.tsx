@@ -36,32 +36,33 @@ export function Respiratory() {
       const q = (p + i / 3) % 1
       ctx.beginPath()
       ctx.arc(cx, cy, base + q * 26, 0, Math.PI * 2)
-      ctx.strokeStyle = `rgba(143,240,192,${0.32 * (1 - q)})`
+      ctx.strokeStyle = `rgba(143,240,192,${0.45 * (1 - q)})`
       ctx.lineWidth = 1
       ctx.stroke()
     }
     // breathing core
     const r = base + breath * 5
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r)
-    g.addColorStop(0, 'rgba(143,240,192,0.35)')
-    g.addColorStop(1, 'rgba(143,240,192,0.04)')
+    g.addColorStop(0, 'rgba(143,240,192,0.5)')
+    g.addColorStop(0.7, 'rgba(143,240,192,0.16)')
+    g.addColorStop(1, 'rgba(143,240,192,0.08)')
     ctx.beginPath()
     ctx.arc(cx, cy, r, 0, Math.PI * 2)
     ctx.fillStyle = g
     ctx.fill()
-    ctx.strokeStyle = 'rgba(143,240,192,0.65)'
-    ctx.lineWidth = 1.2
+    ctx.strokeStyle = 'rgba(143,240,192,0.55)'
+    ctx.lineWidth = 1.4
     ctx.stroke()
     // flow line to the right
     ctx.beginPath()
     for (let x = cx + base + 34; x < w; x += 2) {
       const k = (x - cx) / w
-      const y = cy + Math.sin(k * 9 - phase.current * Math.PI * 2) * 6 * (0.4 + breath * 0.6) * (1 - k * 0.6)
+      const y = cy + Math.sin(k * 9 - phase.current * Math.PI * 2) * 6 * (0.55 + breath * 0.45) * (1 - k * 0.35)
       if (x === cx + base + 34) ctx.moveTo(x, y)
       else ctx.lineTo(x, y)
     }
-    ctx.strokeStyle = 'rgba(143,240,192,0.22)'
-    ctx.lineWidth = 1
+    ctx.strokeStyle = 'rgba(143,240,192,0.5)'
+    ctx.lineWidth = 1.3
     ctx.stroke()
   })
 

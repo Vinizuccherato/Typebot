@@ -30,7 +30,7 @@ const SHOTS: Record<FeatureId, { az: number; el: number; k: number }> = {
   forehead: { az: 10, el: 12, k: 0.78 },
   brows: { az: 16, el: 6, k: 0.7 },
   eyes: { az: 0, el: 2, k: 0.66 },
-  nose: { az: 32, el: 2, k: 0.7 },
+  nose: { az: 32, el: 2, k: 0.77 },
   cheekbones: { az: 42, el: 4, k: 0.78 },
   lips: { az: 14, el: -6, k: 0.66 },
   jaw: { az: 58, el: -10, k: 0.85 },

@@ -106,8 +106,9 @@ export function Hemodynamic({ space }: { space: React.RefObject<Group | null> })
 
   const path = useMemo(() => {
     const s = src[0]
-    const elbow = new Vector3(0.74, -0.15, s.z + 0.12)
-    const end = new Vector3(0.86, -0.15, s.z + 0.12)
+    // short leader: the label must clear the Analytic Configuration card (x < 1260 design px)
+    const elbow = new Vector3(0.66, -0.15, s.z + 0.12)
+    const end = new Vector3(0.72, -0.15, s.z + 0.12)
     return { s, elbow, end, line: [s, elbow, end] }
   }, [src])
 
@@ -145,6 +146,10 @@ export function Hemodynamic({ space }: { space: React.RefObject<Group | null> })
 }
 
 export function Callouts({ space }: { space: React.RefObject<Group | null> }) {
+  // A selected feature owns the face: its measurement labels must never sit under the cheek
+  // patch or the leader. Unmounting also replays the reveal when the user goes back to overview.
+  const selected = useFace((s) => s.selected)
+  if (selected) return null
   return (
     <>
       <ScanPatch space={space} />
