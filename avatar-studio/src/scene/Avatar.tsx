@@ -17,7 +17,8 @@ import { headTurn } from './interaction'
 
 const SKIN = '#e9c6b4'
 const HAIR = '#53392a'
-const PIVOT = new Vector3(0, -1.15, -0.85)
+// pivot on the head/body seam so turning the head never shears the neck join
+const PIVOT = new Vector3(0, -1.45, -0.88)
 const MP = { width: 0, round: 0, lips: 0 }
 
 export function Avatar() {
