@@ -15,10 +15,10 @@ import { headTurn } from './interaction'
    neck so drags, pointer-follow and idle sway turn the head naturally; accessories live
    inside the same head-local group. */
 
-const SKIN = '#e9c6b4'
-const HAIR = '#53392a'
+const SKIN = '#f0c8b2'
+const HAIR = '#55392a'
 // pivot on the head/body seam so turning the head never shears the neck join
-const PIVOT = new Vector3(0, -1.45, -0.88)
+const PIVOT = new Vector3(0, -1.3, -0.86)
 const MP = { width: 0, round: 0, lips: 0 }
 
 export function Avatar() {
@@ -34,7 +34,10 @@ export function Avatar() {
     }),
     [], // eslint-disable-line react-hooks/exhaustive-deps
   )
-  const hairU = useMemo(() => ({ uMorph: shared.uMorph, uKeyView: { value: new Vector3() }, uHair: { value: new Color(HAIR) } }), [shared])
+  const hairU = useMemo(
+    () => ({ uMorph: shared.uMorph, uKeyView: { value: new Vector3() }, uHair: { value: new Color(HAIR) }, uBend: { value: new Vector3() }, uPivot: { value: PIVOT.clone() } }),
+    [shared],
+  )
   const mats = useMemo(
     () => ({ head: createSkinMaterial('head', shared), body: createSkinMaterial('body', shared), hair: createHairMaterial(hairU) }),
     [shared, hairU],
@@ -83,11 +86,13 @@ export function Avatar() {
       easing.damp(pivot.current.rotation, 'y', yaw, 0.18, dt)
       easing.damp(pivot.current.rotation, 'x', -pitch, 0.18, dt)
       pivot.current.rotation.z = Math.sin(t * 0.23) * 0.008
+      hairU.uBend.value.set(pivot.current.rotation.x, pivot.current.rotation.y, 0)
     }
     // breathing
     if (body.current) body.current.scale.set(1 + Math.sin(t * 1.3) * 0.004, 1 + Math.sin(t * 1.3) * 0.006, 1)
     // eyes follow the pointer, a little ahead of the head
-    gaze.current.set(p.x * 1.6, p.y * 0.9 - 0.04, 3)
+    // a far focus point keeps the gaze relaxed (no convergence); the pointer steers it
+    gaze.current.set(p.x * 5.5, p.y * 3.2 - 0.04, 12)
   })
 
   if (!geo) return null

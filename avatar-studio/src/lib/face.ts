@@ -10,7 +10,7 @@ import type { Mesh } from 'three'
    Landmarks are given as FRONTAL (x, y) coordinates. The sculptor must place the
    anatomy so each landmark sits on the surface at that (x, y); the analysis layer
    finds the 3D point by raycasting along −Z from z = +2 onto the head mesh.
-   Proportions follow an average adult face (~140 mm bizygomatic, ~187 mm trichion→menton).
+   Avatar studio: stylized adult proportions (rounder face, shorter midface, larger eyes) set by the sculptor.
    ────────────────────────────────────────────────────────────── */
 
 export type LandmarkId =
@@ -25,7 +25,7 @@ export type LandmarkId =
 
 /** R = subject's right = viewer's left (−X). */
 export const LANDMARKS: Record<LandmarkId, { x: number; y: number; label: string }> = {
-  trichion: { x: 0, y: 0.62, label: 'Trichion (hairline)' },
+  trichion: { x: 0, y: 0.6, label: 'Trichion (hairline)' },
   glabella: { x: 0, y: 0.06, label: 'Glabella' },
   nasion: { x: 0, y: 0, label: 'Nasion' },
   browInnerR: { x: -0.18, y: 0.12, label: 'Brow head R' },
@@ -34,29 +34,29 @@ export const LANDMARKS: Record<LandmarkId, { x: number; y: number; label: string
   browPeakL: { x: 0.42, y: 0.2, label: 'Brow arch L' },
   browOuterR: { x: -0.6, y: 0.13, label: 'Brow tail R' },
   browOuterL: { x: 0.6, y: 0.13, label: 'Brow tail L' },
-  endoR: { x: -0.16, y: -0.05, label: 'Inner canthus R' },
-  endoL: { x: 0.16, y: -0.05, label: 'Inner canthus L' },
-  exoR: { x: -0.5, y: -0.03, label: 'Outer canthus R' },
-  exoL: { x: 0.5, y: -0.03, label: 'Outer canthus L' },
-  pupilR: { x: -0.32, y: -0.04, label: 'Pupil R' },
-  pupilL: { x: 0.32, y: -0.04, label: 'Pupil L' },
-  zygionR: { x: -0.7, y: -0.15, label: 'Zygion R' },
-  zygionL: { x: 0.7, y: -0.15, label: 'Zygion L' },
-  pronasale: { x: 0, y: -0.42, label: 'Nose tip' },
-  alarR: { x: -0.18, y: -0.5, label: 'Alar R' },
-  alarL: { x: 0.18, y: -0.5, label: 'Alar L' },
-  subnasale: { x: 0, y: -0.58, label: 'Subnasale' },
-  labraleSup: { x: 0, y: -0.7, label: 'Upper lip' },
-  stomion: { x: 0, y: -0.78, label: 'Stomion' },
-  labraleInf: { x: 0, y: -0.86, label: 'Lower lip' },
-  cheilionR: { x: -0.25, y: -0.78, label: 'Mouth corner R' },
-  cheilionL: { x: 0.25, y: -0.78, label: 'Mouth corner L' },
-  gonionR: { x: -0.6, y: -0.95, label: 'Jaw angle R' },
-  gonionL: { x: 0.6, y: -0.95, label: 'Jaw angle L' },
-  pogonion: { x: 0, y: -1.18, label: 'Pogonion' },
-  menton: { x: 0, y: -1.25, label: 'Menton' },
-  tragusR: { x: -0.78, y: -0.2, label: 'Tragus R' },
-  tragusL: { x: 0.78, y: -0.2, label: 'Tragus L' },
+  endoR: { x: -0.17, y: -0.04, label: 'Inner canthus R' },
+  endoL: { x: 0.17, y: -0.04, label: 'Inner canthus L' },
+  exoR: { x: -0.53, y: -0.02, label: 'Outer canthus R' },
+  exoL: { x: 0.53, y: -0.02, label: 'Outer canthus L' },
+  pupilR: { x: -0.345, y: -0.035, label: 'Pupil R' },
+  pupilL: { x: 0.345, y: -0.035, label: 'Pupil L' },
+  zygionR: { x: -0.66, y: -0.15, label: 'Zygion R' },
+  zygionL: { x: 0.66, y: -0.15, label: 'Zygion L' },
+  pronasale: { x: 0, y: -0.35, label: 'Nose tip' },
+  alarR: { x: -0.11, y: -0.41, label: 'Alar R' },
+  alarL: { x: 0.11, y: -0.41, label: 'Alar L' },
+  subnasale: { x: 0, y: -0.47, label: 'Subnasale' },
+  labraleSup: { x: 0, y: -0.6, label: 'Upper lip' },
+  stomion: { x: 0, y: -0.655, label: 'Stomion' },
+  labraleInf: { x: 0, y: -0.73, label: 'Lower lip' },
+  cheilionR: { x: -0.21, y: -0.645, label: 'Mouth corner R' },
+  cheilionL: { x: 0.21, y: -0.645, label: 'Mouth corner L' },
+  gonionR: { x: -0.55, y: -0.82, label: 'Jaw angle R' },
+  gonionL: { x: 0.55, y: -0.82, label: 'Jaw angle L' },
+  pogonion: { x: 0, y: -1.06, label: 'Pogonion' },
+  menton: { x: 0, y: -1.12, label: 'Menton' },
+  tragusR: { x: -0.76, y: -0.15, label: 'Tragus R' },
+  tragusL: { x: 0.76, y: -0.15, label: 'Tragus L' },
 }
 
 export type FeatureId = 'forehead' | 'brows' | 'eyes' | 'nose' | 'cheekbones' | 'lips' | 'jaw' | 'chin'

@@ -36,10 +36,10 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
     color: '#ffffff',
     roughness: 0.52,
     metalness: 0,
-    sheen: 0.55,
-    sheenRoughness: 0.55,
-    sheenColor: new Color('#ff9a86'),
-    clearcoat: 0.08,
+    sheen: 0.75,
+    sheenRoughness: 0.6,
+    sheenColor: new Color('#ff9f88'),
+    clearcoat: 0.06,
     clearcoatRoughness: 0.5,
   })
   m.onBeforeCompile = (sh) => {
@@ -78,33 +78,37 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
         float ax = abs(P.x);
         vec3 skin = uSkin;
         // gentle tonal variation + pores
-        skin *= 0.96 + 0.06 * vnoise(P * 18.0) + 0.02 * vnoise(P * 140.0);
+        skin *= 0.975 + 0.035 * vnoise(P * 14.0) + 0.012 * vnoise(P * 140.0);
         ${
           kind === 'head'
             ? `
         vec2 q = vec2(ax, P.y);
         // blush: apples of the cheeks, nose tip, a touch on the chin
-        float blush = blob(q, vec2(0.36, -0.3), vec2(0.2, 0.15)) * 0.9 + blob(q, vec2(0.0, -0.43), vec2(0.09, 0.08)) * 0.7 + blob(q, vec2(0.0, -1.1), vec2(0.14, 0.09)) * 0.35;
-        skin = mix(skin, skin * vec3(1.02, 0.8, 0.78), clamp(blush, 0.0, 1.0) * 0.36);
+        float blush = blob(q, vec2(0.38, -0.3), vec2(0.21, 0.15)) * 0.9 + blob(q, vec2(0.0, -0.36), vec2(0.08, 0.07)) * 0.6 + blob(q, vec2(0.0, -1.0), vec2(0.13, 0.08)) * 0.3;
+        skin = mix(skin, skin * vec3(1.02, 0.83, 0.8), clamp(blush, 0.0, 1.0) * 0.3);
         // freckles across the nose bridge and upper cheeks
-        float fz = blob(q, vec2(0.16, -0.24), vec2(0.36, 0.17));
+        float fz = blob(q, vec2(0.16, -0.2), vec2(0.34, 0.15));
         vec3 fc = P * 62.0;
         float speck = smoothstep(0.82, 0.92, vnoise(fc)) * smoothstep(0.35, 0.7, vnoise(P * 9.0));
-        skin = mix(skin, skin * vec3(0.8, 0.64, 0.56), speck * fz * 0.65);
+        skin = mix(skin, skin * vec3(0.86, 0.72, 0.64), speck * fz * 0.25);
         // lips
-        float upper = blob(vec2(P.x, P.y), vec2(0.0, -0.715), vec2(0.21, 0.05));
-        float lower = blob(vec2(P.x, P.y), vec2(0.0, -0.845), vec2(0.19, 0.055));
+        float upper = blob(vec2(P.x, P.y), vec2(0.0, -0.6), vec2(0.17, 0.042));
+        float lower = blob(vec2(P.x, P.y), vec2(0.0, -0.712), vec2(0.15, 0.05));
         float lip = clamp(upper + lower, 0.0, 1.0) * smoothstep(-0.2, 0.0, P.z);
-        skin = mix(skin, vec3(0.8, 0.5, 0.49), lip * 0.62);
+        skin = mix(skin, vec3(0.84, 0.55, 0.52), lip * 0.55);
         // hair casts soft occlusion onto the temples and cheeks
         skin *= 1.0 - 0.26 * smoothstep(0.42, 0.66, ax) * smoothstep(-1.1, -0.6, P.y);
         skin *= 1.0 - 0.18 * smoothstep(0.42, 0.58, P.y) * smoothstep(0.15, 0.55, ax);
+        // mouth line, painted (crisper than geometry): corners lift slightly
+        float mY = -0.655 + 0.32 * sq2(P.x) ;
+        float mouth = exp(-sq2((P.y - mY) / 0.006)) * (1.0 - smoothstep(0.15, 0.2, ax)) * smoothstep(-0.1, 0.05, P.z);
+        skin = mix(skin, vec3(0.45, 0.25, 0.25), mouth * 0.75);
         // soft under-eye and socket shading
-        skin *= 1.0 - 0.12 * blob(q, vec2(0.32, -0.16), vec2(0.15, 0.05));
+        skin *= 1.0 - 0.07 * blob(q, vec2(0.345, -0.17), vec2(0.15, 0.05));
         `
             : `
         // crew-neck tee below the collar line
-        float yc = P.z > -0.9 ? -1.98 - 0.36 * max(0.0, 1.0 - sq2(P.x / 0.62)) : -1.86;
+        float yc = P.z > -0.9 ? -1.72 - 0.3 * max(0.0, 1.0 - sq2(P.x / 0.6)) : -1.6;
         float tee = smoothstep(yc + 0.012, yc - 0.012, P.y);
         float rib = smoothstep(0.05, 0.0, abs(P.y - (yc - 0.04)));
         vec3 fabric = uShirt * (0.94 + 0.06 * vnoise(P * vec3(60.0, 8.0, 60.0)));
@@ -115,20 +119,20 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
         // creases and occlusion
         skin *= 1.0 - vCav * 0.55;
         diffuseColor.rgb = skin;
-        ${kind === 'head' ? 'if (vLocal.y < -1.46) discard; // hide the cut cap: the body mesh carries the neck below' : ''}`,
+        ${kind === 'head' ? 'if (vLocal.y < -1.31) discard; // hide the cut cap: the body mesh carries the neck below' : ''}`,
       )
     if (kind === 'body') {
       sh.fragmentShader = sh.fragmentShader.replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
-        { float yc2 = vLocal.z > -0.9 ? -1.98 - 0.36 * max(0.0, 1.0 - sq2(vLocal.x / 0.62)) : -1.86;
+        { float yc2 = vLocal.z > -0.9 ? -1.72 - 0.3 * max(0.0, 1.0 - sq2(vLocal.x / 0.6)) : -1.6;
           roughnessFactor = mix(roughnessFactor, 0.92, smoothstep(yc2 + 0.012, yc2 - 0.012, vLocal.y)); }`,
       )
     } else {
       sh.fragmentShader = sh.fragmentShader.replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
-        { float lipR = clamp(blob(vec2(vLocal.x, vLocal.y), vec2(0.0, -0.78), vec2(0.22, 0.1)), 0.0, 1.0);
+        { float lipR = clamp(blob(vec2(vLocal.x, vLocal.y), vec2(0.0, -0.655), vec2(0.18, 0.09)), 0.0, 1.0);
           roughnessFactor = mix(roughnessFactor, 0.32, lipR * 0.8); }`,
       )
     }
@@ -139,6 +143,9 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
 
 export interface HairUniforms {
   uMorph: { value: Vector3 }
+  /** head rotation (x = pitch rad, y = yaw rad) to counter-rotate the lower hair */
+  uBend: { value: Vector3 }
+  uPivot: { value: Vector3 }
   uKeyView: { value: Vector3 }
   uHair: { value: Color }
 }
@@ -147,21 +154,26 @@ export interface HairUniforms {
 export function createHairMaterial(u: HairUniforms) {
   const m = new MeshPhysicalMaterial({
     color: '#ffffff',
-    roughness: 0.62,
+    roughness: 0.74,
     metalness: 0,
-    sheen: 0.25,
+    sheen: 0.12,
     sheenRoughness: 0.45,
     sheenColor: new Color('#a07a5c'),
-    envMapIntensity: 0.35,
+    envMapIntensity: 0.2,
   })
+  m.alphaToCoverage = true
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uMorph = u.uMorph
     sh.uniforms.uKeyView = u.uKeyView
     sh.uniforms.uHair = u.uHair
+    sh.uniforms.uBend = u.uBend
+    sh.uniforms.uPivot = u.uPivot
     sh.vertexShader = sh.vertexShader
       .replace(
         '#include <common>',
         `#include <common>
+        uniform vec3 uBend;
+        uniform vec3 uPivot;
         ${MORPH_GLSL}
         varying vec3 vLocal;
         varying vec3 vTanView;`,
@@ -169,6 +181,14 @@ export function createHairMaterial(u: HairUniforms) {
       .replace(
         '#include <begin_vertex>',
         `vec3 transformed = avatarMorph(position);
+        // below the jaw, the hair follows the body: undo the head turn progressively
+        float bw = 1.0 - smoothstep(-2.3, -1.15, position.y);
+        vec3 rp = transformed - uPivot;
+        float cy = cos(-uBend.y * bw), sy = sin(-uBend.y * bw);
+        rp = vec3(cy * rp.x + sy * rp.z, rp.y, -sy * rp.x + cy * rp.z);
+        float cx = cos(-uBend.x * bw), sx = sin(-uBend.x * bw);
+        rp = vec3(rp.x, cx * rp.y - sx * rp.z, sx * rp.y + cx * rp.z);
+        transformed = rp + uPivot;
         vLocal = position;
         // strand direction: radiating from the centre part on the crown, falling straight below
         vec3 down = vec3(0.0, -1.0, 0.0);
@@ -212,7 +232,13 @@ export function createHairMaterial(u: HairUniforms) {
           float s1 = pow(max(0.0, sqrt(max(0.0, 1.0 - sq2(th - 0.12)))), 90.0);
           float s2 = pow(max(0.0, sqrt(max(0.0, 1.0 - sq2(th + 0.18)))), 24.0);
           float shimmer = 0.6 + 0.4 * vnoise(vec3(vLocal.x * 120.0, vLocal.y * 2.0, vLocal.z * 120.0));
-          totalEmissiveRadiance += (vec3(1.0, 0.93, 0.86) * s1 * 0.28 + uHair * 1.6 * s2 * 0.18) * shimmer;
+          totalEmissiveRadiance += (vec3(1.0, 0.93, 0.86) * s1 * 0.26 + uHair * 1.6 * s2 * 0.14) * shimmer;
+          // soft outer rim + tapered tips (alpha-to-coverage with MSAA)
+          float ndv = abs(dot(normal, V));
+          float rimA = max(smoothstep(0.015, 0.14, ndv), smoothstep(0.05, 0.4, vLocal.y)); // crown stays solid
+          float tipA = smoothstep(-4.0, -3.35, vLocal.y);
+          float fray = vnoise(vec3(vLocal.x * 160.0, vLocal.y * 4.0, vLocal.z * 160.0));
+          diffuseColor.a = clamp(rimA * tipA + (fray - 0.5) * 0.25 * (1.0 - rimA * tipA), 0.0, 1.0);
         }`,
       )
   }
@@ -255,7 +281,7 @@ export function createEyeMaterial(u: EyeUniforms) {
         vec3 p = normalize(vObj);
         float a = acos(clamp(p.z, -1.0, 1.0));
         float th = atan(p.y, p.x);
-        float ri = 0.6;
+        float ri = 0.64;
         vec3 sclera = vec3(0.95, 0.93, 0.91) * (1.0 - 0.18 * smoothstep(0.9, 1.6, a));
         sclera = mix(sclera, vec3(0.93, 0.78, 0.76), 0.25 * smoothstep(0.85, 1.5, a) * vnoise(p * 30.0));
         float r = a / ri;

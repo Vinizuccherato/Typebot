@@ -13,6 +13,7 @@ import { EyeForm } from './components/right/EyeForm'
 import { EyeColor } from './components/right/EyeColor'
 import { BrowForm } from './components/right/BrowForm'
 import { BrowColor } from './components/right/BrowColor'
+import { AvatarLoader } from './layout/AvatarLoader'
 
 /* Layout map — design px on the 1440×1020 reference (see SPEC.md). The avatar is centred
    at x≈715 inside the frame; the right column starts at the frame divider (x≈995). */
@@ -99,6 +100,7 @@ function Shell() {
     <>
       {mode === 'desktop' ? <DesktopLayout /> : <CompactLayout />}
       <AvatarCanvas />
+      <AvatarLoader />
       <Toasts />
     </>
   )

@@ -38,20 +38,20 @@ export function morphPoint(p: Vector3, m: MorphParams, out: Vector3): Vector3 {
   const y = p.y
   const z = p.z
   const ax = Math.abs(x)
-  const neck = smooth(-1.4, -1.1, y)
+  const neck = smooth(-1.3, -1.0, y)
   const front = smooth(-1.35, -0.55, z)
   // 1) face breadth: strongest across the cheeks
   const wMask = Math.exp(-(((y + 0.25) / 0.78) ** 2)) * neck * (0.35 + 0.65 * front)
   let nx = x * (1 + 0.1 * m.width * wMask)
   // 2) jaw roundness: soft (+) narrows the gonial corners toward a rounded chin, angular (−) squares them
-  const jaw = smooth(-0.5, -0.95, y) * smooth(0.12, 0.52, ax) * neck
+  const jaw = smooth(-0.45, -0.85, y) * smooth(0.12, 0.5, ax) * neck
   nx *= 1 - 0.085 * m.round * jaw
-  const chin = Math.exp(-((x / 0.3) ** 2 + ((y + 1.12) / 0.18) ** 2)) * neck
+  const chin = Math.exp(-((x / 0.28) ** 2 + ((y + 1.03) / 0.16) ** 2)) * neck
   let ny = y - 0.035 * m.round * chin
   // 3) lip fullness: lips push forward and away from the stomion
-  const lip = Math.exp(-((x / 0.25) ** 2 + ((y + 0.78) / 0.11) ** 2)) * smooth(-0.35, -0.05, z)
-  const nz = z + 0.04 * m.lips * lip
-  ny += 0.022 * m.lips * lip * Math.tanh((y + 0.78) / 0.03)
+  const lip = Math.exp(-((x / 0.21) ** 2 + ((y + 0.66) / 0.1) ** 2)) * smooth(-0.25, 0.0, z)
+  const nz = z + 0.032 * m.lips * lip
+  ny += 0.02 * m.lips * lip * Math.tanh((y + 0.655) / 0.03)
   return out.set(nx, ny, nz)
 }
 
@@ -61,17 +61,17 @@ export const MORPH_GLSL = /* glsl */ `
   float sq(float v) { return v * v; }
   vec3 avatarMorph(vec3 p) {
     float ax = abs(p.x);
-    float neck = smoothstep(-1.4, -1.1, p.y);
+    float neck = smoothstep(-1.3, -1.0, p.y);
     float front = smoothstep(-1.35, -0.55, p.z);
     float wMask = exp(-sq((p.y + 0.25) / 0.78)) * neck * (0.35 + 0.65 * front);
     float nx = p.x * (1.0 + 0.1 * uMorph.x * wMask);
-    float jaw = (1.0 - smoothstep(-0.95, -0.5, p.y)) * smoothstep(0.12, 0.52, ax) * neck;
+    float jaw = (1.0 - smoothstep(-0.85, -0.45, p.y)) * smoothstep(0.12, 0.5, ax) * neck;
     nx *= 1.0 - 0.085 * uMorph.y * jaw;
-    float chin = exp(-(sq(p.x / 0.3) + sq((p.y + 1.12) / 0.18))) * neck;
+    float chin = exp(-(sq(p.x / 0.28) + sq((p.y + 1.03) / 0.16))) * neck;
     float ny = p.y - 0.035 * uMorph.y * chin;
-    float lip = exp(-(sq(p.x / 0.25) + sq((p.y + 0.78) / 0.11))) * smoothstep(-0.35, -0.05, p.z);
-    float nz = p.z + 0.04 * uMorph.z * lip;
-    ny += 0.022 * uMorph.z * lip * tanh((p.y + 0.78) / 0.03);
+    float lip = exp(-(sq(p.x / 0.21) + sq((p.y + 0.66) / 0.1))) * smoothstep(-0.25, 0.0, p.z);
+    float nz = p.z + 0.032 * uMorph.z * lip;
+    ny += 0.02 * uMorph.z * lip * tanh((p.y + 0.655) / 0.03);
     return vec3(nx, ny, nz);
   }
 `

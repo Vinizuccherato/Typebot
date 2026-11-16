@@ -12,18 +12,18 @@ import { morphParams, morphPoint, type MorphParams } from './morph'
 
 /** Aperture recipes on the unit shell: half-width, upper/lower height (rad), canthal tilt, cornerness, hood. */
 export const EYE_SHAPES: Record<EyeFormId, { w: number; up: number; lo: number; tilt: number; pow: number; hood: number }> = {
-  almond: { w: 1.0, up: 0.31, lo: 0.25, tilt: 0.07, pow: 1.55, hood: 0 },
-  round: { w: 0.96, up: 0.38, lo: 0.29, tilt: 0.0, pow: 2.4, hood: 0 },
-  hooded: { w: 1.0, up: 0.27, lo: 0.25, tilt: 0.02, pow: 1.8, hood: 1 },
-  monolid: { w: 1.02, up: 0.25, lo: 0.2, tilt: 0.1, pow: 1.5, hood: 2 },
-  upturned: { w: 1.0, up: 0.33, lo: 0.24, tilt: 0.22, pow: 1.7, hood: 0 },
-  downturned: { w: 1.0, up: 0.33, lo: 0.26, tilt: -0.17, pow: 1.7, hood: 0 },
+  almond: { w: 1.0, up: 0.36, lo: 0.28, tilt: 0.07, pow: 1.55, hood: 0 },
+  round: { w: 0.98, up: 0.44, lo: 0.33, tilt: 0.0, pow: 2.4, hood: 0 },
+  hooded: { w: 1.0, up: 0.31, lo: 0.28, tilt: 0.02, pow: 1.8, hood: 1 },
+  monolid: { w: 1.02, up: 0.29, lo: 0.23, tilt: 0.1, pow: 1.5, hood: 2 },
+  upturned: { w: 1.0, up: 0.37, lo: 0.27, tilt: 0.22, pow: 1.7, hood: 0 },
+  downturned: { w: 1.0, up: 0.37, lo: 0.29, tilt: -0.17, pow: 1.7, hood: 0 },
 }
 
 /** Eye centre in head-local units (behind the pupil landmark, inside the socket). */
-export const EYE_CENTRE = { x: 0.32, y: -0.035, z: -0.205 }
-const EYE_R = 0.118
-const SHELL = new Vector3(0.168, 0.126, 0.132)
+export const EYE_CENTRE = { x: 0.345, y: -0.035, z: -0.14 }
+const EYE_R = 0.135
+const SHELL = new Vector3(0.19, 0.145, 0.15)
 
 interface Props {
   look: Look
@@ -89,7 +89,7 @@ export function Eyes({ look, skin, gaze }: Props) {
         b.next = t + (Math.random() < 0.15 ? 0.25 : 3 + Math.random() * 3)
       }
     }
-    const open = (0.7 + 0.38 * look.strength.eyes) * lid
+    const open = (0.82 + 0.4 * look.strength.eyes) * lid
     const size = 0.9 + 0.22 * look.face.eyes
 
     morphParams(look.face, look.strength.face, tmp.m)
@@ -109,7 +109,8 @@ export function Eyes({ look, skin, gaze }: Props) {
       if (ball && g) {
         // look at the gaze target (clamped)
         tmp.d.copy(gaze.current).sub(g.position)
-        const yaw = Math.max(-0.35, Math.min(0.35, Math.atan2(tmp.d.x, tmp.d.z)))
+        // the inner canthus sits deeper than the outer one, so a tiny outward rest angle reads as straight ahead
+        const yaw = Math.max(-0.35, Math.min(0.35, Math.atan2(tmp.d.x, tmp.d.z) + side * 0.075))
         const pitch = Math.max(-0.25, Math.min(0.25, Math.atan2(tmp.d.y, Math.hypot(tmp.d.x, tmp.d.z))))
         easing.damp(ball.rotation, 'y', yaw, 0.08, dt)
         easing.damp(ball.rotation, 'x', -pitch, 0.08, dt)
