@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/outfit';
+
+/* ──────────────────────────────────────────────────────────────
+   Appearance studio tokens — lavender-grey studio, warm blush glow
+   behind the avatar, frosted white glass, one electric-blue accent.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: 'Outfit Variable', ui-sans-serif, system-ui, -apple-system, 'SF Pro Display', sans-serif;
+  --color-azure: #3c6cf6; /* accent: Save, active states, slider fill */
+  --color-azure-deep: #2a55dd;
+  --color-ink: #262a36;
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: light;
+  --bg-a: #e7cfcf; /* blush glow behind the avatar */
+  --bg-b: #c9cbdb;
+  --bg-c: #b3b7ca;
+  --text: #262a36;
+  --text-2: rgb(38 42 54 / 0.66);
+  --text-3: rgb(38 42 54 / 0.46);
+  --text-4: rgb(38 42 54 / 0.28);
+  --on-glass: #ffffff;
+  --azure: #3c6cf6;
+  --s: 1;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(42% 48% at 47% 62%, rgb(240 190 182 / 0.75) 0%, transparent 70%),
+    radial-gradient(120% 100% at 50% 40%, var(--bg-b) 0%, var(--bg-c) 100%);
+  background-color: var(--bg-b);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.compact {
+  overflow-y: auto;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Unlayered on purpose: utilities must not strip it from controls. */
+:where(button, a, [role='slider'], [role='switch'], [role='radio'], [role='option'], [role='tab'], [tabindex='0']):focus-visible {
+  outline: 2px solid var(--azure);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Liquid glass, light. tinted fill → backdrop blur → hairline refraction edge
+     (masked gradient) → inner bevel → pointer-following specular (--mx/--my). */
+  .glass {
+    --g-fill-a: rgb(255 255 255 / 0.3);
+    --g-fill-b: rgb(255 255 255 / 0.12);
+    --g-blur: 20px;
+    --g-sat: 150%;
+    --g-edge-a: rgb(255 255 255 / 0.95);
+    --g-edge-b: rgb(255 255 255 / 0.35);
+    --g-edge-c: rgb(255 255 255 / 0.15);
+    --g-edge-d: rgb(255 255 255 / 0.7);
+    --g-shadow: 0 20px 50px -30px rgb(60 64 90 / 0.35);
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.6);
+    --g-spec: rgb(255 255 255 / 0.55);
+
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(150deg, var(--g-fill-a) 0%, var(--g-fill-b) 100%);
+    -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat));
+    backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow: var(--g-bevel), var(--g-shadow);
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(145deg, var(--g-edge-a) 0%, var(--g-edge-b) 32%, var(--g-edge-c) 62%, var(--g-edge-d) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--spec-o, 0);
+    background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), var(--g-spec) 0%, transparent 55%);
+    transition: opacity 0.5s var(--ease-glass);
+    mix-blend-mode: soft-light;
+  }
+  /* frost — panels (Face Form box, popovers) */
+  .glass-frost {
+  }
+  /* smoke — the big frame: outline-only window over the avatar */
+  .glass-smoke {
+    --g-fill-a: rgb(255 255 255 / 0.06);
+    --g-fill-b: rgb(255 255 255 / 0.02);
+    --g-blur: 0px;
+    --g-shadow: none;
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.25);
+  }
+  /* pill — small round controls */
+  .glass-pill {
+    --g-fill-a: rgb(255 255 255 / 0.4);
+    --g-fill-b: rgb(255 255 255 / 0.2);
+    --g-blur: 14px;
+    --g-shadow: 0 6px 16px -10px rgb(60 64 90 / 0.4);
+  }
+  /* well — recessed thumbnail/track wells */
+  .glass-well {
+    --g-fill-a: rgb(120 124 150 / 0.16);
+    --g-fill-b: rgb(120 124 150 / 0.08);
+    --g-shadow: none;
+    --g-bevel: inset 0 1px 2px rgb(40 44 70 / 0.12);
+  }
+  /* ink — primary blue (Save, active rail item) */
+  .glass-ink {
+    --g-fill-a: rgb(74 122 255 / 1);
+    --g-fill-b: rgb(52 96 238 / 1);
+    --g-blur: 0px;
+    --g-edge-a: rgb(255 255 255 / 0.55);
+    --g-edge-b: rgb(255 255 255 / 0.12);
+    --g-edge-c: rgb(255 255 255 / 0.04);
+    --g-edge-d: rgb(255 255 255 / 0.25);
+    --g-shadow: 0 12px 26px -12px rgb(60 108 246 / 0.65);
+    --g-bevel: inset 0 1px 0 rgb(255 255 255 / 0.3);
+    color: #fff;
+  }
+  .glass :is(.glass-pill, .glass-well, .glass-ink) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .label {
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--on-glass);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
