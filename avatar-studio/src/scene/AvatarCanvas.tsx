@@ -30,13 +30,13 @@ export function AvatarCanvas() {
           onIncline={() => setDpr((d) => Math.min(2, d + 0.25))}
         />
         <CameraRig />
-        <hemisphereLight args={['#e6e2f6', '#a99ca8', 0.55]} />
-        <directionalLight position={[-3.2, 2.6, 5]} intensity={2.1} color="#ffd9cf" />
+        <hemisphereLight args={['#e6e2f6', '#9c8f9c', 0.38]} />
+        <directionalLight position={[-4.2, 2.8, 3.6]} intensity={2.5} color="#ffe4dc" />
         <directionalLight position={[3.6, 1.2, 3.4]} intensity={0.75} color="#c9cdf2" />
         <directionalLight position={[0.5, 3.5, -4]} intensity={1.1} color="#fff1ea" />
         <Suspense fallback={null}>
           <Environment resolution={128} frames={1}>
-            <Lightformer form="rect" intensity={2.4} color="#fff3ee" position={[0, 1.5, 6]} scale={[5, 3, 1]} />
+            <Lightformer form="rect" intensity={1.3} color="#fff3ee" position={[-1.5, 2, 6]} scale={[4, 2.5, 1]} />
             <Lightformer form="rect" intensity={1.6} color="#ffc6b8" position={[-5, 0.5, 2]} rotation-y={Math.PI / 2.4} scale={[3, 5, 1]} />
             <Lightformer form="rect" intensity={1.1} color="#c8ccf5" position={[5, 0.5, 2]} rotation-y={-Math.PI / 2.4} scale={[3, 5, 1]} />
             <Lightformer form="ring" intensity={2} color="#ffffff" position={[-1.2, 1.6, 5]} scale={0.6} />

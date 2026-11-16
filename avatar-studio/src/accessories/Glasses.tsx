@@ -87,10 +87,11 @@ export function Glasses({ style, weight, faded }: { style: GlassesId; weight: nu
       fitRev.current = anchors.rev
       // lenses on the pupils, bridge resting on the nasion
       const ipd = p.pupilL.distanceTo(p.pupilR)
-      const s = ipd / CANON_IPD
+      const s = (ipd / CANON_IPD) * 0.95
       _mid.addVectors(p.pupilL, p.pupilR).multiplyScalar(0.5)
       const z = Math.max(p.nasion.z + 0.045, p.pupilL.z + 0.17)
-      g.position.set(_mid.x, _mid.y + 0.01, z)
+      // pupils sit a touch above the optical centre, as with real frames
+      g.position.set(_mid.x, _mid.y - 0.018, z)
       g.rotation.set(-0.07, 0, Math.atan2(p.pupilL.y - p.pupilR.y, p.pupilL.x - p.pupilR.x))
       g.scale.setScalar(s)
       g.updateMatrix()
@@ -112,7 +113,7 @@ export function Glasses({ style, weight, faded }: { style: GlassesId; weight: nu
     // spring scale + fade
     const e = pop.current
     const k = 0.9 + 0.1 * e
-    g.scale.setScalar((p.pupilL.distanceTo(p.pupilR) / CANON_IPD) * k)
+    g.scale.setScalar((p.pupilL.distanceTo(p.pupilR) / CANON_IPD) * 0.95 * k)
     const fade = e * (faded ? 0.45 : 1)
     setOpacity([b.frameMat, b.metalMat], fade)
     b.lensMat.opacity = ((b.lensMat.userData.baseOpacity as number | undefined) ?? (b.lensMat.userData.baseOpacity = b.lensMat.opacity)) * fade

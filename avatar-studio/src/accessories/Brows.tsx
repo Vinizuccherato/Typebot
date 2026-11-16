@@ -38,7 +38,7 @@ export const BROW_PROFILES: Record<BrowFormId, Profile> = {
 }
 
 const KEYS = Object.keys(BROW_PROFILES['straight']) as (keyof Profile)[]
-const N = 340 // strands per side (max)
+const N = 480 // strands per side (max)
 
 /** Tapered, slightly curved strand: base at y=0, tip at y=1, width 1 at the base. */
 function strandGeometry() {
@@ -108,7 +108,7 @@ function writeSide(mesh: InstancedMesh, side: 1 | -1, P: Profile, thick: number)
     browNormal(x, y, _n)
     _dir.addScaledVector(_n, -_dir.dot(_n)).normalize()
     _side.crossVectors(_n, _dir).normalize()
-    const len = (0.048 + 0.03 * jitter) * (t < 0.2 ? 0.8 : 1) * (0.85 + thick * 0.3)
+    const len = (0.054 + 0.032 * jitter) * (t < 0.2 ? 0.8 : 1) * (0.85 + thick * 0.3)
     _p.set(x, y, browZ(x, y) + 0.002)
     _q.copy(_p).addScaledVector(_dir, len).addScaledVector(_n, 0.004)
     morph(_p, _root)
@@ -117,7 +117,7 @@ function writeSide(mesh: InstancedMesh, side: 1 | -1, P: Profile, thick: number)
     _dir.subVectors(_tip, _root)
     const L = _dir.length()
     _dir.divideScalar(L || 1)
-    const w = 0.0056 * (0.8 + 0.4 * jitter) * (t < 0.15 ? 1.15 : 1)
+    const w = 0.0064 * (0.8 + 0.4 * jitter) * (t < 0.15 ? 1.15 : 1)
     _m.makeBasis(_side.multiplyScalar(w), _dir.multiplyScalar(L), _n)
     _m.setPosition(_root)
     mesh.setMatrixAt(k, _m)

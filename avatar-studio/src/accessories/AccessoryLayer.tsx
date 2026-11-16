@@ -22,7 +22,8 @@ function AnchorSync({ space }: { space: React.RefObject<Group | null> }) {
     syncBase(space.current)
     // the face form in effect right now (compare shows the saved one)
     const s = useStudio.getState()
-    syncMorph((s.comparing ? s.saved : s.look).face)
+    const l = s.comparing ? s.saved : s.look
+    syncMorph(l.face, l.strength.face)
   })
   return null
 }

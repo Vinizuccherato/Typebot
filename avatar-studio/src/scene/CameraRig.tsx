@@ -16,10 +16,11 @@ const PPU = 174.5 // design px per head unit at zoom 1
 const ANCHOR = { x: 715, y: 382 } // where the nasion sits in design px
 
 const FOCUS_REGION: Record<RegionId, { k: number; y: number }> = {
-  face: { k: 1, y: 0 },
-  eyes: { k: 1.26, y: 0.07 },
-  brows: { k: 1.26, y: 0.12 },
-  accessories: { k: 1.14, y: 0.0 },
+  // the reference frames the head this way with the eye region active
+  eyes: { k: 1, y: 0 },
+  face: { k: 0.94, y: -0.05 },
+  brows: { k: 1.08, y: 0.08 },
+  accessories: { k: 1.04, y: 0.02 },
 }
 const FOCUS_NAV: Record<Exclude<NavId, 'head'>, { k: number; y: number }> = {
   body: { k: 0.64, y: -0.95 },

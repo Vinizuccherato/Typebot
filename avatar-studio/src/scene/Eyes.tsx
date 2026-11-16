@@ -12,8 +12,8 @@ import { morphParams, morphPoint, type MorphParams } from './morph'
 
 /** Aperture recipes on the unit shell: half-width, upper/lower height (rad), canthal tilt, cornerness, hood. */
 export const EYE_SHAPES: Record<EyeFormId, { w: number; up: number; lo: number; tilt: number; pow: number; hood: number }> = {
-  almond: { w: 1.0, up: 0.34, lo: 0.25, tilt: 0.07, pow: 1.55, hood: 0 },
-  round: { w: 0.96, up: 0.44, lo: 0.33, tilt: 0.0, pow: 2.4, hood: 0 },
+  almond: { w: 1.0, up: 0.31, lo: 0.25, tilt: 0.07, pow: 1.55, hood: 0 },
+  round: { w: 0.96, up: 0.38, lo: 0.29, tilt: 0.0, pow: 2.4, hood: 0 },
   hooded: { w: 1.0, up: 0.27, lo: 0.25, tilt: 0.02, pow: 1.8, hood: 1 },
   monolid: { w: 1.02, up: 0.25, lo: 0.2, tilt: 0.1, pow: 1.5, hood: 2 },
   upturned: { w: 1.0, up: 0.33, lo: 0.24, tilt: 0.22, pow: 1.7, hood: 0 },
@@ -35,7 +35,7 @@ interface Props {
 export function Eyes({ look, skin, gaze }: Props) {
   const eyeGeo = useMemo(() => new SphereGeometry(1, 64, 48).rotateX(Math.PI / 2), [])
   const shellGeo = useMemo(() => new SphereGeometry(1, 72, 48).rotateX(Math.PI / 2), [])
-  const iris = useMemo(() => ({ uIris: { value: new Color(look.eyeColor) }, uPupil: { value: 0.19 } }), []) // eslint-disable-line react-hooks/exhaustive-deps
+  const iris = useMemo(() => ({ uIris: { value: new Color(look.eyeColor) }, uPupil: { value: 0.22 } }), []) // eslint-disable-line react-hooks/exhaustive-deps
   const eyeMat = useMemo(() => createEyeMaterial(iris), [iris])
 
   const shape = EYE_SHAPES[look.eyeForm]
@@ -89,7 +89,7 @@ export function Eyes({ look, skin, gaze }: Props) {
         b.next = t + (Math.random() < 0.15 ? 0.25 : 3 + Math.random() * 3)
       }
     }
-    const open = (0.78 + 0.42 * look.strength.eyes) * lid
+    const open = (0.7 + 0.38 * look.strength.eyes) * lid
     const size = 0.9 + 0.22 * look.face.eyes
 
     morphParams(look.face, look.strength.face, tmp.m)

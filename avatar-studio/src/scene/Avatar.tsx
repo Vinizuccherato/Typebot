@@ -15,8 +15,8 @@ import { headTurn } from './interaction'
    neck so drags, pointer-follow and idle sway turn the head naturally; accessories live
    inside the same head-local group. */
 
-const SKIN = '#ecc3ad'
-const HAIR = '#7b5639'
+const SKIN = '#e9c6b4'
+const HAIR = '#53392a'
 const PIVOT = new Vector3(0, -1.15, -0.85)
 const MP = { width: 0, round: 0, lips: 0 }
 

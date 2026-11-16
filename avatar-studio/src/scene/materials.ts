@@ -85,7 +85,7 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
         vec2 q = vec2(ax, P.y);
         // blush: apples of the cheeks, nose tip, a touch on the chin
         float blush = blob(q, vec2(0.36, -0.3), vec2(0.2, 0.15)) * 0.9 + blob(q, vec2(0.0, -0.43), vec2(0.09, 0.08)) * 0.7 + blob(q, vec2(0.0, -1.1), vec2(0.14, 0.09)) * 0.35;
-        skin = mix(skin, skin * vec3(1.02, 0.78, 0.76), clamp(blush, 0.0, 1.0) * 0.55);
+        skin = mix(skin, skin * vec3(1.02, 0.8, 0.78), clamp(blush, 0.0, 1.0) * 0.36);
         // freckles across the nose bridge and upper cheeks
         float fz = blob(q, vec2(0.16, -0.24), vec2(0.36, 0.17));
         vec3 fc = P * 62.0;
@@ -95,7 +95,10 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
         float upper = blob(vec2(P.x, P.y), vec2(0.0, -0.715), vec2(0.21, 0.05));
         float lower = blob(vec2(P.x, P.y), vec2(0.0, -0.845), vec2(0.19, 0.055));
         float lip = clamp(upper + lower, 0.0, 1.0) * smoothstep(-0.2, 0.0, P.z);
-        skin = mix(skin, vec3(0.78, 0.45, 0.45), lip * 0.72);
+        skin = mix(skin, vec3(0.8, 0.5, 0.49), lip * 0.62);
+        // hair casts soft occlusion onto the temples and cheeks
+        skin *= 1.0 - 0.26 * smoothstep(0.42, 0.66, ax) * smoothstep(-1.1, -0.6, P.y);
+        skin *= 1.0 - 0.18 * smoothstep(0.42, 0.58, P.y) * smoothstep(0.15, 0.55, ax);
         // soft under-eye and socket shading
         skin *= 1.0 - 0.12 * blob(q, vec2(0.32, -0.16), vec2(0.15, 0.05));
         `
@@ -111,7 +114,8 @@ export function createSkinMaterial(kind: 'head' | 'body', shared: SkinUniforms) 
         }
         // creases and occlusion
         skin *= 1.0 - vCav * 0.55;
-        diffuseColor.rgb = skin;`,
+        diffuseColor.rgb = skin;
+        ${kind === 'head' ? 'if (vLocal.y < -1.46) discard; // hide the cut cap: the body mesh carries the neck below' : ''}`,
       )
     if (kind === 'body') {
       sh.fragmentShader = sh.fragmentShader.replace(
@@ -145,9 +149,10 @@ export function createHairMaterial(u: HairUniforms) {
     color: '#ffffff',
     roughness: 0.62,
     metalness: 0,
-    sheen: 0.35,
-    sheenRoughness: 0.4,
-    sheenColor: new Color('#c99a74'),
+    sheen: 0.25,
+    sheenRoughness: 0.45,
+    sheenColor: new Color('#a07a5c'),
+    envMapIntensity: 0.35,
   })
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uMorph = u.uMorph
@@ -192,7 +197,7 @@ export function createHairMaterial(u: HairUniforms) {
         float clumps = 0.8 + 0.2 * vnoise(vec3(P.x * 9.0, P.y * 0.8, P.z * 9.0));
         // root → tip: darker at the part/roots, sun-lightened ends
         float tips = smoothstep(-0.6, -3.4, P.y);
-        vec3 col = uHair * mix(0.62, 1.18, tips) * strands * clumps;
+        vec3 col = uHair * mix(0.7, 1.1, tips) * strands * clumps;
         col *= 1.0 - 0.35 * smoothstep(0.06, 0.0, abs(P.x)) * smoothstep(0.7, 1.1, P.y); // part shadow
         diffuseColor.rgb = col;`,
       )
@@ -250,7 +255,7 @@ export function createEyeMaterial(u: EyeUniforms) {
         vec3 p = normalize(vObj);
         float a = acos(clamp(p.z, -1.0, 1.0));
         float th = atan(p.y, p.x);
-        float ri = 0.52;
+        float ri = 0.6;
         vec3 sclera = vec3(0.95, 0.93, 0.91) * (1.0 - 0.18 * smoothstep(0.9, 1.6, a));
         sclera = mix(sclera, vec3(0.93, 0.78, 0.76), 0.25 * smoothstep(0.85, 1.5, a) * vnoise(p * 30.0));
         float r = a / ri;

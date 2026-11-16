@@ -42,6 +42,8 @@ export const anchors = {
   meshToLayer: new Matrix4(),
   mesh: null as Mesh | null,
   face: null as FaceForm | null,
+  /** strength.face — the sculptor's morph scales with it */
+  sculpt: -1,
 }
 
 const ray = new Raycaster()
@@ -126,9 +128,10 @@ export function browNormal(x: number, y: number, out: Vector3): Vector3 {
 const faceEq = (a: FaceForm | null, b: FaceForm) => !!a && a.width === b.width && a.eyes === b.eyes && a.roundness === b.roundness && a.lips === b.lips
 
 /** Push base anchors through the live face-form deformation. Returns true if they changed. */
-export function syncMorph(face: FaceForm): boolean {
-  if (faceEq(anchors.face, face)) return false
+export function syncMorph(face: FaceForm, sculpt: number): boolean {
+  if (faceEq(anchors.face, face) && anchors.sculpt === sculpt) return false
   anchors.face = { ...face }
+  anchors.sculpt = sculpt
   for (const id of IDS) avatarRegistry.morph(anchors.base[id], face, anchors.morphed[id])
   anchors.rev++
   return true

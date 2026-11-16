@@ -71,14 +71,14 @@ export function sdfHead(x: number, y: number, z: number): number {
   // midface
   d = smin(d, ell(x, y + 0.2, z + 0.5, 0.68, 0.55, 0.48), 0.18)
   // cheekbones (malar → zygomatic arch)
-  d = smin(d, ell(ax - 0.5, y + 0.14, z + 0.4, 0.23, 0.13, 0.22), 0.14)
-  d = smin(d, ell(ax - 0.38, y + 0.2, z + 0.18, 0.17, 0.12, 0.14), 0.12)
+  d = smin(d, ell(ax - 0.5, y + 0.15, z + 0.42, 0.2, 0.11, 0.2), 0.16)
+  d = smin(d, ell(ax - 0.36, y + 0.22, z + 0.2, 0.15, 0.11, 0.13), 0.14)
   // lower face / mandible body
-  d = smin(d, ell(x, y + 0.78, z + 0.48, 0.58, 0.45, 0.47), 0.16)
+  d = smin(d, ell(x, y + 0.76, z + 0.5, 0.54, 0.43, 0.45), 0.18)
   // ramus + gonial angle
-  d = smin(d, ell(ax - 0.52, y + 0.85, z + 0.66, 0.1, 0.3, 0.25), 0.14)
+  d = smin(d, ell(ax - 0.49, y + 0.8, z + 0.68, 0.09, 0.27, 0.23), 0.16)
   // chin
-  d = smin(d, ell(x, y + 1.08, z + 0.13, 0.22, 0.18, 0.15), 0.1)
+  d = smin(d, ell(x, y + 1.07, z + 0.15, 0.18, 0.15, 0.13), 0.12)
   // brow ridge (glabella → tail)
   d = smin(d, capsule(ax, y, z, 0, 0.1, -0.04, 0.6, 0.15, -0.32, 0.09), 0.1)
   // forehead plane softening above brows
@@ -86,23 +86,24 @@ export function sdfHead(x: number, y: number, z: number): number {
   // eye sockets — open: the eyeballs and lid shells (Eyes.tsx) sit in here
   d = smax(d, -ell(ax - 0.32, y + 0.04, z + 0.13, 0.172, 0.112, 0.115), 0.05)
   // nose: bridge, tip, alae, columella, nostrils
-  d = smin(d, capsule(x, y, z, 0, 0, -0.07, 0, -0.38, 0.12, 0.075), 0.12)
-  d = smin(d, sphere(x, y + 0.43, z - 0.165, 0.08), 0.07)
-  d = smin(d, sphere(ax - 0.13, y + 0.5, z - 0.005, 0.064), 0.09)
-  d = smin(d, ell(x, y + 0.56, z - 0.03, 0.07, 0.05, 0.07), 0.05)
-  d = smax(d, -sphere(ax - 0.065, y + 0.545, z - 0.09, 0.03), 0.02)
+  d = smin(d, capsule(x, y, z, 0, 0.0, -0.07, 0, -0.37, 0.1, 0.058), 0.12)
+  d = smin(d, sphere(x, y + 0.425, z - 0.135, 0.058), 0.08)
+  d = smin(d, sphere(ax - 0.1, y + 0.49, z + 0.02, 0.038), 0.11)
+  d = smin(d, ell(x, y + 0.545, z - 0.03, 0.055, 0.04, 0.06), 0.05)
   // philtrum
-  d = smin(d, ell(x, y + 0.64, z + 0.02, 0.12, 0.08, 0.08), 0.06)
+  d = smin(d, ell(x, y + 0.64, z + 0.04, 0.1, 0.07, 0.06), 0.07)
   d = smax(d, -ell(x, y + 0.64, z - 0.07, 0.022, 0.06, 0.02), 0.03)
   // lips
-  d = smin(d, ell(x, y + 0.71, z + 0.03, 0.23, 0.065, 0.11), 0.05)
-  d = smin(d, ell(x, y + 0.85, z + 0.05, 0.21, 0.07, 0.11), 0.05)
-  d = smax(d, -ell(x, y + 0.78, z - 0.06, 0.25, 0.012, 0.09), 0.015)
+  d = smin(d, ell(x, y + 0.72, z + 0.05, 0.17, 0.045, 0.085), 0.06)
+  d = smin(d, ell(x, y + 0.84, z + 0.07, 0.15, 0.052, 0.085), 0.06)
+  d = smax(d, -ell(x, y + 0.78, z - 0.05, 0.19, 0.009, 0.06), 0.012)
+  // soft cheek pads (youthful adult fullness under the cheekbones)
+  d = smin(d, ell(ax - 0.33, y + 0.47, z + 0.2, 0.2, 0.2, 0.16), 0.2)
   // ears
   d = smin(d, ell(ax - 0.75, y + 0.15, z + 0.95, 0.095, 0.27, 0.16), 0.07)
   d = smax(d, -ell(ax - 0.8, y + 0.12, z + 0.93, 0.03, 0.2, 0.1), 0.03)
   // neck
-  d = smin(d, capsule(x, y, z, 0, -0.85, -0.95, 0, -2.6, -0.85, 0.52), 0.22)
+  d = smin(d, capsule(x, y, z, 0, -0.85, -0.92, 0, -2.6, -0.8, 0.41), 0.24)
   return d
 }
 
@@ -111,9 +112,12 @@ export function sdfFigure(x: number, y: number, z: number): number {
   const ax = abs(x)
   let d = sdfHead(x, y, z)
   if (y < -1.05) {
-    d = smin(d, capsule(ax, y, z, 0.2, -1.9, -1.0, 1.5, -2.45, -0.95, 0.36), 0.3)
-    d = smin(d, capsule(ax, y, z, 1.2, -2.55, -0.9, 2.1, -2.8, -0.85, 0.42), 0.25)
-    d = smin(d, ell(x, y + 3.05, z + 0.75, 1.65, 0.62, 0.58), 0.3)
+    d = smin(d, capsule(ax, y, z, 0.2, -2.05, -0.95, 1.25, -2.5, -0.92, 0.3), 0.32)
+    d = smin(d, capsule(ax, y, z, 1.05, -2.62, -0.88, 1.75, -2.9, -0.85, 0.36), 0.28)
+    d = smin(d, ell(x, y + 3.2, z + 0.72, 1.45, 0.62, 0.55), 0.32)
+    // torso and upper arms continue past the frame
+    d = smin(d, ell(x, y + 4.6, z + 0.74, 1.5, 1.7, 0.6), 0.4)
+    d = smin(d, capsule(ax, y, z, 1.62, -2.95, -0.85, 1.9, -6.0, -0.85, 0.42), 0.3)
   }
   return d
 }
@@ -143,16 +147,16 @@ export function sdfBase(x: number, y: number, z: number): number {
 /** One curtain of hair (x mirrored by the caller), swept as a chain of ellipsoids. */
 function curtain(ax: number, y: number, z: number): number {
   let d = 1e9
-  const N = 9
+  const N = 18
   for (let i = 0; i <= N; i++) {
     const t = i / N
-    const cx = 0.7 + 0.32 * t * t + 0.06 * t
+    const cx = 0.74 + 0.5 * t * t + 0.04 * t
     const cy = 0.35 - 3.75 * t
     const cz = -0.62 + 0.62 * t * (1.6 - t)
-    const rx = 0.2 - 0.07 * t
+    const rx = 0.2 + 0.03 * t
     const ry = 0.42
-    const rz = 0.5 - 0.18 * t
-    d = smin(d, ell(ax - cx, y - cy, z - cz, rx, ry, rz), 0.16)
+    const rz = 0.5 - 0.1 * t
+    d = smin(d, ell(ax - cx, y - cy, z - cz, rx, ry, rz), 0.24)
   }
   return d
 }
@@ -160,8 +164,8 @@ function curtain(ax: number, y: number, z: number): number {
 export function sdfHair(x: number, y: number, z: number): number {
   const ax = abs(x)
   // scalp cap: cranium offset outward
-  let d = ell(x, y - 0.38, z + 0.95, 0.83, 0.82, 0.99)
-  d = smin(d, ell(x, y - 0.12, z + 1.27, 0.73, 0.7, 0.7), 0.2)
+  let d = ell(x, y - 0.38, z + 0.95, 0.86, 0.85, 1.02)
+  d = smin(d, ell(x, y - 0.12, z + 1.27, 0.76, 0.73, 0.73), 0.2)
   // side volume over the ears
   d = smin(d, ell(ax - 0.62, y + 0.05, z + 0.75, 0.24, 0.62, 0.55), 0.18)
   // curtains framing the face
@@ -169,9 +173,9 @@ export function sdfHair(x: number, y: number, z: number): number {
   // back mass, falling behind the neck to below the shoulders
   d = smin(d, ell(x, y + 1.35, z + 1.3, 0.98, 2.25, 0.42), 0.3)
   // face window: hairline at the trichion, lower at the temples
-  d = smax(d, -ell(x, y + 0.3, z - 0.15, 0.6, 0.93, 0.95), 0.08)
+  d = smax(d, -ell(x, y + 0.3, z - 0.15, 0.66, 0.84, 0.95), 0.12)
   // keep the curtains clear of the cheeks/jaw
-  d = smax(d, -ell(x, y + 0.75, z + 0.05, 0.6, 1.2, 0.9), 0.06)
+  d = smax(d, -ell(x, y + 0.75, z + 0.05, 0.66, 1.2, 0.9), 0.06)
   // centre part
   d = smax(d, -capsule(x, y, z, 0, 1.25, 0.0, 0, 0.95, -1.5, 0.018), 0.025)
   // never inside the head

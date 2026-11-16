@@ -51,7 +51,7 @@ interface Style {
 
 export const STYLES: Record<Exclude<GlassesId, 'none'>, Style> = {
   round: { kind: 'acetate', hw: 0.215, hh: 0.205, n: 2, taper: 0, lift: 0, drop: 0, rim: 0.026, frame: 'tortoise', lensTint: '#e8ddc8', lensOpacity: 0.12 },
-  aviator: { kind: 'metal', hw: 0.255, hh: 0.215, n: 2.4, taper: 0.08, lift: 0, drop: 0.085, rim: 0.009, frame: 'gold', lensTint: '#5d6b5a', lensOpacity: 0.32, doubleBridge: true },
+  aviator: { kind: 'metal', hw: 0.25, hh: 0.2, n: 2.2, taper: 0.1, lift: 0, drop: 0.13, rim: 0.009, frame: 'gold', lensTint: '#5d6b5a', lensOpacity: 0.32, doubleBridge: true },
   wayfarer: { kind: 'acetate', hw: 0.245, hh: 0.175, n: 3.6, taper: 0.12, lift: 0.03, drop: 0, rim: 0.038, frame: 'black', lensTint: '#9aa3b0', lensOpacity: 0.14 },
   cateye: { kind: 'acetate', hw: 0.24, hh: 0.17, n: 2.8, taper: 0.1, lift: 0.085, drop: 0, rim: 0.034, frame: 'burgundy', lensTint: '#e9d6d6', lensOpacity: 0.12 },
   browline: { kind: 'browline', hw: 0.24, hh: 0.18, n: 3, taper: 0.06, lift: 0.015, drop: 0, rim: 0.034, frame: 'smoke', lensTint: '#dfe4ea', lensOpacity: 0.1 },
@@ -155,7 +155,7 @@ function frameMaterial(kind: Style['frame']): Material {
     case 'tortoise':
       return new MeshPhysicalMaterial({ map: tortoise(), color: '#ffffff', roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08, transparent: true })
     case 'burgundy':
-      return new MeshPhysicalMaterial({ color: '#5a1f2a', roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.1, transparent: true })
+      return new MeshPhysicalMaterial({ color: '#3d1119', roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.1, transparent: true })
     case 'smoke':
       return new MeshPhysicalMaterial({ color: '#2b2a2e', roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.12, transparent: true })
     default:
@@ -231,11 +231,17 @@ export function buildGlasses(id: Exclude<GlassesId, 'none'>, weight: number): Bu
       [left, cx],
       [right, -cx],
     ] as const) {
-      const top = pts.filter((p) => p.y > -st.hh * 0.05)
-      const ordered = top.slice().sort((a, b) => Math.atan2(b.y, b.x) - Math.atan2(a.y, a.x))
-      const outer = offset(pts, rim).filter((p) => p.y > -st.hh * 0.05)
-      outer.sort((a, b) => Math.atan2(b.y, b.x) - Math.atan2(a.y, a.x))
-      const bar = new Shape([...outer, ...ordered.slice().reverse().map((p) => new Vector2(p.x * 0.985, p.y - rim * 0.15))])
+      // same sample indices on both edges (θ just past 0 → just past π), so the band never folds
+      const n = pts.length
+      const ring = offset(pts, rim)
+      const idx: number[] = []
+      for (let i = 0; i < n; i++) {
+        const th = (i / n) * Math.PI * 2
+        if (th <= Math.PI + 0.14 || th >= Math.PI * 2 - 0.14) idx.push(i)
+      }
+      // order the arc continuously from the outer-bottom (θ≈−0.14) round the top to the inner-bottom
+      idx.sort((a, b) => ((a / n) * Math.PI * 2 + (a / n > 0.5 ? -Math.PI * 2 : 0)) - ((b / n) * Math.PI * 2 + (b / n > 0.5 ? -Math.PI * 2 : 0)))
+      const bar = new Shape([...idx.map((i) => ring[i]), ...idx.slice().reverse().map((i) => pts[i])])
       const g = new ExtrudeGeometry(bar, { depth: 0.032, bevelEnabled: true, bevelThickness: 0.006, bevelSize: 0.005, bevelSegments: 2 })
       g.translate(dx, 0, -0.016)
       parts.push(g)

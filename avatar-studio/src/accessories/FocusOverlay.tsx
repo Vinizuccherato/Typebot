@@ -105,7 +105,9 @@ export function FocusOverlay({ space }: { space: React.RefObject<Group | null> }
   const ring = 'absolute left-0 top-0 grid cursor-pointer place-items-center rounded-full outline-none'
 
   return (
-    <Html fullscreen zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
+    // fullscreen Html is placed at its object's projected position; pin it to the canvas centre so the
+    // overlay covers the canvas exactly and our own projections line up
+    <Html fullscreen calculatePosition={(_el, _cam, sz) => [sz.width / 2, sz.height / 2]} zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
       <div ref={root} className="absolute inset-0" style={{ pointerEvents: 'none' }}>
         <div ref={box} className="absolute left-0 top-0" aria-hidden style={{ filter: 'drop-shadow(0 1px 3px rgb(40 44 70 / 0.35))' }}>
           <span className={`${corner} left-0 top-0 rounded-tl-[10px] border-l-[1.5px] border-t-[1.5px]`} />
