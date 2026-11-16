@@ -42,7 +42,7 @@ const isSoftware = () => typeof navigator !== 'undefined' && (navigator.webdrive
 
 /** framing → (centre y, fit height, fit width) in head-local units */
 const FRAMES = {
-  head: { cy: -0.02, h: 3.25, w: 3.3 },
+  head: { cy: -0.06, h: 3.45, w: 3.9 }, // wide enough for the hair at ±35° sway
   face: { cy: -0.24, h: 2.25, w: 2.05 },
   eyes: { cy: 0.04, h: 0.95, w: 1.75 },
   bust: { cy: -1.35, h: 5.6, w: 4.8 },
@@ -193,9 +193,10 @@ export function FaceView({ className, subject, framing, interactive, look: lookP
   return (
     <div
       ref={host}
-      className={className}
+      // keep the caller's positioning (e.g. `absolute inset-0`); an inline `position` would override it and collapse the box
+      className={/\b(absolute|fixed|relative|sticky)\b/.test(className ?? '') ? className : `relative ${className ?? ''}`}
       data-wheel={interactive ? '' : undefined}
-      style={{ position: 'relative', overflow: 'hidden', touchAction: interactive ? 'none' : undefined, cursor: interactive ? 'grab' : undefined }}
+      style={{ overflow: 'hidden', touchAction: interactive ? 'none' : undefined, cursor: interactive ? 'grab' : undefined }}
       role="img"
       aria-label={subject === 'mark' ? 'facet. brand crystal' : `3D face — ${rest.material ?? 'skin'}${interactive ? ', drag to rotate, scroll to zoom' : ''}`}
     >

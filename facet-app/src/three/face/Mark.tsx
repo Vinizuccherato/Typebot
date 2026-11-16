@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { AdditiveBlending, Color, LatheGeometry, MeshPhysicalMaterial, Vector2, type Group, type PointLight, type Sprite } from 'three'
-import { glowTexture } from './labels'
+import { Color, LatheGeometry, MeshPhysicalMaterial, Vector2, type Group, type PointLight } from 'three'
 
 /* The splash brand object: an original faceted gem — "facet." — cut as a
    12-sided brilliant (table, crown, girdle, pavilion), iridescent glass with a
-   lilac body tint, turning slowly in a soft halo; a light sweeps across it on mount. */
+   lilac body tint, turning slowly (the splash's CSS aura is its halo); a light sweeps across it on mount. */
 
 function gemGeometry() {
   const pts = [
@@ -49,7 +48,6 @@ export function Mark() {
   useEffect(() => () => (geo.dispose(), mat.dispose()), [geo, mat])
   const gem = useRef<Group>(null)
   const sweep = useRef<PointLight>(null)
-  const halo = useRef<Sprite>(null)
   const born = useRef(-1)
 
   useFrame((s, dt) => {
@@ -68,17 +66,10 @@ export function Mark() {
       sweep.current.position.x = -3 + 6 * k
       sweep.current.intensity = Math.sin(k * Math.PI) * 26
     }
-    if (halo.current) {
-      const m = halo.current.material
-      m.opacity = (0.35 + 0.08 * Math.sin(t * 1.3)) * Math.min(1, age / 0.8)
-    }
   })
 
   return (
     <group>
-      <sprite ref={halo} position={[0, 0, -1.2]} scale={[5.2, 5.2, 1]}>
-        <spriteMaterial map={glowTexture()} color="#9d86ff" transparent blending={AdditiveBlending} depthWrite={false} toneMapped={false} />
-      </sprite>
       <group ref={gem}>
         <mesh geometry={geo} material={mat} />
       </group>
