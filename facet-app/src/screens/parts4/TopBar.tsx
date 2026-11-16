@@ -12,8 +12,9 @@ export function TopBar({ title, onBack, trailing }: { title: string; onBack?: ()
       ) : (
         <span className="w-11" />
       )}
-      <span className="text-[15px] font-semibold">{title}</span>
-      <span className="flex w-11 justify-end">{trailing}</span>
+      {/* centred independently of the side controls' widths */}
+      <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 text-[15px] font-semibold">{title}</span>
+      <span className="flex min-w-11 justify-end">{trailing}</span>
     </div>
   )
 }

@@ -171,7 +171,7 @@ export function ScanScreen() {
         title="Face scan"
         onBack={mode === 'app' ? back : undefined}
         trailing={
-          <span className="glass glass-pill inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-[11.5px] font-semibold text-[var(--text-2)]">
+          <span className="glass glass-pill inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-[11.5px] font-semibold text-[var(--text-2)]">
             <Lock size={11} className="relative z-[3]" />
             <span className="relative z-[3]">On-device</span>
           </span>
