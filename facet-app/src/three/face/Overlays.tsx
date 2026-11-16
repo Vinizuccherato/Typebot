@@ -17,10 +17,10 @@ const FRONT = 0.42 // overlays float in front of the face plane
 
 type V3 = [number, number, number]
 
-function Label({ at, text, value, accent = LILAC, size = 0.055 }: { at: V3; text: string; value?: string; accent?: string; size?: number }) {
+function Label({ at, text, value, accent = LILAC, size = 0.2 }: { at: V3; text: string; value?: string; accent?: string; size?: number }) {
   const { tex, aspect } = useMemo(() => labelTexture(text, accent, value), [text, accent, value])
   return (
-    <sprite position={at} scale={[size * aspect, size, 1]} renderOrder={12}>
+    <sprite position={at} scale={[size * aspect, size, 1]} renderOrder={21}>
       <spriteMaterial map={tex} transparent depthTest={false} toneMapped={false} />
     </sprite>
   )
@@ -37,6 +37,7 @@ function FadeIn({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
     const e = 1 - Math.pow(1 - k, 3)
     g.current.scale.set(1, 0.96 + 0.04 * e, 1)
     g.current.traverse((o) => {
+      o.renderOrder = 20 // after the (possibly transparent) face
       const m = (o as unknown as { material?: { opacity: number; transparent: boolean; userData: Record<string, number> } }).material
       if (!m) return
       m.transparent = true
@@ -75,7 +76,7 @@ function Thirds() {
         return (
           <group key={i}>
             <Line points={[[x1 + 0.06, a, FRONT], [x1 + 0.06, c, FRONT]]} color={CHAMP} lineWidth={1.4} depthTest={false} />
-            <Label at={[x1 + 0.06 + 0.24, (a + c) / 2, FRONT]} text={names[i]} value={`${mm} mm`} accent={CHAMP} size={0.05} />
+            <Label at={[x1 - 0.42, (a + c) / 2 + 0.02, FRONT + 0.05]} text={names[i]} value={`${mm} mm`} accent={CHAMP} size={0.17} />
           </group>
         )
       })}
@@ -113,7 +114,7 @@ function Symmetry() {
           </group>
         )
       })}
-      <Label at={[0, b.trichion.y + 0.33, FRONT]} text="Mid-sagittal axis" size={0.05} />
+      <Label at={[0, b.trichion.y + 0.36, FRONT]} text="Mid-sagittal axis" size={0.16} />
     </FadeIn>
   )
 }
@@ -131,34 +132,27 @@ function Golden() {
   const x1 = w / 2
   const cut = bottom + h / PHI // golden section from the chin
   const cutX = x0 + w / PHI
-  // golden spiral approximated by quarter arcs in shrinking squares (from the right)
+  // logarithmic golden spiral (growth φ per quarter turn) centred on the golden point
   const spiral = useMemo(() => {
     const pts: V3[] = []
-    let cx = x1 - h / PHI
-    let cy = top - h / PHI
-    let r = h / PHI
-    let a0 = 0
-    for (let k = 0; k < 6; k++) {
-      for (let i = 0; i <= 16; i++) {
-        const a = a0 + (i / 16) * (Math.PI / 2)
-        pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a), FRONT])
-      }
-      const nr = r / PHI
-      const dir = a0 + Math.PI / 2
-      cx += (r - nr) * Math.cos(dir)
-      cy += (r - nr) * Math.sin(dir)
-      r = nr
-      a0 += Math.PI / 2
+    const B = Math.log(PHI) / (Math.PI / 2)
+    const rMax = Math.min(w, h) * 0.62
+    const tMax = 3.2 * Math.PI
+    const a = rMax / Math.exp(B * tMax)
+    for (let i = 0; i <= 220; i++) {
+      const th = (i / 220) * tMax
+      const r = a * Math.exp(B * th)
+      pts.push([cutX + r * Math.cos(th + Math.PI), cut + r * Math.sin(th + Math.PI), FRONT])
     }
     return pts
-  }, [x1, top, h])
+  }, [w, h, cutX, cut])
   return (
     <FadeIn>
       <Line points={[[x0, top, FRONT], [x1, top, FRONT], [x1, bottom, FRONT], [x0, bottom, FRONT], [x0, top, FRONT]]} color={CHAMP} lineWidth={1.1} transparent opacity={0.8} depthTest={false} />
       <Line points={[[x0, cut, FRONT], [x1, cut, FRONT]]} color={CHAMP} lineWidth={1} dashed dashSize={0.03} gapSize={0.02} depthTest={false} />
       <Line points={[[cutX, top, FRONT], [cutX, bottom, FRONT]]} color={CHAMP} lineWidth={1} dashed dashSize={0.03} gapSize={0.02} depthTest={false} />
       <Line points={spiral} color={LILAC} lineWidth={1.4} transparent opacity={0.9} depthTest={false} />
-      <Label at={[x1 - 0.12, top + 0.1, FRONT]} text="φ" value={(h / w).toFixed(2)} accent={CHAMP} size={0.05} />
+      <Label at={[x1 - 0.12, top + 0.1, FRONT]} text="φ ratio" value={(h / w).toFixed(2)} accent={CHAMP} size={0.17} />
     </FadeIn>
   )
 }
@@ -209,7 +203,7 @@ function DimLine({ d }: { d: Dim }) {
   const horiz = d.axis !== 'y'
   const t1: V3[] = horiz ? [[P[0], P[1] - tick, P[2]], [P[0], P[1] + tick, P[2]]] : [[P[0] - tick, P[1], P[2]], [P[0] + tick, P[1], P[2]]]
   const t2: V3[] = horiz ? [[Q[0], Q[1] - tick, Q[2]], [Q[0], Q[1] + tick, Q[2]]] : [[Q[0] - tick, Q[1], Q[2]], [Q[0] + tick, Q[1], Q[2]]]
-  const mid: V3 = [(P[0] + Q[0]) / 2 + (horiz ? 0 : 0.2), (P[1] + Q[1]) / 2 + (horiz ? 0.055 : 0), P[2]]
+  const mid: V3 = [(P[0] + Q[0]) / 2 + (horiz ? 0 : 0.25), (P[1] + Q[1]) / 2 + (horiz ? 0.085 : 0), P[2]]
   return (
     <group>
       <Line points={[[A.x, A.y, A.z + 0.01], P]} color={LILAC} lineWidth={0.8} dashed dashSize={0.012} gapSize={0.012} transparent opacity={0.6} depthTest={false} />
@@ -217,7 +211,7 @@ function DimLine({ d }: { d: Dim }) {
       <Line points={[P, Q]} color={CHAMP} lineWidth={1.6} depthTest={false} />
       <Line points={t1} color={CHAMP} lineWidth={1.6} depthTest={false} />
       <Line points={t2} color={CHAMP} lineWidth={1.6} depthTest={false} />
-      <Label at={mid} text={d.label} value={`${mm.toFixed(1)} mm`} accent={CHAMP} size={0.045} />
+      <Label at={mid} text={d.label} value={`${mm.toFixed(1)} mm`} accent={CHAMP} size={0.14} />
     </group>
   )
 }

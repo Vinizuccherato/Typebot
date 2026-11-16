@@ -107,8 +107,8 @@ const THERMAL_FRAG = /* glsl */ `
     float heat = 0.12 + 0.72 * rim + 0.12 * smoothstep(0.0, 0.6, bfres);
     heat += 0.18 * pow(ndv, 3.0) * (1.0 - rim);             // warm frontal planes
     heat -= vCav * 0.42;                                      // cool creases
-    float n = vnoise(vLocal * 9.0 + vec3(0.0, uTime * 0.07, 0.0)) * 0.6 + vnoise(vLocal * 23.0 - uTime * 0.05) * 0.4;
-    heat += (n - 0.5) * 0.14;
+    float n = vnoise(vLocal * 14.0 + vec3(0.0, uTime * 0.07, 0.0)) * 0.6 + vnoise(vLocal * 31.0 - uTime * 0.05) * 0.4;
+    heat += (n - 0.5) * 0.07;
     heat *= 1.0 + 0.06 * uPulse;
     heat *= 1.0 - 0.45 * uCool;
     vec3 col = ramp(heat);
@@ -148,12 +148,14 @@ const HOLO_FRAG = /* glsl */ `
     // revealed above the sweep (top → down)
     float d = vLocal.y - uScanY;
     float shown = smoothstep(-0.02, 0.04, d);
-    float a = (0.05 + 0.55 * fres + 0.38 * zl + 0.16 * grid * (1.0 - uCool * 0.6)) * shown;
-    vec3 col = mix(uR2, uR3, smoothstep(0.4, 1.0, fres)) * a;
-    col += vec3(1.0) * exp(-pow(d / 0.01, 2.0)) * 0.9 * uSweep;          // bright scan line
-    col += uR2 * exp(-pow(max(0.0, d) / 0.18, 2.0)) * 0.25 * uSweep;       // afterglow
+    float a = (0.02 + 0.34 * fres + 0.2 * zl + 0.07 * grid) * shown * (1.0 - 0.55 * uCool);
+    vec3 col = mix(uR2, uR3, smoothstep(0.45, 1.0, fres)) * a;
+    col += vec3(1.0) * exp(-pow(d / 0.008, 2.0)) * 0.7 * uSweep;          // bright scan line
+    col += uR2 * exp(-pow(max(0.0, d) / 0.16, 2.0)) * 0.12 * uSweep;       // afterglow
     float fade = smoothstep(-3.4, -1.8, vLocal.y);
-    gl_FragColor = vec4(col * fade * uReveal, 1.0);
+    col *= fade * uReveal;
+    // premultiplied-style alpha so the additive glow composites over the transparent canvas
+    gl_FragColor = vec4(col, clamp(max(col.r, max(col.g, col.b)), 0.0, 1.0));
     #include <colorspace_fragment>
   }
 `

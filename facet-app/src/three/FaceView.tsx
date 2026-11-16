@@ -195,7 +195,7 @@ export function FaceView({ className, subject, framing, interactive, look: lookP
       ref={host}
       className={className}
       data-wheel={interactive ? '' : undefined}
-      style={{ position: 'relative', touchAction: interactive ? 'none' : undefined, cursor: interactive ? 'grab' : undefined }}
+      style={{ position: 'relative', overflow: 'hidden', touchAction: interactive ? 'none' : undefined, cursor: interactive ? 'grab' : undefined }}
       role="img"
       aria-label={subject === 'mark' ? 'facet. brand crystal' : `3D face — ${rest.material ?? 'skin'}${interactive ? ', drag to rotate, scroll to zoom' : ''}`}
     >

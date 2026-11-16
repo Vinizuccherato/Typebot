@@ -42,8 +42,8 @@ export function Landmarks({ scan, color = '#c3b4ff' }: { scan?: number; color?: 
 
   return (
     <group renderOrder={8}>
-      <instancedMesh ref={halo} args={[geo, haloMat, IDS.length]} frustumCulled={false} />
-      <instancedMesh ref={core} args={[geo, coreMat, IDS.length]} frustumCulled={false} />
+      <instancedMesh ref={halo} args={[geo, haloMat, IDS.length]} frustumCulled={false} renderOrder={19} />
+      <instancedMesh ref={core} args={[geo, coreMat, IDS.length]} frustumCulled={false} renderOrder={19} />
     </group>
   )
 }
