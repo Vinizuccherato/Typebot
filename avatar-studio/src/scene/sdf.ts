@@ -1,5 +1,6 @@
 /* ──────────────────────────────────────────────────────────────
-   Procedural, anonymous adult head as a signed distance field.
+   Procedural, anonymous adult avatar (head, open-eye sockets, hair, shoulders)
+   as signed distance fields.
    Head-local frame of lib/face.ts: 1 unit = 10 cm, origin = nasion,
    +Y up, +X viewer's right, +Z toward the viewer.
 
@@ -82,10 +83,8 @@ export function sdfHead(x: number, y: number, z: number): number {
   d = smin(d, capsule(ax, y, z, 0, 0.1, -0.04, 0.6, 0.15, -0.32, 0.09), 0.1)
   // forehead plane softening above brows
   d = smin(d, ell(x, y - 0.38, z + 0.32, 0.52, 0.3, 0.24), 0.16)
-  // eye sockets
-  d = smax(d, -ell(ax - 0.32, y + 0.04, z, 0.17, 0.11, 0.13), 0.06)
-  // closed eyelids
-  d = smin(d, ell(ax - 0.32, y + 0.05, z + 0.2, 0.145, 0.09, 0.1), 0.04)
+  // eye sockets — open: the eyeballs and lid shells (Eyes.tsx) sit in here
+  d = smax(d, -ell(ax - 0.32, y + 0.04, z + 0.13, 0.172, 0.112, 0.115), 0.05)
   // nose: bridge, tip, alae, columella, nostrils
   d = smin(d, capsule(x, y, z, 0, 0, -0.07, 0, -0.38, 0.12, 0.075), 0.12)
   d = smin(d, sphere(x, y + 0.43, z - 0.165, 0.08), 0.07)
@@ -133,5 +132,49 @@ export function sdfBase(x: number, y: number, z: number): number {
     d = smin(d, capsule(ax, y, z, 1.2, -2.55, -0.9, 2.1, -2.8, -0.85, 0.42), 0.25)
     d = smin(d, ell(x, y + 3.05, z + 0.75, 1.65, 0.62, 0.58), 0.3)
   }
+  return d
+}
+
+/* ── hair ─────────────────────────────────────────────────────────
+   Long, straight, centre-parted hair: a scalp cap with the face cut out
+   along a natural hairline, two curtains framing the face and falling in
+   front of the shoulders, and a back mass. Head-local units. */
+
+/** One curtain of hair (x mirrored by the caller), swept as a chain of ellipsoids. */
+function curtain(ax: number, y: number, z: number): number {
+  let d = 1e9
+  const N = 9
+  for (let i = 0; i <= N; i++) {
+    const t = i / N
+    const cx = 0.7 + 0.32 * t * t + 0.06 * t
+    const cy = 0.35 - 3.75 * t
+    const cz = -0.62 + 0.62 * t * (1.6 - t)
+    const rx = 0.2 - 0.07 * t
+    const ry = 0.42
+    const rz = 0.5 - 0.18 * t
+    d = smin(d, ell(ax - cx, y - cy, z - cz, rx, ry, rz), 0.16)
+  }
+  return d
+}
+
+export function sdfHair(x: number, y: number, z: number): number {
+  const ax = abs(x)
+  // scalp cap: cranium offset outward
+  let d = ell(x, y - 0.38, z + 0.95, 0.83, 0.82, 0.99)
+  d = smin(d, ell(x, y - 0.12, z + 1.27, 0.73, 0.7, 0.7), 0.2)
+  // side volume over the ears
+  d = smin(d, ell(ax - 0.62, y + 0.05, z + 0.75, 0.24, 0.62, 0.55), 0.18)
+  // curtains framing the face
+  d = smin(d, curtain(ax, y, z), 0.14)
+  // back mass, falling behind the neck to below the shoulders
+  d = smin(d, ell(x, y + 1.35, z + 1.3, 0.98, 2.25, 0.42), 0.3)
+  // face window: hairline at the trichion, lower at the temples
+  d = smax(d, -ell(x, y + 0.3, z - 0.15, 0.6, 0.93, 0.95), 0.08)
+  // keep the curtains clear of the cheeks/jaw
+  d = smax(d, -ell(x, y + 0.75, z + 0.05, 0.6, 1.2, 0.9), 0.06)
+  // centre part
+  d = smax(d, -capsule(x, y, z, 0, 1.25, 0.0, 0, 0.95, -1.5, 0.018), 0.025)
+  // never inside the head
+  d = smax(d, -(sdfHead(x, y, z) - 0.025), 0.03)
   return d
 }

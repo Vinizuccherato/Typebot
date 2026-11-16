@@ -1,10 +1,22 @@
-import { Glass } from '../../ui/Glass'
+import { BROW_COLORS, useStudio } from '../../store'
+import { Label, SwatchRow } from '../kit'
 
-/** STUB — replaced by its owner agent. */
 export function BrowColor() {
+  const color = useStudio((s) => s.look.browColor)
+  const edit = useStudio((s) => s.edit)
+  const setRegion = useStudio((s) => s.setRegion)
   return (
-    <Glass variant="smoke" className="grid h-full w-full place-items-center text-sm text-white">
-      <span className="relative z-[3]">Eyebrow color</span>
-    </Glass>
+    <div className="flex h-full w-full flex-col gap-4">
+      <Label region="brows">Eyebrow color</Label>
+      <SwatchRow
+        label="Eyebrow colour"
+        colors={BROW_COLORS}
+        value={color}
+        onPick={(hex) => {
+          setRegion('brows')
+          edit({ browColor: hex })
+        }}
+      />
+    </div>
   )
 }
