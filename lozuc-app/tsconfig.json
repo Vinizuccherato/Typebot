@@ -27,6 +27,6 @@
     "vite.config.ts"
   ],
   "exclude": [
-    "src/three/_facet"
+    "src/three/__preview__"
   ]
 }
