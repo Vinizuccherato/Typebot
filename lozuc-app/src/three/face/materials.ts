@@ -38,7 +38,7 @@ export interface SkinUniforms {
 }
 
 export const createSkinUniforms = (): SkinUniforms => ({
-  uSkin: { value: new Color('#c99876') },
+  uSkin: { value: new Color('#c49a80') },
   uShirt: { value: new Color('#1d2a25') },
   uHairTone: { value: new Color('#3b2a20') },
   uBeardTone: { value: new Color('#3b2a20') },
@@ -51,7 +51,6 @@ export const createSkinUniforms = (): SkinUniforms => ({
   uTime: { value: 0 },
 })
 
-const SAGE = 'vec3(0.663, 0.78, 0.714)'
 const CLAY = 'vec3(0.78, 0.8, 0.78)'
 
 /** Skin. kind 'head' paints the face; 'body' paints the neck and the crew-neck tee. */
@@ -60,9 +59,9 @@ export function createSkinMaterial(kind: 'head' | 'body', u: SkinUniforms) {
     color: '#ffffff',
     roughness: 0.56,
     metalness: 0,
-    sheen: 0.55,
-    sheenRoughness: 0.65,
-    sheenColor: new Color('#e09a80'),
+    sheen: 0.32,
+    sheenRoughness: 0.6,
+    sheenColor: new Color('#d9a08c'),
     clearcoat: 0.05,
     clearcoatRoughness: 0.55,
   })
@@ -96,6 +95,7 @@ export function createSkinMaterial(kind: 'head' | 'body', u: SkinUniforms) {
         `#include <color_fragment>
         vec3 P = vLocal;
         float ax = abs(P.x);
+        float tee = 0.0;
         vec3 skin = uSkin * (0.97 + 0.04 * vnoise(P * 14.0) + 0.014 * vnoise(P * 150.0));
         ${
           kind === 'head'
@@ -115,9 +115,10 @@ export function createSkinMaterial(kind: 'head' | 'body', u: SkinUniforms) {
         float bz = beardZone(P);
         float shadowA = bz * uGroom.y * 0.35;
         skin = mix(skin, skin * mix(vec3(0.72, 0.74, 0.76), uBeardTone * 1.6, 0.3), shadowA);
-        float dots = smoothstep(0.55, 0.9, vnoise(P * 240.0)) * (0.6 + 0.4 * vnoise(P * 60.0));
-        float stub = bz * uGroom.x * clamp(dots * 1.4 + 0.25, 0.0, 1.0);
-        skin = mix(skin, uBeardTone, stub * 0.85);
+        float dots = smoothstep(0.62, 0.86, vnoise(P * 420.0)) * (0.55 + 0.45 * vnoise(P * 70.0));
+        float stub = bz * uGroom.x * clamp(dots * 1.2 + 0.32, 0.0, 1.0);
+        skin = mix(skin, skin * vec3(0.8, 0.82, 0.86), bz * uGroom.x * 0.35); // grey-blue shadow under the stubble
+        skin = mix(skin, uBeardTone, stub * 0.72);
 
         // ── scalp: buzz density and short-side fades below the hair shell ──
         float H = hairlineH(ax, P.z);
@@ -140,7 +141,7 @@ export function createSkinMaterial(kind: 'head' | 'body', u: SkinUniforms) {
             : `
         // crew-neck tee below the collar line
         float yc = P.z > -0.95 ? -1.78 - 0.32 * max(0.0, 1.0 - sq2(P.x / 0.62)) : -1.62;
-        float tee = smoothstep(yc + 0.012, yc - 0.012, P.y);
+        tee = smoothstep(yc + 0.012, yc - 0.012, P.y);
         float rib = smoothstep(0.05, 0.0, abs(P.y - (yc - 0.04)));
         vec3 fabric = uShirt * (0.92 + 0.08 * vnoise(P * vec3(60.0, 8.0, 60.0)));
         fabric *= 1.0 - 0.08 * rib * (0.6 + 0.4 * sin(P.x * 260.0));
@@ -153,19 +154,26 @@ export function createSkinMaterial(kind: 'head' | 'body', u: SkinUniforms) {
         skin = mix(skin, ${CLAY} * (1.0 - vCav * 0.6), uClay);
         // region glow
         ${kind === 'head' ? 'float rm = regionMask(P, uRegion) * uRegionAmt;' : 'float rm = (uRegion > 8.5 && uRegion < 9.5 ? smoothstep(-1.15, -1.3, P.y) * smoothstep(-2.0, -1.6, P.y) : 0.0) * uRegionAmt;'}
-        skin = mix(skin, ${SAGE}, rm * 0.45);
+        skin = mix(skin, mix(vec3(0.396, 0.571, 0.468), vec3(0.11, 0.24, 0.17), uClay), rm * mix(0.5, 0.85, uClay));
         diffuseColor.rgb = skin;
         ${kind === 'head' ? 'if (vLocal.y < -1.31) discard;' : ''}`,
       )
       .replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
-        totalEmissiveRadiance += ${SAGE} * rm * (0.22 + 0.08 * sin(uTime * 3.0));`,
+        totalEmissiveRadiance += vec3(0.396, 0.571, 0.468) * rm * (0.12 + 0.06 * sin(uTime * 3.0)) * (1.0 - 0.6 * uClay);`,
       )
       .replace(
         '#include <roughnessmap_fragment>',
         `#include <roughnessmap_fragment>
-        roughnessFactor = mix(roughnessFactor, 0.85, uClay);`,
+        roughnessFactor = mix(mix(roughnessFactor, 0.9, tee), 0.85, uClay);`,
+      )
+      .replace(
+        '#include <lights_physical_fragment>',
+        `#include <lights_physical_fragment>
+        #ifdef USE_SHEEN
+        material.sheenColor *= 1.0 - tee * 0.9;
+        #endif`,
       )
   }
   m.customProgramCacheKey = () => `lz-skin-${kind}`
@@ -200,7 +208,7 @@ export function createShellMaterial(u: ShellUniforms, beard = false) {
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u)
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', `#include <common>\nuniform float uFlow;\nvarying vec3 vLocal;\nvarying vec3 vTanView;`)
+      .replace('#include <common>', `#include <common>\nuniform float uFlow;\nvarying vec3 vLocal;\nvarying vec3 vTanView;\nvarying float vAcross;`)
       .replace(
         '#include <begin_vertex>',
         `#include <begin_vertex>
@@ -213,7 +221,8 @@ export function createShellMaterial(u: ShellUniforms, beard = false) {
         else if (uFlow < 3.5) dirL = normalize(vec3(P.x * 0.2, -0.1, -1.0));
         else dirL = normalize(vec3(0.0, -1.0, 0.25));
         vec3 tl = normalize(dirL - normal * dot(normal, dirL));
-        vTanView = normalize(normalMatrix * tl);`,
+        vTanView = normalize(normalMatrix * tl);
+        vAcross = dot(P, normalize(cross(normal, tl)));`,
       )
     sh.fragmentShader = sh.fragmentShader
       .replace(
@@ -222,6 +231,7 @@ export function createShellMaterial(u: ShellUniforms, beard = false) {
         uniform vec3 uTone; uniform float uShow; uniform vec3 uKeyView; uniform float uHi; uniform float uClay; uniform float uTime;
         varying vec3 vLocal;
         varying vec3 vTanView;
+        varying float vAcross;
         ${NOISE}`,
       )
       .replace(
@@ -230,7 +240,7 @@ export function createShellMaterial(u: ShellUniforms, beard = false) {
         vec3 P = vLocal;
         // dithered dissolve: crossfades between styles without transparency sorting
         if (hash31(floor(gl_FragCoord.xyz * vec3(1.0, 1.0, 0.0)) + vec3(0.0, 0.0, 7.0)) > uShow) discard;
-        float across = dot(P, vec3(${beard ? '120.0, 30.0, 90.0' : '70.0, 18.0, 52.0'})) + vnoise(P * 4.0) * 6.0;
+        float across = vAcross * ${beard ? '260.0' : '170.0'} + vnoise(P * 5.0) * 5.0;
         float strands = 0.6 + 0.4 * vnoise(vec3(across, P.y * 2.0, 0.0));
         float clumps = 0.82 + 0.18 * vnoise(P * 11.0);
         vec3 col = uTone * strands * clumps;
@@ -249,7 +259,7 @@ export function createShellMaterial(u: ShellUniforms, beard = false) {
           float s1 = pow(max(0.0, sqrt(max(0.0, 1.0 - sq2(th - 0.1)))), 80.0);
           float s2 = pow(max(0.0, sqrt(max(0.0, 1.0 - sq2(th + 0.16)))), 22.0);
           float shimmer = 0.6 + 0.4 * vnoise(vec3(vLocal.x * 140.0, vLocal.y * 3.0, vLocal.z * 140.0));
-          totalEmissiveRadiance += (vec3(1.0, 0.95, 0.88) * s1 * ${beard ? '0.08' : '0.18'} + uTone * 1.4 * s2 * 0.1) * shimmer * (1.0 - uClay);
+          totalEmissiveRadiance += (vec3(1.0, 0.95, 0.88) * s1 * ${beard ? '0.05' : '0.09'} + uTone * 1.4 * s2 * 0.08) * shimmer * strands * strands * (1.0 - uClay);
           totalEmissiveRadiance += vec3(0.663, 0.78, 0.714) * uHi * (0.18 + 0.06 * sin(uTime * 3.0));
           // soft silhouette: dither away the grazing rim so edges read as hair, not a shell
           float ndv = abs(dot(normal, V));
@@ -325,7 +335,7 @@ export function createLidMaterial(u: LidUniforms) {
         float w = 1.0;
         float k = clamp(abs(u) / w, 0.0, 1.0);
         float tilt = 0.05 * u * uSide;
-        float yU = 0.33 * uOpen * (1.0 - pow(k, 1.6)) + tilt;
+        float yU = 0.28 * uOpen * (1.0 - pow(k, 1.6)) + tilt;
         float yL = -0.26 * min(1.0, uOpen * 1.15 + 0.05) * (1.0 - pow(k, 1.45)) + tilt * 0.6;
         float inside = step(0.0, p.z) * step(abs(u), w) * step(yL, v) * step(v, yU);
         if (inside > 0.5) discard;

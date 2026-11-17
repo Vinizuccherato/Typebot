@@ -33,7 +33,10 @@ export function Eyes({ skin, clay, gaze, override = null }: Props) {
   const blink = useRef({ next: 2.5, t: -1 })
   const d = useMemo(() => new Vector3(), [])
 
+  const irisSkin = useMemo(() => new Color('#5a4232'), [])
+  const irisClay = useMemo(() => new Color('#8f9690'), [])
   useFrame((state, dt) => {
+    iris.uIris.value.lerpColors(irisSkin, irisClay, clay.value)
     const t = state.clock.elapsedTime
     const b = blink.current
     if (b.t < 0 && t > b.next) b.t = t

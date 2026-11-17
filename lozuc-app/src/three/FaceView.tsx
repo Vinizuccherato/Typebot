@@ -80,7 +80,7 @@ function Lights({ mark }: { mark: boolean }) {
     <>
       <hemisphereLight args={['#eef3ee', '#17201c', 0.5]} />
       {/* warm key from the viewer's left, sage rim from the right-back, brass top, mist fill */}
-      <directionalLight position={[-3.6, 2.6, 3.8]} intensity={2.1} color="#ffe8d4" />
+      <directionalLight position={[-3.6, 2.6, 3.8]} intensity={2.1} color="#fff0e4" />
       <directionalLight position={[4.4, 1.6, -2.2]} intensity={1.5} color="#a9c7b6" />
       <directionalLight position={[0.5, 4.5, -1]} intensity={0.55} color="#d8b97e" />
       <directionalLight position={[1.6, 0.2, 4]} intensity={0.45} color="#d7e8de" />

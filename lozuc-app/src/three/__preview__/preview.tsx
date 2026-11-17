@@ -15,8 +15,10 @@ const cells: { label: string; props: FaceViewProps }[] = [
   { label: 'side-part · hair framing', props: { subject: 'face', framing: 'hair', pose: 'threeQuarter', style: { ...CURRENT_STYLE, hair: 'side-part', beard: 'clean' } } },
 ]
 
+const qs = new URLSearchParams(location.search)
+
 function MapCell() {
-  const [active, setActive] = useState<RegionId | null>('jaw')
+  const [active, setActive] = useState<RegionId | null>((qs.get('active') as RegionId) ?? 'jaw')
   return (
     <FaceView
       className="absolute inset-0"
@@ -29,6 +31,13 @@ function MapCell() {
 }
 
 function App() {
+  if (qs.get('only') === 'map')
+    return (
+      <div style={{ position: 'relative', width: 400, height: 470 }}>
+        <SceneRoot />
+        <MapCell />
+      </div>
+    )
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: 10 }}>
       <SceneRoot />

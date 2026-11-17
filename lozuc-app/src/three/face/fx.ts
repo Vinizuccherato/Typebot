@@ -1,4 +1,4 @@
-import { AdditiveBlending, Color, ShaderMaterial } from 'three'
+import { Color, CustomBlending, OneFactor, OneMinusSrcAlphaFactor, ShaderMaterial } from 'three'
 
 /* ──────────────────────────────────────────────────────────────
    'scan' material: a sage hologram — iso-contours along depth, a light
@@ -65,7 +65,7 @@ const FRAG = /* glsl */ `
     float a = (0.03 + 0.36 * fres + 0.22 * zl + 0.07 * grid) * shown * uDim;
     vec3 col = mix(uA, uB, smoothstep(0.45, 1.0, fres)) * a;
     col += vec3(1.0) * exp(-pow(d / 0.008, 2.0)) * 0.75 * uSweep;
-    col += uA * exp(-pow(max(0.0, d) / 0.16, 2.0)) * 0.14 * uSweep;
+    col += uA * exp(-pow(min(0.0, d) / 0.1, 2.0)) * step(d, 0.0) * 0.12 * uSweep;
     col *= smoothstep(-3.4, -1.8, vLocal.y) * uReveal;
     gl_FragColor = vec4(col, clamp(max(col.r, max(col.g, col.b)), 0.0, 1.0));
     #include <colorspace_fragment>
@@ -80,6 +80,11 @@ export function createScan(u: FxUniforms, dim = 1, eye = false) {
     defines: eye ? { EYE: '' } : {},
     transparent: true,
     depthWrite: false,
-    blending: AdditiveBlending,
+    // additive colour, premultiplied-correct alpha (a transparent canvas never darkens the page)
+    blending: CustomBlending,
+    blendSrc: OneFactor,
+    blendDst: OneFactor,
+    blendSrcAlpha: OneFactor,
+    blendDstAlpha: OneMinusSrcAlphaFactor,
   })
 }

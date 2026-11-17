@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { AdditiveBlending, BackSide, Color, ExtrudeGeometry, MeshPhysicalMaterial, Shape, ShaderMaterial, type Group, type PointLight } from 'three'
+import { BackSide, Color, CustomBlending, ExtrudeGeometry, OneFactor, OneMinusSrcAlphaFactor, MeshPhysicalMaterial, Shape, ShaderMaterial, type Group, type PointLight } from 'three'
 
 /* The lozuc brand object: an original liquid-glass lozenge — a rounded rhombus
    pebble with soft bevelled shoulders, clear glass with a faint sage body,
@@ -41,7 +41,7 @@ export function Mark() {
   const glass = useMemo(
     () =>
       new MeshPhysicalMaterial({
-        color: new Color('#f2f8f4'),
+        color: new Color('#f6fbf8'),
         roughness: 0.05,
         metalness: 0,
         transmission: 1,
@@ -51,7 +51,7 @@ export function Mark() {
         iridescenceIOR: 1.3,
         iridescenceThicknessRange: [200, 600],
         attenuationColor: new Color('#a9c7b6'),
-        attenuationDistance: 1.6,
+        attenuationDistance: 2.6,
         clearcoat: 1,
         clearcoatRoughness: 0.03,
         specularIntensity: 1,
@@ -76,9 +76,14 @@ export function Mark() {
           void main() {
             float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 3.0);
             vec3 c = mix(uA, uB, 0.5 + 0.5 * sin(vY * 2.4 + uT * 0.7));
-            gl_FragColor = vec4(c * f * 0.55, 1.0);
+            vec3 o = c * f * 0.55;
+            gl_FragColor = vec4(o, max(o.r, max(o.g, o.b)));
           }`,
-        blending: AdditiveBlending,
+        blending: CustomBlending,
+        blendSrc: OneFactor,
+        blendDst: OneFactor,
+        blendSrcAlpha: OneFactor,
+        blendDstAlpha: OneMinusSrcAlphaFactor,
         depthWrite: false,
         transparent: true,
         side: BackSide,
@@ -90,13 +95,14 @@ export function Mark() {
   const sweep = useRef<PointLight>(null)
   const born = useRef(-1)
 
-  useFrame((s, dt) => {
+  useFrame((s) => {
     const t = s.clock.elapsedTime
     if (born.current < 0) born.current = t
     const age = t - born.current
     rim.uniforms.uT.value = t
     if (obj.current) {
-      obj.current.rotation.y += dt * 0.32
+      // a slow turn that never shows the thin edge: the lozenge stays readable
+      obj.current.rotation.y = Math.sin(t * 0.3) * 0.75
       obj.current.rotation.x = 0.18 + Math.sin(t * 0.55) * 0.06
       obj.current.rotation.z = Math.sin(t * 0.4) * 0.05
       const intro = 1 - Math.pow(1 - Math.min(1, age / 1.2), 3)

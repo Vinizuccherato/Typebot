@@ -213,7 +213,7 @@ export function sdfHair(shape: HairShape) {
 
     // hairline clip (keep hair only above it; front clip only in front of the ear)
     d = smax(d, hairlineH(ax, z) - y, 0.05)
-    if (shape !== 'current' && shape !== 'medium-flow') d = smax(d, -0.0 - (z + 1.68), 0.04) // short nape
+    if (shape !== 'current' && shape !== 'medium-flow') d = smax(d, -0.36 - y, 0.04) // short nape
     // never inside the head
     d = smax(d, -(sdfHead(x, y, z) - 0.008), 0.02)
     return d
@@ -245,27 +245,39 @@ function beardZone(x: number, y: number, z: number, cheekLift: number, neckDrop:
 
 export type BeardShape = 'short-boxed' | 'full' | 'goatee'
 
+/** sdfHead normalised by its gradient near the surface, so shell offsets are real thicknesses. */
+function faceDist(x: number, y: number, z: number) {
+  const f = sdfHead(x, y, z)
+  if (abs(f) > 0.3) return f
+  const e = 0.004
+  const gx = sdfHead(x + e, y, z) - sdfHead(x - e, y, z)
+  const gy = sdfHead(x, y + e, z) - sdfHead(x, y - e, z)
+  const gz = sdfHead(x, y, z + e) - sdfHead(x, y, z - e)
+  const g = sqrt(gx * gx + gy * gy + gz * gz) / (2 * e)
+  return f / max(0.35, g)
+}
+
 export function sdfBeard(shape: BeardShape) {
   return (x: number, y: number, z: number): number => {
     const ax = abs(x)
-    const face = sdfHead(x, y, z)
+    const face = faceDist(x, y, z)
     let d: number
     if (shape === 'goatee') {
       const chin = ell(x, y + 0.95, z - 0.0, 0.2, 0.24, 0.6)
       const mous = ell(x, y + 0.56, z - 0.0, 0.22, 0.06, 0.4)
       let zone = smin(chin, mous, 0.05)
       zone = max(zone, -ell(x, y + 0.67, z - 0.04, 0.2, 0.085, 0.4))
-      d = max(face - 0.055, zone)
+      d = max(face - 0.04 * min(1, max(0.12, -zone / 0.05)), zone)
     } else if (shape === 'full') {
       const zone = beardZone(x, y, z, 0.06, 0.1)
       // fuller at the chin and jaw
-      const bulk = 0.12 + 0.06 * Math.exp(-((x / 0.34) ** 2 + ((y + 1.0) / 0.22) ** 2)) + 0.025 * sstep(0.3, 0.6, ax) * sstep(-0.5, -0.85, y)
-      d = max(face - bulk, zone)
-      d -= 0.012 * sin(x * 25 + y * 6) * sin(y * 18 + z * 4)
+      const bulk = 0.07 + 0.05 * Math.exp(-((x / 0.34) ** 2 + ((y + 1.0) / 0.22) ** 2)) + 0.02 * sstep(0.3, 0.6, ax) * sstep(-0.5, -0.85, y)
+      d = max(face - bulk * min(1, max(0.1, -zone / 0.14)), zone)
+      d -= 0.008 * sin(x * 25 + y * 6) * sin(y * 18 + z * 4)
     } else {
       // short boxed: 6–8 mm, crisp lines
-      const zone = beardZone(x, y, z, 0, 0)
-      d = max(face - 0.07, zone)
+      const zone = beardZone(x, y, z, -0.08, -0.02)
+      d = max(face - 0.03 * min(1, max(0.2, -zone / 0.035)), zone)
     }
     // never inside the face
     d = smax(d, -(face - 0.004), 0.012)

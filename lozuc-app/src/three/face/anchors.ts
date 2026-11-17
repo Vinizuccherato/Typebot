@@ -18,15 +18,15 @@ const placeholderZ = (x: number, y: number) => 0.92 * Math.sqrt(Math.max(0, 1 - 
 /** Region probe: ray origin (head-local) + direction + outward lift (units). */
 const REGION_PROBES: Record<RegionId, { o: [number, number, number]; d: [number, number, number]; lift: number }> = {
   composition: { o: [0, 0.36, 2], d: [0, 0, -1], lift: 0.03 },
-  hair: { o: [0.42, 2.2, -0.45], d: [-0.15, -1, -0.12], lift: 0.15 },
+  hair: { o: [0.3, 0.86, 2], d: [0, -0.22, -1], lift: 0.16 },
   brows: { o: [0.4, 0.15, 2], d: [0, 0, -1], lift: 0.03 },
   eyes: { o: [-0.36, -0.2, 2], d: [0, 0, -1], lift: 0.02 },
   contrast: { o: [0.5, -0.28, 2], d: [0, 0, -1], lift: 0.02 },
-  skin: { o: [-0.48, -0.35, 2], d: [0, 0, -1], lift: 0.02 },
+  skin: { o: [-0.36, 0.34, 2], d: [0, 0, -1], lift: 0.02 },
   noseEars: { o: [0, -0.33, 2], d: [0, 0, -1], lift: 0.03 },
   lips: { o: [0, -0.7, 2], d: [0, 0, -1], lift: 0.03 },
   beard: { o: [-0.36, -0.9, 2], d: [0, 0, -1], lift: 0.08 },
-  jaw: { o: [2, -0.78, -0.62], d: [-1, 0, 0], lift: 0.05 },
+  jaw: { o: [1.1, -0.84, 2], d: [-0.3, 0, -1], lift: 0.05 },
   neck: { o: [0, -1.62, 2], d: [0, 0, -1], lift: 0.03 },
 }
 
