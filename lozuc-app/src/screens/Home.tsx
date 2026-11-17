@@ -73,9 +73,9 @@ export function HomeScreen() {
                     <p className="mt-2 text-[13.5px] leading-[1.45] text-[var(--text-2)]">Para {next.purpose.toLowerCase()}. {next.review}.</p>
                   </div>
                   <div className="flex flex-col items-start gap-2">
-                    <button type="button" onClick={() => go('guide')} className="glass glass-ink liquid inline-flex h-12 cursor-pointer items-center gap-2 rounded-full px-5 text-[14.5px] font-semibold outline-none">
+                    <button type="button" onClick={() => go('guide')} className="glass glass-ink liquid inline-flex h-12 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full px-5 text-[14.5px] font-semibold outline-none">
                       <Scissors size={16} className="relative z-[3]" />
-                      <span className="relative z-[3]">Abrir guia do barbeiro</span>
+                      <span className="relative z-[3]">Guia do barbeiro</span>
                     </button>
                     <span className="text-[12px] text-[var(--text-3)]">{direction.name}</span>
                   </div>

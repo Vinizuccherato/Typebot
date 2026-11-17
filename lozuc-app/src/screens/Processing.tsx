@@ -124,7 +124,7 @@ export function ProcessingScreen() {
 
   const cta = (
     <PinnedCTA web={web}>
-      <Button className="w-full" disabled={!done} onClick={() => go('reading')}>
+      <Button className="w-full disabled:opacity-60" variant={done ? 'primary' : 'secondary'} disabled={!done} onClick={() => go('reading')}>
         {done ? 'Ver minha leitura' : 'Lendo…'}
       </Button>
     </PinnedCTA>

@@ -103,7 +103,7 @@ export function PersonalScreen() {
         ))}
       </div>
       <form
-        className="glass glass-smoke liquid mx-auto flex max-w-[720px] items-center gap-2 rounded-[28px] p-1.5 pl-4"
+        className="glass glass-smoke liquid mx-auto flex max-w-[720px] items-center gap-2 rounded-[28px] p-1.5 pl-4 focus-within:ring-2 focus-within:ring-[var(--sage)]/60"
         onSubmit={(e) => {
           e.preventDefault()
           submit()
@@ -119,7 +119,9 @@ export function PersonalScreen() {
           placeholder="Conte o que fez ou pergunte…"
           autoComplete="off"
           tabIndex={active ? 0 : -1}
-          className="relative z-[3] h-11 min-w-0 flex-1 bg-transparent text-[15px] text-[var(--text)] placeholder:text-[var(--text-4)] outline-none focus-visible:outline-none"
+          className="relative z-[3] h-11 min-w-0 flex-1 bg-transparent text-[15px] text-[var(--text)] placeholder:text-[var(--text-4)]"
+          // the whole capsule shows the focus ring (focus-within) — the global input outline would draw a box inside it
+          style={{ outline: 'none' }}
         />
         <motion.button type="submit" aria-label="Enviar" disabled={!text.trim() || typing} whileTap={{ scale: 0.9 }} className="glass glass-ink relative grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-full outline-none disabled:opacity-40">
           <ArrowUp size={19} strokeWidth={2.4} className="relative z-[3]" />

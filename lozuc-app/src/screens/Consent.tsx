@@ -131,7 +131,8 @@ export function ConsentScreen() {
   const cta = (
     <PinnedCTA web={web}>
       <Button
-        className="w-full"
+        className="w-full disabled:opacity-60"
+        variant={consent.biometric ? 'primary' : 'secondary'}
         disabled={!consent.biometric}
         onClick={() => {
           setConsent({ camera: 'granted' })

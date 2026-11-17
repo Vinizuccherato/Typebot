@@ -30,6 +30,10 @@ const declaredStyle = (p: Profile): StyleSpec => ({
   brows: 'natural',
 })
 
+const BUDGET_LABEL = { enxuto: 'Orçamento enxuto', equilibrado: 'Orçamento equilibrado', investir: 'Investir mais' } as const
+const HAIR_LABEL = { curto: 'curto', medio: 'médio', longo: 'longo' } as const
+const BEARD_LABEL = { sem: 'sem', 'por-fazer': 'por fazer', curta: 'curta', cheia: 'cheia' } as const
+
 const TRI = [
   { value: '0', label: 'Nada' },
   { value: '1', label: 'Às vezes' },
@@ -37,9 +41,9 @@ const TRI = [
 ] as const
 
 const SKIN: { key: keyof Profile['skin']; label: string; why: string }[] = [
-  { key: 'oleosidade', label: 'Oleosidade', why: 'Brilho na testa e no nariz ao longo do dia' },
-  { key: 'ressecamento', label: 'Ressecamento', why: 'Repuxa ou descama, principalmente após o banho' },
-  { key: 'sensibilidade', label: 'Sensibilidade', why: 'Arde, coça ou fica vermelha ao barbear' },
+  { key: 'oleosidade', label: 'Oleosidade', why: 'Brilho na testa e no nariz' },
+  { key: 'ressecamento', label: 'Ressecamento', why: 'Repuxa ou descama após o banho' },
+  { key: 'sensibilidade', label: 'Sensibilidade', why: 'Arde ou avermelha ao barbear' },
 ]
 
 function StepGoal() {
@@ -235,7 +239,7 @@ export function ProfileScreen() {
 
   const cta = (
     <PinnedCTA web={web}>
-      <Button onClick={next} disabled={!answered} className="w-full">
+      <Button onClick={next} disabled={!answered} variant={answered ? 'primary' : 'secondary'} className="w-full disabled:opacity-60">
         {step < 3 ? 'Continuar' : 'Continuar para as fotos'}
       </Button>
     </PinnedCTA>
@@ -250,7 +254,7 @@ export function ProfileScreen() {
           <div className="glass glass-frost relative hidden overflow-hidden rounded-[32px] @3xl:block">
             <FaceView subject="face" material="skin" style={declaredStyle(p)} framing="bust" autoRotate className="absolute inset-0" />
             <div className="absolute inset-x-5 bottom-5 flex flex-wrap gap-2">
-              {[p.goal && GOALS.find((g) => g.value === p.goal)?.title, p.groomingTime && `${p.groomingTime} min/dia`, p.budget, p.hairNow && `cabelo ${p.hairNow}`, p.beardNow && `barba ${p.beardNow}`]
+              {[p.goal && GOALS.find((g) => g.value === p.goal)?.title, p.groomingTime && `${p.groomingTime === '20' ? '20+' : p.groomingTime} min/dia`, p.budget && BUDGET_LABEL[p.budget], p.hairNow && `Cabelo ${HAIR_LABEL[p.hairNow]}`, p.beardNow && `Barba ${BEARD_LABEL[p.beardNow]}`]
                 .filter(Boolean)
                 .map((t) => (
                   <span key={t as string} className="glass glass-pill liquid rounded-full px-3 py-1.5 text-[12px] font-medium">
