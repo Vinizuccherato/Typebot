@@ -49,28 +49,35 @@ const FRAMES = {
   head: { cy: -0.08, h: 3.3, w: 3.3 },
   face: { cy: -0.3, h: 2.15, w: 2.0 },
   bust: { cy: -1.15, h: 5.2, w: 5.0 },
-  hair: { cy: 0.62, h: 1.9, w: 2.5 },
-  beard: { cy: -0.8, h: 1.35, w: 1.9 },
-  brows: { cy: 0.08, h: 0.72, w: 1.6 },
+  hair: { cy: 0.45, h: 2.5, w: 3.0 }, // whole hair mass incl. sides and fringe
+  beard: { cy: -0.78, h: 1.8, w: 2.2 }, // nose to neckline, both cheeks
+  brows: { cy: 0.08, h: 1.0, w: 1.9 }, // both brows + eyes for context
   mark: { cy: 0, h: 2.7, w: 2.7 },
 } as const
 
 const NAME = Object.fromEntries(READING.map((r) => [r.id, r.name])) as Record<RegionId, string>
 
-function CameraRig({ framing, pose }: { framing: keyof typeof FRAMES; pose: React.MutableRefObject<Pose> }) {
+/** how far the face centre swings sideways at each preset yaw (pivot behind the face) */
+const POSE_X = { front: 0, threeQuarter: 0.6, profile: 0.85 } as const
+
+function CameraRig({ framing, pose, preset }: { framing: keyof typeof FRAMES; pose: React.MutableRefObject<Pose>; preset?: keyof typeof POSE_X }) {
   const camera = useThree((s) => s.camera) as PerspectiveCamera
   const size = useThree((s) => s.size)
-  const cur = useRef<{ cy: number; d: number } | null>(null)
+  const cur = useRef<{ cx: number; cy: number; d: number } | null>(null)
   useFrame((_, dt) => {
     const f = FRAMES[framing]
     const t = Math.tan((camera.fov * Math.PI) / 360)
     const aspect = size.width / Math.max(1, size.height)
     const d = Math.max(f.h / (2 * t), f.w / (2 * t * aspect)) / pose.current.zoom
-    if (!cur.current) cur.current = { cy: f.cy, d }
+    // close framings follow the face when the preset turns it (no cheek-cropped thumbnails)
+    const close = framing === 'face' || framing === 'beard' || framing === 'brows' ? 1 : framing === 'hair' ? 0.55 : framing === 'head' ? 0.2 : 0
+    const cx = POSE_X[preset ?? 'front'] * close
+    if (!cur.current) cur.current = { cx, cy: f.cy, d }
+    easing.damp(cur.current, 'cx', cx, 0.35, dt)
     easing.damp(cur.current, 'cy', f.cy, 0.35, dt)
     easing.damp(cur.current, 'd', d, 0.3, dt)
-    camera.position.set(0, cur.current.cy + 0.04, cur.current.d)
-    camera.lookAt(0, cur.current.cy, 0)
+    camera.position.set(cur.current.cx, cur.current.cy + 0.04, cur.current.d)
+    camera.lookAt(cur.current.cx, cur.current.cy, 0)
   })
   return null
 }
@@ -78,12 +85,12 @@ function CameraRig({ framing, pose }: { framing: keyof typeof FRAMES; pose: Reac
 function Lights({ mark }: { mark: boolean }) {
   return (
     <>
-      <hemisphereLight args={['#eef3ee', '#17201c', 0.5]} />
-      {/* warm key from the viewer's left, sage rim from the right-back, brass top, mist fill */}
-      <directionalLight position={[-3.6, 2.6, 3.8]} intensity={2.1} color="#fff0e4" />
-      <directionalLight position={[4.4, 1.6, -2.2]} intensity={1.5} color="#a9c7b6" />
-      <directionalLight position={[0.5, 4.5, -1]} intensity={0.55} color="#d8b97e" />
-      <directionalLight position={[1.6, 0.2, 4]} intensity={0.45} color="#d7e8de" />
+      <hemisphereLight args={['#f1f0ea', '#3a302a', 0.55]} />
+      {/* sculpture studio: soft warm key from the upper left, cool sage rim from behind right, mist fill, warm bounce */}
+      <directionalLight position={[-3.4, 3.2, 3.6]} intensity={1.75} color="#fff1e6" />
+      <directionalLight position={[4.2, 1.8, -2.6]} intensity={1.6} color="#a9c7b6" />
+      <directionalLight position={[2.2, 0.6, 4]} intensity={0.55} color="#e3ece6" />
+      <directionalLight position={[0, -3.5, 2.2]} intensity={0.32} color="#e9cdb8" />
       <Suspense fallback={null}>
         <Environment resolution={64} frames={1}>
           <Lightformer form="rect" intensity={1.3} color="#fff0e2" position={[-3, 1.5, 4]} scale={[3, 2.4, 1]} />
@@ -273,7 +280,7 @@ export function FaceView({ className, subject, framing, interactive, style, pose
           style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
         >
           <PerformanceMonitor onDecline={() => setDegraded(true)} />
-          <CameraRig framing={frame} pose={pose} />
+          <CameraRig framing={frame} pose={pose} preset={subject === 'face' ? posePreset : undefined} />
           <Lights mark={subject === 'mark'} />
           {subject === 'mark' ? (
             <Mark />

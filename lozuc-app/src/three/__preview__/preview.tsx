@@ -9,9 +9,9 @@ const cells: { label: string; props: FaceViewProps }[] = [
   { label: 'skin · current · front', props: { subject: 'face', interactive: true } },
   { label: 'textured-crop + short-boxed · ¾', props: { subject: 'face', pose: 'threeQuarter', style: { hair: 'textured-crop', hairTone: TONES.espresso, beard: 'short-boxed', beardTone: TONES.espresso, brows: 'clean-up' } } },
   { label: 'slick-back + full · profile', props: { subject: 'face', pose: 'profile', style: { hair: 'slick-back', hairTone: TONES.castanho, beard: 'full', beardTone: TONES.castanho, brows: 'natural' } } },
-  { label: 'scan 60', props: { subject: 'face', material: 'scan', scan: 60, landmarks: true } },
+  { label: 'beard framing · stubble', props: { subject: 'face', framing: 'beard', pose: 'threeQuarter' } },
   { label: 'buzz + goatee · bust', props: { subject: 'face', framing: 'bust', style: { hair: 'buzz', hairTone: TONES.grafite, beard: 'goatee', beardTone: TONES.grafite, brows: 'defined' } } },
-  { label: 'mark', props: { subject: 'mark' } },
+  { label: 'medium-flow + full · face', props: { subject: 'face', framing: 'face', style: { hair: 'medium-flow', hairTone: TONES.avela, beard: 'full', beardTone: TONES.avela, brows: 'natural' } } },
   { label: 'side-part · hair framing', props: { subject: 'face', framing: 'hair', pose: 'threeQuarter', style: { ...CURRENT_STYLE, hair: 'side-part', beard: 'clean' } } },
 ]
 

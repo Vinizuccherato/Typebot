@@ -13,8 +13,8 @@ export const REGION_GLSL = /* glsl */ `
   // beard zone on the skin: below the cheek line, above the neckline, lips excluded
   float beardZone(vec3 P) {
     float ax = abs(P.x);
-    float cheek = -0.2 - 0.35 * smoothstep(0.74, 0.24, ax);
-    float neck = -1.32 + 0.55 * smoothstep(-0.55, -1.0, P.z);
+    float cheek = -0.2 - 0.35 * (1.0 - smoothstep(0.24, 0.74, ax));
+    float neck = -1.32 + 0.55 * (1.0 - smoothstep(-1.0, -0.55, P.z));
     float m = smoothstep(cheek + 0.03, cheek - 0.03, P.y) * smoothstep(neck - 0.04, neck + 0.04, P.y) * smoothstep(-1.06, -0.98, P.z);
     float lips = rgBlob(vec2(P.x, P.y), vec2(0.0, -0.67), vec2(0.2, 0.075));
     float mous = rgBlob(vec2(P.x, P.y), vec2(0.0, -0.545), vec2(0.24, 0.06)) * smoothstep(-0.3, 0.0, P.z);
@@ -34,7 +34,7 @@ export const REGION_GLSL = /* glsl */ `
     if (id < 6.5) return max(rgBlob(vec2(P.x, P.y), vec2(0.0, -0.25), vec2(0.12, 0.22)) * front, rgBlob(vec2(ax, P.z), vec2(0.78, -0.95), vec2(0.12, 0.2)) * smoothstep(-0.5, -0.3, P.y) * (1.0 - smoothstep(0.15, 0.35, P.y))); // nose + ears
     if (id < 7.5) return rgBlob(vec2(P.x, P.y), vec2(0.0, -0.67), vec2(0.2, 0.09)) * front;      // lips
     if (id < 8.5) return smoothstep(0.2, 0.5, ax) * rgBlob(vec2(0.0, P.y), vec2(0.0, -0.78), vec2(1.0, 0.22)) + rgBlob(vec2(P.x, P.y), vec2(0.0, -1.04), vec2(0.25, 0.12)) * front; // jaw + chin
-    if (id < 9.5) return smoothstep(-1.15, -1.3, P.y) * smoothstep(-2.0, -1.6, P.y);              // neck
+    if (id < 9.5) return (1.0 - smoothstep(-1.3, -1.15, P.y)) * smoothstep(-2.0, -1.6, P.y);              // neck
     return (rgBlob(q, vec2(0.42, -0.3), vec2(0.22, 0.2)) + rgBlob(vec2(P.x, P.y), vec2(0.0, 0.36), vec2(0.4, 0.14))) * front; // skin: cheeks + forehead
   }
 `

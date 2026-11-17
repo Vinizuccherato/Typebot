@@ -22,7 +22,7 @@ interface Props {
 export function Eyes({ skin, clay, gaze, override = null }: Props) {
   const eyeGeo = useMemo(() => new SphereGeometry(1, 48, 36).rotateX(Math.PI / 2), [])
   const shellGeo = useMemo(() => new SphereGeometry(1, 56, 36).rotateX(Math.PI / 2), [])
-  const iris = useMemo(() => ({ uIris: { value: new Color('#5a4232') }, uPupil: { value: 0.22 } }), [])
+  const iris = useMemo(() => ({ uIris: { value: new Color('#5e4636') }, uPupil: { value: 0.2 }, uSkin: { value: skin }, uClay: clay }), []) // eslint-disable-line react-hooks/exhaustive-deps
   const eyeMat = useMemo(() => createEyeMaterial(iris), [iris])
   const lidU = useMemo(() => [-1, 1].map((side): LidUniforms => ({ uSkin: { value: skin }, uClay: clay, uOpen: { value: 1 }, uSide: { value: side } })), []) // eslint-disable-line react-hooks/exhaustive-deps
   const lidMats = useMemo(() => lidU.map(createLidMaterial), [lidU])
@@ -33,16 +33,13 @@ export function Eyes({ skin, clay, gaze, override = null }: Props) {
   const blink = useRef({ next: 2.5, t: -1 })
   const d = useMemo(() => new Vector3(), [])
 
-  const irisSkin = useMemo(() => new Color('#5a4232'), [])
-  const irisClay = useMemo(() => new Color('#8f9690'), [])
   useFrame((state, dt) => {
-    iris.uIris.value.lerpColors(irisSkin, irisClay, clay.value)
     const t = state.clock.elapsedTime
     const b = blink.current
     if (b.t < 0 && t > b.next) b.t = t
     let lid = 1
     if (b.t >= 0) {
-      const p = (t - b.t) / 0.24
+      const p = (t - b.t) / 0.3
       lid = Math.max(0.02, p < 0.4 ? 1 - p / 0.4 : Math.min(1, (p - 0.4) / 0.6))
       if (p >= 1) {
         b.t = -1
@@ -56,10 +53,10 @@ export function Eyes({ skin, clay, gaze, override = null }: Props) {
       const ball = balls.current[i]
       if (g && ball) {
         d.copy(gaze.current).sub(g.position)
-        const yaw = Math.max(-0.35, Math.min(0.35, Math.atan2(d.x, d.z) + side * 0.07))
-        const pitch = Math.max(-0.25, Math.min(0.25, Math.atan2(d.y, Math.hypot(d.x, d.z))))
-        easing.damp(ball.rotation, 'y', yaw, 0.08, dt)
-        easing.damp(ball.rotation, 'x', -pitch, 0.08, dt)
+        const yaw = Math.max(-0.2, Math.min(0.2, Math.atan2(d.x, d.z) + side * 0.07))
+        const pitch = Math.max(-0.12, Math.min(0.12, Math.atan2(d.y, Math.hypot(d.x, d.z))))
+        easing.damp(ball.rotation, 'y', yaw, 0.25, dt)
+        easing.damp(ball.rotation, 'x', -pitch, 0.25, dt)
       }
     }
   })

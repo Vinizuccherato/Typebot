@@ -1,3 +1,6 @@
+/** 'skin' is a sculpted bust: mostly clay, a hint of tone in hair/beard; eyes are carved like a statue's. */
+const SKIN_CLAY = 0.62
+const EYE_CLAY = 0.94
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Color, Raycaster, Vector2, Vector3, type Group, type Material, type Mesh, type Object3D } from 'three'
@@ -44,8 +47,8 @@ const FLOW: Record<HairShape, number> = { current: 0, 'textured-crop': 1, 'side-
 const BEARD: Record<StyleSpec['beard'], { shell: BeardShape | null; stubble: number; shadow: number }> = {
   clean: { shell: null, stubble: 0, shadow: 0.7 },
   stubble: { shell: null, stubble: 1, shadow: 0.45 },
-  'short-boxed': { shell: 'short-boxed', stubble: 0.7, shadow: 0.4 },
-  full: { shell: 'full', stubble: 0.7, shadow: 0.4 },
+  'short-boxed': { shell: 'short-boxed', stubble: 0.25, shadow: 0.35 },
+  full: { shell: 'full', stubble: 0.3, shadow: 0.35 },
   goatee: { shell: 'goatee', stubble: 0.12, shadow: 0.55 },
 }
 const BROW: Record<StyleSpec['brows'], [number, number, number]> = {
@@ -87,6 +90,7 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
   const size = useThree((s) => s.size)
 
   const skinU = useMemo(createSkinUniforms, [])
+  const eyeClay = useMemo(() => ({ value: 0 }), [])
   const shellU = useMemo(() => {
     const mk = (beard: boolean): ShellUniforms => ({ uTone: { value: new Color() }, uShow: { value: 0 }, uFlow: { value: beard ? 4 : 0 }, uKeyView: { value: new Vector3() }, uHi: { value: 0 }, uClay: skinU.uClay, uTime: skinU.uTime })
     return {
@@ -140,13 +144,18 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
     easing.dampC(skinU.uBeardTone.value, targets.beard.set(style.beardTone), 0.2, dt)
     easing.damp(skinU.uGroom.value, 'x', beardSpec.stubble, 0.25, dt)
     easing.damp(skinU.uGroom.value, 'y', beardSpec.shadow, 0.25, dt)
+    // carved beard relief on the face surface (skin/map); scan keeps the shell meshes
+    easing.damp(skinU.uBeard.value, 'x', beardSpec.shell === 'short-boxed' ? 1 : 0, 0.25, dt)
+    easing.damp(skinU.uBeard.value, 'y', beardSpec.shell === 'full' ? 1 : 0, 0.25, dt)
+    easing.damp(skinU.uBeard.value, 'z', beardSpec.shell === 'goatee' ? 1 : 0, 0.25, dt)
     easing.damp(skinU.uGroom.value, 'z', hairSpec.scalp, 0.25, dt)
     easing.damp(skinU.uFade.value, 'x', hairSpec.fade, 0.25, dt)
     const bw = BROW[style.brows]
     easing.damp(skinU.uBrow.value, 'x', bw[0], 0.2, dt)
     easing.damp(skinU.uBrow.value, 'y', bw[1], 0.2, dt)
     easing.damp(skinU.uBrow.value, 'z', bw[2], 0.2, dt)
-    easing.damp(skinU.uClay, 'value', material === 'map' ? 1 : 0, 0.25, dt)
+    easing.damp(skinU.uClay, 'value', material === 'map' ? 1 : SKIN_CLAY, 0.25, dt)
+    easing.damp(eyeClay, 'value', material === 'map' ? 1 : EYE_CLAY, 0.25, dt)
     const ri = regions?.show ? regionIndex(regions.active) : -1
     if (ri >= 0) skinU.uRegion.value = ri
     easing.damp(skinU.uRegionAmt, 'value', ri >= 0 ? 1 : 0, 0.2, dt)
@@ -168,7 +177,7 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
       easing.damp(u.uShow, 'value', beardSpec.shell === s ? 1 : 0, 0.22, dt)
       easing.damp(u.uHi, 'value', regions?.show && regions.active === 'beard' ? 1 : 0, 0.2, dt)
       const m = beardMeshes.current[s]
-      if (m) m.visible = material === 'scan' ? beardSpec.shell === s : u.uShow.value > 0.01
+      if (m) m.visible = material === 'scan' && beardSpec.shell === s
     }
 
     // pose: preset + drag + idle life
@@ -183,7 +192,7 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
       easing.damp(outer.current.rotation, 'x', -pitch, P.dragging ? 0.05 : 0.3, dt)
       outer.current.position.y = PIVOT.y + Math.sin(t * 1.1) * 0.004 // breathing
     }
-    gaze.current.set(state.pointer.x * 5, state.pointer.y * 3, 12)
+    gaze.current.set(state.pointer.x * 2.5, state.pointer.y * 1.2 - 0.8, 12) // relaxed, slightly lowered gaze
 
     // region hotspots: project anchors to host px; hide when facing away
     if (regions && inner.current) {
@@ -240,7 +249,7 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
       <group ref={inner} position={[-PIVOT.x, -PIVOT.y, -PIVOT.z]}>
         <mesh geometry={geo.body} material={mats.body} renderOrder={1} />
         <mesh ref={headMesh} geometry={geo.head} material={mats.head} renderOrder={2} />
-        <Eyes skin={skinU.uSkin.value} clay={skinU.uClay} gaze={gaze} override={mats.eye} />
+        <Eyes skin={skinU.uSkin.value} clay={eyeClay} gaze={gaze} override={mats.eye} />
         {HAIR_SHAPES.map((s) =>
           geo.hair[s] ? <mesh key={s} ref={(m) => void (hairMeshes.current[s] = m)} geometry={geo.hair[s]} material={mats.hair[s]} renderOrder={order} visible={false} /> : null,
         )}

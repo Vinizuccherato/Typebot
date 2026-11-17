@@ -163,7 +163,7 @@ interface Shell {
 }
 
 const SHELLS: Record<HairShape, Shell> = {
-  current: { top: 0.12, side: 0.13, back: 0.1, sideTop: 0.0 },
+  current: { top: 0.085, side: 0.12, back: 0.09, sideTop: 0.0 },
   'textured-crop': { top: 0.11, side: 0.018, back: 0.02, sideTop: 0.48 },
   'side-part': { top: 0.1, side: 0.03, back: 0.035, sideTop: 0.38 },
   'slick-back': { top: 0.085, side: 0.028, back: 0.04, sideTop: 0.4 },
@@ -179,13 +179,23 @@ export function sdfHair(shape: HairShape) {
     const back = sstep(-0.9, -1.5, z) * (1 - sstep(0.4, 0.8, y))
     let t = s.side + (s.top - s.side) * up
     t = t * (1 - back) + max(s.back, t * 0.6) * back
+    // taper to nothing toward the hairline: the mass grows out of the scalp instead of sitting on it like a helmet
+    const hl = hairlineH(ax, z)
+    t *= Math.min(1, Math.max(0.15, (y - hl) / 0.16))
     let d = skull(x, y, z) - t
 
     if (shape === 'current') {
-      // untidy volume at the sides + a loose fringe
-      d = smin(d, ell(ax - 0.62, y - 0.18, z + 0.85, 0.26, 0.32, 0.42), 0.16)
-      d = smin(d, ell(x + 0.05, y - 0.6, z + 0.12, 0.42, 0.13, 0.22), 0.14)
-      d -= 0.018 * sin(x * 11 + z * 5) * sin(y * 9 + x * 3) * sin(z * 8 + y * 2)
+      // volume concentrated at the sides (as read), a flatter crown, loose tufts at the fringe and over the ears
+      d = smin(d, ell(ax - 0.6, y - 0.22, z + 0.88, 0.26, 0.3, 0.44), 0.14)
+      d = smin(d, ell(ax - 0.66, y - 0.02, z + 0.74, 0.13, 0.14, 0.2), 0.08)
+      d = smin(d, ell(ax - 0.62, y + 0.02, z + 1.08, 0.13, 0.15, 0.2), 0.08)
+      d = smin(d, ell(x + 0.05, y - 0.62, z + 0.14, 0.4, 0.11, 0.2), 0.12)
+      for (let i = 0; i < 5; i++) {
+        const tx = -0.36 + i * 0.18 + 0.03 * sin(i * 2.3)
+        d = smin(d, ell(x - tx, y - 0.57 + 0.025 * sin(i * 1.7), z + 0.02, 0.085, 0.07, 0.12), 0.05)
+      }
+      d -= 0.022 * sin(x * 13.1 + z * 4.7) * sin(y * 10.3 + x * 3.1) * sin(z * 9.7 + y * 2.3)
+      d -= 0.01 * sin(x * 31 + y * 7) * sin(z * 27 - x * 5)
     } else if (shape === 'textured-crop') {
       // volume on top, pushed forward, with chunky texture
       d = smin(d, ell(x, y - 0.66, z + 0.62, 0.6, 0.27, 0.72), 0.12)
@@ -212,7 +222,8 @@ export function sdfHair(shape: HairShape) {
     }
 
     // hairline clip (keep hair only above it; front clip only in front of the ear)
-    d = smax(d, hairlineH(ax, z) - y, 0.05)
+    const ragged = shape === 'current' || shape === 'medium-flow' ? 0.03 * sin(x * 29 + z * 7) * sin(z * 23 - x * 5) : 0
+    d = smax(d, hl + ragged - y, 0.04)
     if (shape !== 'current' && shape !== 'medium-flow') d = smax(d, -0.36 - y, 0.04) // short nape
     // never inside the head
     d = smax(d, -(sdfHead(x, y, z) - 0.008), 0.02)
