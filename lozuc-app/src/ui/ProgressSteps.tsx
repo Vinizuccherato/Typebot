@@ -10,7 +10,7 @@ export function ProgressSteps({ total, current, label }: { total: number; curren
           <span key={i} className="relative h-1 flex-1 overflow-hidden rounded-full bg-white/12">
             <motion.span
               className="absolute inset-y-0 left-0 rounded-full"
-              style={{ background: 'linear-gradient(90deg, var(--lilac), var(--champagne))' }}
+              style={{ background: 'linear-gradient(90deg, var(--sage), var(--mist))' }}
               initial={false}
               animate={{ width: i < current ? '100%' : i === current ? '55%' : '0%' }}
               transition={springs.soft}

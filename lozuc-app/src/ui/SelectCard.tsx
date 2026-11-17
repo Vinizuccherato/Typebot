@@ -19,7 +19,7 @@ export function SelectCard({ selected, onToggle, icon, title, hint }: { selected
       whileTap={{ scale: 0.97 }}
       transition={springs.snappy}
       className={cn('glass glass-frost relative flex min-h-[112px] cursor-pointer flex-col items-start justify-between rounded-[22px] p-4 text-left outline-none')}
-      style={selected ? { ['--g-edge-a' as string]: 'rgb(195 180 255 / 0.9)', ['--g-fill-a' as string]: 'rgb(195 180 255 / 0.16)' } : undefined}
+      style={selected ? { ['--g-edge-a' as string]: 'rgb(215 232 222 / 0.9)', ['--g-fill-a' as string]: 'rgb(169 199 182 / 0.18)' } : undefined}
     >
       <span className="relative z-[3] grid h-10 w-10 place-items-center rounded-full bg-white/8 text-[var(--text)]">{icon}</span>
       <span className="relative z-[3]">
@@ -30,10 +30,10 @@ export function SelectCard({ selected, onToggle, icon, title, hint }: { selected
         aria-hidden
         className="absolute right-3 top-3 z-[3] grid h-6 w-6 place-items-center rounded-full"
         initial={false}
-        animate={{ scale: selected ? 1 : 0.6, opacity: selected ? 1 : 0, backgroundColor: 'var(--lilac)' }}
+        animate={{ scale: selected ? 1 : 0.6, opacity: selected ? 1 : 0, backgroundColor: 'var(--sage)' }}
         transition={springs.bouncy}
       >
-        <Check size={14} strokeWidth={2.6} className="text-[var(--color-ink)]" />
+        <Check size={14} strokeWidth={2.6} className="text-[var(--color-pine)]" />
       </motion.span>
     </motion.button>
   )

@@ -75,6 +75,8 @@ interface Props {
   regions?: RegionLayer
 }
 
+const byKey = <K extends string, V>(keys: K[], f: (k: K) => V) => Object.fromEntries(keys.map((k) => [k, f(k)])) as unknown as Record<K, V>
+
 const _v = new Vector3()
 const _n = new Vector3()
 const _ndc = new Vector2()
@@ -88,8 +90,8 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
   const shellU = useMemo(() => {
     const mk = (beard: boolean): ShellUniforms => ({ uTone: { value: new Color() }, uShow: { value: 0 }, uFlow: { value: beard ? 4 : 0 }, uKeyView: { value: new Vector3() }, uHi: { value: 0 }, uClay: skinU.uClay, uTime: skinU.uTime })
     return {
-      hair: Object.fromEntries(HAIR_SHAPES.map((s) => [s, { ...mk(false), uFlow: { value: FLOW[s] } }])) as Record<HairShape, ShellUniforms>,
-      beard: Object.fromEntries(BEARD_SHAPES.map((s) => [s, mk(true)])) as Record<BeardShape, ShellUniforms>,
+      hair: byKey<HairShape, ShellUniforms>(HAIR_SHAPES, (s) => ({ ...mk(false), uFlow: { value: FLOW[s] } })),
+      beard: byKey<BeardShape, ShellUniforms>(BEARD_SHAPES, () => mk(true)),
     }
   }, [skinU])
   const fxU = useMemo(createFxUniforms, [])
@@ -100,12 +102,12 @@ export function HeadModel({ material, scan, style, pose, posePreset, landmarks, 
       const body = createScan(fxU, 0.8)
       const hair = createScan(fxU, 0.55)
       const eye = createScan(fxU, 0.6, true)
-      return { head, body, hair: Object.fromEntries(HAIR_SHAPES.map((s) => [s, hair])) as Record<HairShape, Material>, beard: Object.fromEntries(BEARD_SHAPES.map((s) => [s, hair])) as Record<BeardShape, Material>, eye: eye as Material | null, owned: [head, body, hair, eye] as Material[] }
+      return { head, body, hair: byKey<HairShape, Material>(HAIR_SHAPES, () => hair), beard: byKey<BeardShape, Material>(BEARD_SHAPES, () => hair), eye: eye as Material | null, owned: [head, body, hair, eye] as Material[] }
     }
     const head = createSkinMaterial('head', skinU)
     const body = createSkinMaterial('body', skinU)
-    const hair = Object.fromEntries(HAIR_SHAPES.map((s) => [s, createShellMaterial(shellU.hair[s])])) as Record<HairShape, Material>
-    const beard = Object.fromEntries(BEARD_SHAPES.map((s) => [s, createShellMaterial(shellU.beard[s], true)])) as Record<BeardShape, Material>
+    const hair = byKey<HairShape, Material>(HAIR_SHAPES, (s) => createShellMaterial(shellU.hair[s]))
+    const beard = byKey<BeardShape, Material>(BEARD_SHAPES, (s) => createShellMaterial(shellU.beard[s], true))
     return { head, body, hair, beard, eye: null, owned: [head, body, ...Object.values(hair), ...Object.values(beard)] as Material[] }
   }, [material, skinU, shellU, fxU])
   useEffect(() => () => mats.owned.forEach((m) => m.dispose()), [mats])
