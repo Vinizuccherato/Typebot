@@ -1,0 +1,216 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/geist';
+
+/* ──────────────────────────────────────────────────────────────
+   lozuc — personal de imagem masculina com IA.
+   Pine-graphite room, sage light, a single brass highlight.
+   Every surface is liquid glass: tinted fill → backdrop blur (+ SVG
+   refraction where supported) → specular rim → inner light → pointer
+   specular. See PLAYBOOK.md for the rules this follows.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'SF Pro Text', sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --color-pine: #0a0f0d;
+  --color-pine-2: #111b17;
+  --color-forest: #23463b;
+  --color-sage: #a9c7b6;
+  --color-mist: #d7e8de;
+  --color-brass: #d8b97e;
+  --color-bone: #eef3ef;
+  --color-clay: #e3a48a;
+  --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0a0f0d;
+  --bg-2: #111b17;
+  --text: #eef3ef;
+  --text-2: rgb(238 243 239 / 0.7);
+  --text-3: rgb(238 243 239 / 0.48);
+  --text-4: rgb(238 243 239 / 0.3);
+  --sage: #a9c7b6;
+  --mist: #d7e8de;
+  --brass: #d8b97e;
+  --clay: #e3a48a; /* "attention" — never red alarms */
+  --ok: #9fd8b6;
+  --s: 1;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(90% 60% at 50% -10%, #1d3a31 0%, var(--bg) 62%);
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 92;
+  letter-spacing: -0.035em;
+}
+
+:where(button, a, input, textarea, [role='slider'], [role='switch'], [role='radio'], [role='option'], [role='tab'], [role='checkbox'], [tabindex='0']):focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* ── Liquid glass ───────────────────────────────────────────── */
+  .glass {
+    --g-fill-a: rgb(255 255 255 / 0.09);
+    --g-fill-b: rgb(255 255 255 / 0.025);
+    --g-blur: 20px;
+    --g-sat: 160%;
+    --g-rim: rgb(255 255 255 / 0.42);
+    --g-rim-2: rgb(169 199 182 / 0.28);
+    --g-shadow: 0 24px 48px -26px rgb(0 0 0 / 0.8);
+    --g-inner: inset 0 1px 0 rgb(255 255 255 / 0.16), inset 0 -1px 0 rgb(255 255 255 / 0.04), inset 0 0 24px rgb(169 199 182 / 0.035);
+    --g-spec: rgb(215 232 222 / 0.2);
+
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(155deg, var(--g-fill-a) 0%, var(--g-fill-b) 100%);
+    -webkit-backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat));
+    backdrop-filter: blur(var(--g-blur)) saturate(var(--g-sat));
+    box-shadow: var(--g-inner), var(--g-shadow);
+    color: var(--text);
+  }
+  /* refraction: Chromium bends the backdrop at the edges; elsewhere this
+     declaration is dropped and the blur above applies */
+  .glass.liquid {
+    backdrop-filter: url(#lz-refract) blur(var(--g-blur)) saturate(var(--g-sat));
+  }
+  /* specular rim — bright top-left arc, faint sage bottom-right, via conic sweep */
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(
+      from 210deg at 30% 20%,
+      var(--g-rim) 0deg,
+      rgb(255 255 255 / 0.06) 70deg,
+      rgb(255 255 255 / 0.02) 150deg,
+      var(--g-rim-2) 220deg,
+      rgb(255 255 255 / 0.05) 290deg,
+      var(--g-rim) 360deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+  }
+  /* pointer specular (useSpecular sets --mx/--my/--spec-o) */
+  .glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--spec-o, 0);
+    background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 0%), var(--g-spec) 0%, transparent 55%);
+    transition: opacity 0.5s var(--ease-glass);
+    mix-blend-mode: screen;
+  }
+  .glass-frost {
+  }
+  /* smoke — deeper glass for sheets, tab bar over busy content */
+  .glass-smoke {
+    --g-fill-a: rgb(20 32 27 / 0.82);
+    --g-fill-b: rgb(10 15 13 / 0.78);
+    --g-blur: 28px;
+  }
+  .glass-pill {
+    --g-fill-a: rgb(255 255 255 / 0.13);
+    --g-fill-b: rgb(255 255 255 / 0.05);
+    --g-blur: 16px;
+    --g-shadow: 0 10px 22px -14px rgb(0 0 0 / 0.75);
+  }
+  .glass-well {
+    --g-fill-a: rgb(0 0 0 / 0.3);
+    --g-fill-b: rgb(0 0 0 / 0.16);
+    --g-rim: rgb(255 255 255 / 0.12);
+    --g-rim-2: rgb(255 255 255 / 0.04);
+    --g-shadow: none;
+    --g-inner: inset 0 1px 2px rgb(0 0 0 / 0.45);
+  }
+  /* ink — primary action: bone-white glass capsule, pine text */
+  .glass-ink {
+    --g-fill-a: rgb(244 248 245 / 1);
+    --g-fill-b: rgb(214 228 220 / 1);
+    --g-blur: 0px;
+    --g-rim: rgb(255 255 255 / 1);
+    --g-rim-2: rgb(169 199 182 / 0.9);
+    --g-shadow: 0 16px 34px -16px rgb(169 199 182 / 0.6);
+    --g-inner: inset 0 -2px 3px rgb(35 70 59 / 0.12), inset 0 1px 0 rgb(255 255 255 / 1);
+    color: var(--color-pine);
+  }
+  /* sage — selected/active tint */
+  .glass-sage {
+    --g-fill-a: rgb(169 199 182 / 0.3);
+    --g-fill-b: rgb(169 199 182 / 0.12);
+    --g-rim: rgb(215 232 222 / 0.85);
+    --g-rim-2: rgb(169 199 182 / 0.5);
+  }
+  .glass :is(.glass-pill, .glass-well, .glass-ink, .glass-sage) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .hairline {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.14), transparent);
+  }
+  /* depth: cards tilt toward the pointer (see useTilt) */
+  .tilt {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.5s var(--ease-glass);
+    transform-style: preserve-3d;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tilt {
+    transform: none !important;
+  }
+}
